@@ -1003,6 +1003,19 @@ ul, ol {
    Imprint (modal)
    ======================================== */
 
+.modal--legal {
+  max-width: 640px;
+  padding: 48px 40px;
+}
+
+.legal__body {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin-top: 20px;
+}
+
 .imprint__content {
   display: flex;
   flex-direction: column;

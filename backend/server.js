@@ -5,6 +5,9 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger.json');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'kyroo-secret-change-in-production';
@@ -35,6 +38,13 @@ async function waitForDb(retries = 15, delay = 2000) {
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'KYROO API Docs',
+}));
+
 const FRONTEND_DIR = process.env.FRONTEND_DIR || path.join(__dirname, '..', 'frontend');
 app.use(express.static(FRONTEND_DIR));
 

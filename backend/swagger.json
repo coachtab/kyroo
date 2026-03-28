@@ -1,0 +1,552 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "KYROO API",
+    "description": "The KYROO platform API. A next-generation discovery and lifestyle platform for trends, fitness, AI, and curated recommendations.\n\n## Authentication\nMost endpoints require a JWT Bearer token. Obtain one via `/api/auth/login` or `/api/auth/signup`, then pass it in the `Authorization` header as `Bearer <token>`.\n\n## Roles\n- **Public**: No auth required\n- **Authenticated**: Requires valid JWT\n- **Admin**: Requires JWT with `is_admin: true`\n\n## Base URL\n`http://localhost:3000`",
+    "version": "1.0.0",
+    "contact": {
+      "name": "KYROO UG",
+      "email": "info@kyroo.de"
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local development" }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "User authentication and account management" },
+    { "name": "Site Content", "description": "Public site content fetched dynamically from the database" },
+    { "name": "Articles", "description": "Public article browsing and reading" },
+    { "name": "Newsletter", "description": "Newsletter subscription" },
+    { "name": "Premium", "description": "Premium subscription checkout and management" },
+    { "name": "Payment Methods", "description": "User payment method management" },
+    { "name": "Payments", "description": "Payment history" },
+    { "name": "Admin", "description": "Admin-only content management and analytics" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from /api/auth/login or /api/auth/signup"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "email": { "type": "string", "format": "email", "example": "max@kyroo.de" },
+          "name": { "type": "string", "nullable": true, "example": "Max Mueller" },
+          "is_premium": { "type": "boolean", "example": false },
+          "is_admin": { "type": "boolean", "example": false },
+          "premium_started_at": { "type": "string", "format": "date-time", "nullable": true },
+          "premium_expires_at": { "type": "string", "format": "date-time", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": { "$ref": "#/components/schemas/User" },
+          "token": { "type": "string", "description": "JWT Bearer token", "example": "eyJhbGciOiJIUzI1NiIs..." }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "slug": { "type": "string", "example": "ai-tools-march-2026" },
+          "category": { "type": "string", "enum": ["AI", "Fitness", "Trends", "Recommendations", "Lifestyle", "Future Tools"], "example": "AI" },
+          "title": { "type": "string", "example": "7 AI Tools That Actually Changed How We Work" },
+          "excerpt": { "type": "string", "example": "These seven tools passed our real-world test." },
+          "body": { "type": "string", "nullable": true, "description": "Full article body. Null for premium articles when user is not a premium subscriber." },
+          "is_premium": { "type": "boolean", "example": false },
+          "locked": { "type": "boolean", "description": "Whether the full body is hidden due to premium gating" },
+          "published_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ArticleSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "slug": { "type": "string" },
+          "category": { "type": "string" },
+          "title": { "type": "string" },
+          "excerpt": { "type": "string" },
+          "is_premium": { "type": "boolean" },
+          "published_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "type": { "type": "string", "enum": ["card", "paypal", "sepa"], "example": "card" },
+          "label": { "type": "string", "example": "Visa ending in 4242" },
+          "last_four": { "type": "string", "nullable": true, "example": "4242" },
+          "is_default": { "type": "boolean", "example": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "amount": { "type": "number", "format": "float", "example": 72.00 },
+          "currency": { "type": "string", "example": "EUR" },
+          "description": { "type": "string", "example": "KYROO Premium - Annual (72 EUR/year)" },
+          "status": { "type": "string", "enum": ["completed", "pending", "failed"], "example": "completed" },
+          "payment_method": { "type": "string", "example": "Visa ending in 4242" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Section": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "slug": { "type": "string", "example": "hero" },
+          "tag": { "type": "string", "example": "Born in Berlin. Made for everywhere." },
+          "title": { "type": "string", "example": "Culture moves fast. We move faster." },
+          "description": { "type": "string", "nullable": true }
+        }
+      },
+      "SiteData": {
+        "type": "object",
+        "description": "Complete site content in one response",
+        "properties": {
+          "sections": { "type": "object", "additionalProperties": { "$ref": "#/components/schemas/Section" } },
+          "heroStats": { "type": "array", "items": { "type": "object", "properties": { "value": { "type": "string" }, "label": { "type": "string" } } } },
+          "aboutCards": { "type": "array", "items": { "type": "object" } },
+          "freeContent": { "type": "array", "items": { "type": "object" } },
+          "premiumFeatures": { "type": "array", "items": { "type": "object" } },
+          "premiumPlan": { "type": "object", "nullable": true },
+          "categories": { "type": "array", "items": { "type": "object" } },
+          "whyCards": { "type": "array", "items": { "type": "object" } },
+          "socialLinks": { "type": "array", "items": { "type": "object" } },
+          "settings": { "type": "object", "additionalProperties": { "type": "string" } },
+          "footerLinks": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "object" } } }
+        }
+      },
+      "AdminStats": {
+        "type": "object",
+        "properties": {
+          "total_users": { "type": "integer", "example": 42 },
+          "premium_users": { "type": "integer", "example": 12 },
+          "total_articles": { "type": "integer", "example": 8 },
+          "total_subscribers": { "type": "integer", "example": 156 }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "example": "Something went wrong" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Create a new account",
+        "description": "Registers a new user and returns a JWT token. The account starts on the free plan.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "user@example.com" },
+                  "password": { "type": "string", "minLength": 6, "example": "mypassword123" },
+                  "name": { "type": "string", "example": "Max Mueller", "description": "Optional display name" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Account created successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
+          "400": { "description": "Validation error (missing fields, password too short)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "409": { "description": "Email already registered", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Log in to existing account",
+        "description": "Authenticates a user with email and password, returns a JWT token valid for 30 days.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "max@kyroo.de" },
+                  "password": { "type": "string", "example": "test123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
+          "401": { "description": "Invalid email or password", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user profile",
+        "description": "Returns the authenticated user's profile including premium status and subscription dates.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "User profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Not authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/site": {
+      "get": {
+        "tags": ["Site Content"],
+        "summary": "Get all site content",
+        "description": "Returns all dynamic site content in a single call: sections, hero stats, about cards, free content cards, premium features, pricing plan, categories, why cards, social links, site settings, and footer links. This is the main endpoint the frontend uses to render the page.",
+        "responses": {
+          "200": { "description": "Complete site data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SiteData" } } } }
+        }
+      }
+    },
+    "/api/articles": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "List all published articles",
+        "description": "Returns all articles with their summaries (no body). Optionally filter by category. The `is_premium` flag indicates whether full content requires a premium subscription.",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["AI", "Fitness", "Trends", "Recommendations", "Lifestyle", "Future Tools"] },
+            "description": "Filter articles by category"
+          }
+        ],
+        "responses": {
+          "200": { "description": "List of articles", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ArticleSummary" } } } } }
+        }
+      }
+    },
+    "/api/articles/{slug}": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get a single article by slug",
+        "description": "Returns the full article. For premium articles, the `body` field is `null` and `locked: true` unless the authenticated user has an active premium subscription. Free articles always return the full body.",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" }, "example": "ai-tools-march-2026" }
+        ],
+        "security": [{ "BearerAuth": [] }, {}],
+        "responses": {
+          "200": { "description": "Article content (body may be null if locked)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Article" } } } },
+          "404": { "description": "Article not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/subscribe": {
+      "post": {
+        "tags": ["Newsletter"],
+        "summary": "Subscribe to newsletter",
+        "description": "Adds an email address to the newsletter subscriber list. Duplicate emails are silently accepted (idempotent).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "reader@example.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Subscribed successfully", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "message": { "type": "string" } } } } } },
+          "400": { "description": "Invalid email", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/subscribers/count": {
+      "get": {
+        "tags": ["Newsletter"],
+        "summary": "Get subscriber count",
+        "description": "Returns the total number of newsletter subscribers.",
+        "responses": {
+          "200": { "description": "Subscriber count", "content": { "application/json": { "schema": { "type": "object", "properties": { "count": { "type": "integer", "example": 156 } } } } } }
+        }
+      }
+    },
+    "/api/payment-methods": {
+      "get": {
+        "tags": ["Payment Methods"],
+        "summary": "List saved payment methods",
+        "description": "Returns all payment methods saved by the authenticated user, ordered by default status and creation date.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of payment methods", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/PaymentMethod" } } } } },
+          "401": { "description": "Not authenticated" }
+        }
+      },
+      "post": {
+        "tags": ["Payment Methods"],
+        "summary": "Add a new payment method",
+        "description": "Adds a credit/debit card, PayPal account, or SEPA bank account. The first payment method added becomes the default. Card numbers are validated for length; only the last 4 digits are stored.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                  "type": { "type": "string", "enum": ["card", "paypal", "sepa"], "description": "Payment method type" },
+                  "card_number": { "type": "string", "example": "4242 4242 4242 4242", "description": "Required for type=card" },
+                  "card_expiry": { "type": "string", "example": "12/27", "description": "Required for type=card (MM/YY)" },
+                  "card_cvc": { "type": "string", "example": "123", "description": "Required for type=card" },
+                  "paypal_email": { "type": "string", "format": "email", "description": "Required for type=paypal" },
+                  "iban": { "type": "string", "example": "DE89 3704 0044 0532 0130 00", "description": "Required for type=sepa" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment method created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaymentMethod" } } } },
+          "400": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/payment-methods/{id}": {
+      "delete": {
+        "tags": ["Payment Methods"],
+        "summary": "Delete a payment method",
+        "description": "Removes a saved payment method. Only the owner can delete their own methods.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Deleted successfully" },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/api/premium/checkout": {
+      "post": {
+        "tags": ["Premium"],
+        "summary": "Process premium subscription checkout",
+        "description": "Charges the selected payment method, records the payment, and activates the premium subscription. Supports monthly (6 EUR) and yearly (72 EUR) plans.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["payment_method_id", "plan"],
+                "properties": {
+                  "payment_method_id": { "type": "integer", "description": "ID of the payment method to charge", "example": 1 },
+                  "plan": { "type": "string", "enum": ["monthly", "yearly"], "description": "Subscription plan", "example": "yearly" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Premium activated",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "user": { "$ref": "#/components/schemas/User" }, "token": { "type": "string" }, "message": { "type": "string" } } } } }
+          },
+          "400": { "description": "Invalid payment method", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/premium/cancel": {
+      "post": {
+        "tags": ["Premium"],
+        "summary": "Cancel premium subscription",
+        "description": "Immediately cancels the user's premium subscription. Access to premium content is revoked. Returns an updated JWT token.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Premium cancelled",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "user": { "$ref": "#/components/schemas/User" }, "token": { "type": "string" }, "message": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get payment history",
+        "description": "Returns all payments made by the authenticated user, including amount, currency, description, status, and the payment method used.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Payment history", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Payment" } } } } }
+        }
+      }
+    },
+    "/api/admin/stats": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get dashboard statistics",
+        "description": "Returns aggregate counts of users, premium users, articles, and newsletter subscribers. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Dashboard stats", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminStats" } } } },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/api/admin/articles": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "List all articles (admin view)",
+        "description": "Returns all articles with full body content, regardless of premium status. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "All articles with full content", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Article" } } } } },
+          "403": { "description": "Admin access required" }
+        }
+      },
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Create a new article",
+        "description": "Creates and publishes a new article. Set `is_premium: true` to make it accessible only to premium subscribers. The article is immediately visible on the site. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "slug", "category", "excerpt", "body"],
+                "properties": {
+                  "title": { "type": "string", "example": "The Future of Remote Work in Berlin" },
+                  "slug": { "type": "string", "example": "future-remote-work-berlin" },
+                  "category": { "type": "string", "enum": ["AI", "Fitness", "Trends", "Recommendations", "Lifestyle", "Future Tools"] },
+                  "excerpt": { "type": "string", "example": "Berlin's coworking scene is evolving fast." },
+                  "body": { "type": "string", "example": "Full article content here..." },
+                  "is_premium": { "type": "boolean", "default": false, "description": "If true, only premium subscribers can read the full body" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Article created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Article" } } } },
+          "400": { "description": "Missing required fields" },
+          "409": { "description": "Slug already exists" }
+        }
+      }
+    },
+    "/api/admin/articles/{id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update an article",
+        "description": "Updates an existing article. All fields are optional - only provided fields are updated. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "slug": { "type": "string" },
+                  "category": { "type": "string" },
+                  "excerpt": { "type": "string" },
+                  "body": { "type": "string" },
+                  "is_premium": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Article updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Article" } } } },
+          "404": { "description": "Article not found" },
+          "409": { "description": "Slug already in use" }
+        }
+      },
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Delete an article",
+        "description": "Permanently deletes an article. This cannot be undone. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Article deleted" },
+          "404": { "description": "Article not found" }
+        }
+      }
+    },
+    "/api/admin/generate": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Generate article with AI",
+        "description": "Uses Claude AI to generate a complete article from a prompt. Returns title, slug, excerpt, body, and category. The result is not saved automatically - it should be reviewed and then published via `POST /api/admin/articles`. Requires `ANTHROPIC_API_KEY` environment variable. Admin only.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string", "example": "Top 5 cold plunge spots in Berlin", "description": "Topic or description for the article" },
+                  "category": { "type": "string", "enum": ["AI", "Fitness", "Trends", "Recommendations", "Lifestyle", "Future Tools"], "description": "Optional category override. If omitted, AI auto-detects." },
+                  "is_premium": { "type": "boolean", "default": false, "description": "Whether the generated article should be marked as premium" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated article content (not yet saved)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": { "type": "string" },
+                    "slug": { "type": "string" },
+                    "excerpt": { "type": "string" },
+                    "body": { "type": "string" },
+                    "category": { "type": "string" },
+                    "is_premium": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "AI generation failed or API key not configured" }
+        }
+      }
+    }
+  }
+}

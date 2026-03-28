@@ -245,23 +245,29 @@ function renderFooterLinks(data) {
     cols['Categories'] = data.categories.map(c => ({ label: c.title, url: '#', column_title: 'Categories' }));
   }
 
+  const modalLinks = { imprint: 'Imprint', privacy: 'Privacy', terms: 'Terms' };
+
   container.innerHTML = Object.entries(cols).map(([title, links]) => `
     <div class="footer__col">
       <h4 class="footer__col-title">${esc(title)}</h4>
       ${links.map(l => {
-        if (l.url === 'imprint') {
-          return `<a href="javascript:void(0)" class="footer__link" id="footerImprintLink">${esc(l.label)}</a>`;
+        if (modalLinks[l.url]) {
+          return `<a href="javascript:void(0)" class="footer__link footer__modal-link" data-modal="${esc(l.url)}">${esc(l.label)}</a>`;
         }
         return `<a href="${esc(l.url)}" class="footer__link">${esc(l.label)}</a>`;
       }).join('')}
     </div>
   `).join('');
 
-  // Wire imprint link
-  const imprintLink = document.getElementById('footerImprintLink');
-  if (imprintLink) {
-    imprintLink.addEventListener('click', () => showImprint(data));
-  }
+  // Wire modal links
+  container.querySelectorAll('.footer__modal-link').forEach(link => {
+    link.addEventListener('click', () => {
+      const type = link.dataset.modal;
+      if (type === 'imprint') showImprint(data);
+      else if (type === 'privacy') showPrivacy(data);
+      else if (type === 'terms') showTerms(data);
+    });
+  });
 }
 
 function renderArticlesHeader(data) {
@@ -272,6 +278,24 @@ function renderArticlesHeader(data) {
     <h2 class="section__title">${esc(data.settings.articles_title || 'Latest from KYROO')}</h2>
     <p class="section__desc">${esc(data.settings.articles_desc || '')}</p>
   `;
+}
+
+function showPrivacy(data) {
+  const s = data.settings || {};
+  document.getElementById('privacyContent').innerHTML = `
+    <h2 class="modal__title">${esc(s.privacy_title || 'Privacy Policy')}</h2>
+    <div class="legal__body">${esc(s.privacy_body || '')}</div>
+  `;
+  showModal('privacyModal');
+}
+
+function showTerms(data) {
+  const s = data.settings || {};
+  document.getElementById('termsContent').innerHTML = `
+    <h2 class="modal__title">${esc(s.terms_title || 'Terms of Service')}</h2>
+    <div class="legal__body">${esc(s.terms_body || '')}</div>
+  `;
+  showModal('termsModal');
 }
 
 function showImprint(data) {
@@ -955,6 +979,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('checkoutModalClose').onclick = () => hideModal('checkoutModal');
   document.getElementById('checkoutModal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) hideModal('checkoutModal');
+  });
+  document.getElementById('privacyModalClose').onclick = () => hideModal('privacyModal');
+  document.getElementById('privacyModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) hideModal('privacyModal');
+  });
+  document.getElementById('termsModalClose').onclick = () => hideModal('termsModal');
+  document.getElementById('termsModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) hideModal('termsModal');
   });
   document.getElementById('imprintModalClose').onclick = () => hideModal('imprintModal');
   document.getElementById('imprintModal').addEventListener('click', (e) => {
