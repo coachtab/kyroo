@@ -3,6 +3,7 @@
 // ========================================
 
 const API_BASE = window.location.origin;
+const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
 
 // ---- Icon SVG map (matches DB icon names) ----
 const ICONS = {
@@ -68,14 +69,13 @@ function renderHero(data) {
 }
 
 function renderAbout(data) {
-  renderSectionHeader(document.getElementById('aboutHeader'), data.sections.about);
-  document.getElementById('aboutGrid').innerHTML = data.aboutCards.map((card, i) => `
-    <div class="about__card" data-animate="fade-up" data-delay="${i * 100}">
-      <div class="about__card-icon">${ICONS[card.icon] || ''}</div>
-      <h3 class="about__card-title">${esc(card.title)}</h3>
-      <p class="about__card-text">${esc(card.text)}</p>
-    </div>
-  `).join('');
+  const about = data.sections.about;
+  const el = document.getElementById('aboutStatement');
+  if (!el) return;
+  el.innerHTML = `
+    <h2 class="about__headline">${esc(about.title)}</h2>
+    ${about.description ? `<p class="about__desc">${esc(about.description)}</p>` : ''}
+  `;
 }
 
 // Map free content titles to article categories
@@ -157,14 +157,14 @@ function updatePremiumCTA() {
   if (!btn) return;
 
   if (currentUser && currentUser.is_premium) {
-    btn.textContent = 'You are a Premium member';
+    btn.textContent = 'You have Premium';
     btn.className = 'btn btn--outline btn--full';
     btn.onclick = () => showAccountModal();
   } else if (currentUser) {
-    btn.textContent = 'Start Premium - 14 days free';
+    btn.textContent = 'Go Premium';
     btn.onclick = () => activatePremium();
   } else {
-    btn.textContent = 'Sign up to get started';
+    btn.textContent = 'Get started';
     btn.onclick = () => showAuthModal('signup');
   }
 }
@@ -242,7 +242,7 @@ function renderFooterLinks(data) {
   // Add categories column from DB data
   const cols = { ...data.footerLinks };
   if (data.categories && !cols['Categories']) {
-    cols['Categories'] = data.categories.map(c => ({ label: c.title, url: '#', column_title: 'Categories' }));
+    cols['Categories'] = data.categories.map(c => ({ label: c.title, url: 'category:' + c.title, column_title: 'Categories' }));
   }
 
   const modalLinks = { imprint: 'Imprint', privacy: 'Privacy', terms: 'Terms' };
@@ -253,6 +253,9 @@ function renderFooterLinks(data) {
       ${links.map(l => {
         if (modalLinks[l.url]) {
           return `<a href="javascript:void(0)" class="footer__link footer__modal-link" data-modal="${esc(l.url)}">${esc(l.label)}</a>`;
+        }
+        if (l.url && l.url.startsWith('category:')) {
+          return `<a href="javascript:void(0)" class="footer__link footer__category-link" data-category="${esc(l.url.slice(9))}">${esc(l.label)}</a>`;
         }
         return `<a href="${esc(l.url)}" class="footer__link">${esc(l.label)}</a>`;
       }).join('')}
@@ -266,6 +269,13 @@ function renderFooterLinks(data) {
       if (type === 'imprint') showImprint(data);
       else if (type === 'privacy') showPrivacy(data);
       else if (type === 'terms') showTerms(data);
+    });
+  });
+
+  // Wire category links
+  container.querySelectorAll('.footer__category-link').forEach(link => {
+    link.addEventListener('click', () => {
+      filterArticles(link.dataset.category);
     });
   });
 }
@@ -774,20 +784,33 @@ function renderArticles(articles) {
   }
 
   grid.innerHTML = articles.map((a, i) => `
-    <div class="article-card" data-slug="${esc(a.slug)}" data-animate="fade-up" data-delay="${i * 80}">
+    <div class="article-card ${a.video_url ? 'article-card--has-video' : ''}" data-slug="${esc(a.slug)}" data-animate="fade-up" data-delay="${i * 80}">
+      ${a.video_url ? `
+        <div class="article-card__video">
+          <video src="${esc(a.video_url)}" muted playsinline preload="metadata"></video>
+          <span class="article-card__play">&#9654;</span>
+          ${a.video_duration ? `<span class="article-card__duration">${Math.round(a.video_duration)}s</span>` : ''}
+        </div>
+      ` : ''}
       <div class="article-card__top">
         <span class="article-card__category">${esc(a.category)}</span>
         ${a.is_premium ? '<span class="article-card__lock">Premium</span>' : ''}
+        ${a.video_url ? '<span class="article-card__lock" style="color:var(--color-text-secondary)">Video</span>' : ''}
       </div>
       <h3 class="article-card__title">${esc(a.title)}</h3>
       <p class="article-card__excerpt">${esc(a.excerpt)}</p>
-      <span class="article-card__cta">${a.is_premium && (!currentUser || !currentUser.is_premium) ? 'Unlock with Premium >' : 'Read article >'}</span>
+      <span class="article-card__cta">${a.is_premium && (!currentUser || !currentUser.is_premium) ? 'Unlock' : a.video_url ? 'Watch' : 'Read'} ${ARROW_SVG}</span>
     </div>
   `).join('');
 
-  // Attach click handlers
+  // Attach click handlers and video hover
   grid.querySelectorAll('.article-card').forEach(card => {
     card.addEventListener('click', () => openArticle(card.dataset.slug));
+    const vid = card.querySelector('video');
+    if (vid) {
+      card.addEventListener('mouseenter', () => { vid.currentTime = 0; vid.play().catch(() => {}); });
+      card.addEventListener('mouseleave', () => { vid.pause(); vid.currentTime = 0; });
+    }
   });
 
   initAnimations();
@@ -821,6 +844,11 @@ async function openArticle(slug) {
       content.innerHTML = `
         <div class="article-reader__category">${esc(article.category)}</div>
         <h2 class="article-reader__title">${esc(article.title)}</h2>
+        ${article.video_url ? `
+          <div class="article-reader__video">
+            <video src="${esc(article.video_url)}" controls playsinline preload="metadata"></video>
+          </div>
+        ` : ''}
         <p class="article-reader__excerpt">${esc(article.excerpt)}</p>
         <div class="article-reader__body">${esc(article.body)}</div>
       `;
@@ -1068,14 +1096,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderHero(data);
     renderAbout(data);
-    renderFreeContent(data);
-    renderPremium(data);
     renderExplore(data);
-    renderWhy(data);
+    renderArticlesHeader(data);
+    renderPremium(data);
     renderNewsletter(data);
     renderSocials(data);
     renderFooterLinks(data);
-    renderArticlesHeader(data);
     initAnimations();
   } catch (err) {
     console.error('Failed to load site data:', err);
@@ -1086,4 +1112,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Allow auth modal only after page is fully initialized
   pageReady = true;
+
+  // ---- WebSocket live updates ----
+  connectWebSocket();
 });
+
+function connectWebSocket() {
+  let ws;
+  let reconnectDelay = 1000;
+
+  function connect() {
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      console.log('[KYROO] Live updates connected');
+      reconnectDelay = 1000;
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        handleLiveUpdate(msg);
+      } catch (e) {}
+    };
+
+    ws.onclose = () => {
+      setTimeout(connect, reconnectDelay);
+      reconnectDelay = Math.min(reconnectDelay * 2, 15000);
+    };
+
+    ws.onerror = () => ws.close();
+  }
+
+  connect();
+}
+
+async function handleLiveUpdate(msg) {
+  switch (msg.type) {
+    case 'article-created':
+    case 'article-updated':
+    case 'article-deleted':
+      loadArticles();
+      break;
+    case 'content-updated':
+      // Reload full site data
+      try {
+        const res = await fetch(`${API_BASE}/api/site`);
+        if (!res.ok) return;
+        const data = await res.json();
+        renderHero(data);
+        renderAbout(data);
+        renderExplore(data);
+        renderArticlesHeader(data);
+        renderPremium(data);
+        renderNewsletter(data);
+        renderSocials(data);
+        renderFooterLinks(data);
+      } catch (e) {}
+      break;
+  }
+}

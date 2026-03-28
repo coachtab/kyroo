@@ -5,6 +5,10 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const http = require('http');
+const WebSocket = require('ws');
+const multer = require('multer');
+const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger.json');
 
@@ -282,6 +286,7 @@ app.post('/api/premium/checkout', authRequired, async (req, res) => {
     const user = rows[0];
     const token = generateToken(user);
     res.json({ user, token, message: 'Premium activated! Welcome to KYROO Premium.' });
+    broadcast('premium-activated', { userId: req.user.id });
   } catch (err) {
     console.error('Checkout error:', err);
     res.status(500).json({ error: 'Checkout failed' });
@@ -318,6 +323,48 @@ app.get('/api/payments', authRequired, async (req, res) => {
 // ========================================
 // Admin Routes
 // ========================================
+
+// ---- Video upload config ----
+const UPLOADS_DIR = path.join(FRONTEND_DIR, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+      cb(null, name);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.mp4', '.webm', '.mov', '.m4v'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Only video files are allowed (mp4, webm, mov, m4v)'));
+  },
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
+});
+
+// POST /api/admin/upload-video - upload a video clip
+app.post('/api/admin/upload-video', adminRequired, (req, res, next) => {
+  upload.single('video')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No video file provided' });
+
+    const videoUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: videoUrl, filename: req.file.filename, size: req.file.size });
+  });
+});
+
+// DELETE /api/admin/delete-video - remove an uploaded video
+app.delete('/api/admin/delete-video', adminRequired, (req, res) => {
+  const { filename } = req.body;
+  if (!filename) return res.status(400).json({ error: 'Filename required' });
+  const filePath = path.join(UPLOADS_DIR, path.basename(filename));
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  res.json({ success: true });
+});
 
 // POST /api/admin/generate - AI article generation
 app.post('/api/admin/generate', adminRequired, async (req, res) => {
@@ -384,16 +431,20 @@ app.get('/api/admin/articles', adminRequired, async (req, res) => {
 
 // POST /api/admin/articles - create article
 app.post('/api/admin/articles', adminRequired, async (req, res) => {
-  const { title, slug, category, excerpt, body, is_premium } = req.body;
+  const { title, slug, category, excerpt, body, is_premium, video_url, video_duration } = req.body;
   if (!title || !slug || !category || !excerpt || !body) {
     return res.status(400).json({ error: 'All fields are required: title, slug, category, excerpt, body' });
   }
+  if (video_duration && video_duration > 30) {
+    return res.status(400).json({ error: 'Video must be 30 seconds or shorter' });
+  }
   try {
     const { rows } = await pool.query(
-      'INSERT INTO premium_articles (title, slug, category, excerpt, body, is_premium) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [title, slug, category, excerpt, body, is_premium || false]
+      'INSERT INTO premium_articles (title, slug, category, excerpt, body, is_premium, video_url, video_duration) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [title, slug, category, excerpt, body, is_premium || false, video_url || null, video_duration || null]
     );
     res.status(201).json(rows[0]);
+    broadcast('article-created', { article: rows[0] });
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: 'An article with this slug already exists' });
     console.error('Create article error:', err);
@@ -403,14 +454,18 @@ app.post('/api/admin/articles', adminRequired, async (req, res) => {
 
 // PUT /api/admin/articles/:id - update article
 app.put('/api/admin/articles/:id', adminRequired, async (req, res) => {
-  const { title, slug, category, excerpt, body, is_premium } = req.body;
+  const { title, slug, category, excerpt, body, is_premium, video_url, video_duration } = req.body;
+  if (video_duration && video_duration > 30) {
+    return res.status(400).json({ error: 'Video must be 30 seconds or shorter' });
+  }
   try {
     const { rows } = await pool.query(
-      'UPDATE premium_articles SET title = COALESCE($1, title), slug = COALESCE($2, slug), category = COALESCE($3, category), excerpt = COALESCE($4, excerpt), body = COALESCE($5, body), is_premium = COALESCE($6, is_premium) WHERE id = $7 RETURNING *',
-      [title, slug, category, excerpt, body, is_premium, req.params.id]
+      'UPDATE premium_articles SET title = COALESCE($1, title), slug = COALESCE($2, slug), category = COALESCE($3, category), excerpt = COALESCE($4, excerpt), body = COALESCE($5, body), is_premium = COALESCE($6, is_premium), video_url = $7, video_duration = $8 WHERE id = $9 RETURNING *',
+      [title, slug, category, excerpt, body, is_premium, video_url !== undefined ? video_url : null, video_duration !== undefined ? video_duration : null, req.params.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Article not found' });
     res.json(rows[0]);
+    broadcast('article-updated', { article: rows[0] });
   } catch (err) {
     if (err.code === '23505') return res.status(409).json({ error: 'Slug already in use' });
     res.status(500).json({ error: 'Failed to update article' });
@@ -422,6 +477,7 @@ app.delete('/api/admin/articles/:id', adminRequired, async (req, res) => {
   const { rowCount } = await pool.query('DELETE FROM premium_articles WHERE id = $1', [req.params.id]);
   if (rowCount === 0) return res.status(404).json({ error: 'Article not found' });
   res.json({ success: true });
+  broadcast('article-deleted', { id: parseInt(req.params.id) });
 });
 
 // GET /api/admin/stats - dashboard stats
@@ -448,7 +504,7 @@ app.get('/api/admin/stats', adminRequired, async (req, res) => {
 app.get('/api/articles', authOptional, async (req, res) => {
   try {
     const { category } = req.query;
-    let query = 'SELECT id, slug, category, title, excerpt, is_premium, published_at FROM premium_articles';
+    let query = 'SELECT id, slug, category, title, excerpt, is_premium, video_url, video_duration, published_at FROM premium_articles';
     const params = [];
     if (category) {
       query += ' WHERE category = $1';
@@ -557,6 +613,7 @@ app.post('/api/subscribe', async (req, res) => {
       [email]
     );
     res.json({ success: true, message: 'Subscribed successfully' });
+    broadcast('new-subscriber', {});
   } catch (err) {
     console.error('Subscribe error:', err);
     res.status(500).json({ error: 'Subscription failed' });
@@ -573,11 +630,36 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
 });
 
+// ========================================
+// WebSocket server
+// ========================================
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server, path: '/ws' });
+
+const wsClients = new Set();
+
+wss.on('connection', (ws) => {
+  wsClients.add(ws);
+  ws.on('close', () => wsClients.delete(ws));
+  ws.on('error', () => wsClients.delete(ws));
+});
+
+function broadcast(type, data) {
+  const msg = JSON.stringify({ type, data, timestamp: Date.now() });
+  wsClients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(msg);
+    }
+  });
+}
+
+
 // Start server
 async function start() {
   await waitForDb();
-  app.listen(PORT, '0.0.0.0', () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`KYROO API running on http://localhost:${PORT}`);
+    console.log(`WebSocket available at ws://localhost:${PORT}/ws`);
   });
 }
 

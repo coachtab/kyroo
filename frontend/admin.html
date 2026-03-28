@@ -38,6 +38,11 @@
     .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .toolbar__title { font-family: var(--font-d); font-size: 1.25rem; }
 
+    .toolbar__actions { display: flex; gap: 8px; align-items: center; }
+    .toolbar__search { padding: 8px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.8125rem; outline: none; width: 220px; }
+    .toolbar__search:focus { border-color: var(--accent); }
+    .toolbar__search::placeholder { color: var(--text-3); }
+
     /* Table */
     .table { width: 100%; border-collapse: collapse; }
     .table th { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
@@ -100,6 +105,38 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 640px) { .ai-section__row { flex-direction: column; } }
+
+    /* Video source tabs */
+    .video-source-tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--surface-3); border-radius: var(--radius); padding: 3px; }
+    .video-src-btn { flex: 1; padding: 7px 10px; font-family: var(--font); font-size: 0.75rem; font-weight: 600; border: none; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; transition: all 0.15s; }
+    .video-src-btn--active { background: var(--surface); color: var(--text); }
+
+    /* Camera */
+    .camera-container { text-align: center; }
+    .camera-container video { width: 100%; max-height: 220px; border-radius: var(--radius); background: #000; margin-bottom: 10px; }
+    .camera-controls { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .camera-timer { font-size: 0.875rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-2); min-width: 80px; }
+    .camera-recording .camera-timer { color: var(--red); }
+
+    /* URL input */
+    .video-url-input { display: flex; gap: 8px; padding: 12px 0; }
+    .video-url-input .form__input { flex: 1; }
+
+    /* Video upload */
+    .video-upload { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .video-upload:hover { border-color: var(--accent); }
+    .video-upload__input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .video-upload__label { font-size: 0.875rem; color: var(--text-3); }
+    .video-upload__label strong { color: var(--accent); }
+    .video-upload--has-video { border-style: solid; border-color: var(--accent-subtle); }
+    .video-preview { margin-top: 12px; }
+    .video-preview video { width: 100%; max-height: 240px; border-radius: var(--radius); background: #000; }
+    .video-preview__info { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 0.75rem; color: var(--text-3); }
+    .video-preview__remove { font-family: var(--font); font-size: 0.75rem; font-weight: 600; color: var(--red); background: none; border: none; cursor: pointer; }
+    .video-upload__error { font-size: 0.8125rem; color: var(--red); margin-top: 8px; }
+    .video-upload__progress { margin-top: 8px; }
+    .video-upload__progress-bar { height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+    .video-upload__progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
 
     /* Login */
     .login { max-width: 380px; margin: 80px auto; padding: 24px; }
@@ -206,41 +243,18 @@
             <div class="stat"><div class="stat__value">${stats.total_subscribers}</div><div class="stat__label">Subscribers</div></div>
           </div>
 
-          <div class="ai-section">
-            <div class="ai-section__header">
-              <div class="ai-section__title">AI Article Generator</div>
-              <span class="ai-section__badge">Claude</span>
-            </div>
-            <div class="ai-section__form">
-              <textarea class="ai-section__prompt" id="aiPrompt" placeholder="Describe the article you want to generate...&#10;&#10;e.g. &quot;Top 5 AI productivity tools for freelancers in Berlin&quot; or &quot;A beginner guide to calisthenics in Prenzlauer Berg parks&quot;"></textarea>
-              <div class="ai-section__row">
-                <select class="form__select" id="aiCategory">
-                  <option value="">Auto-detect category</option>
-                  <option value="AI">AI</option>
-                  <option value="Fitness">Fitness</option>
-                  <option value="Trends">Trends</option>
-                  <option value="Recommendations">Recommendations</option>
-                  <option value="Lifestyle">Lifestyle</option>
-                  <option value="Future Tools">Future Tools</option>
-                </select>
-                <label class="form__toggle" style="white-space:nowrap">
-                  <input type="checkbox" id="aiPremium">
-                  <span>Premium</span>
-                </label>
-                <button type="button" class="btn btn--ai btn--small" id="aiGenerateBtn">Generate with AI</button>
-              </div>
-              <div class="ai-section__status" id="aiStatus" hidden></div>
-            </div>
-          </div>
-
           <div class="toolbar">
             <div class="toolbar__title">Articles</div>
-            <button class="btn btn--primary btn--small" id="newArticleBtn">+ New Article</button>
+            <div class="toolbar__actions">
+              <input type="text" class="toolbar__search" id="articleSearch" placeholder="Search articles...">
+              <button class="btn btn--primary btn--small" id="newArticleBtn">+ New Article</button>
+              <button class="btn btn--ai btn--small" id="aiArticleBtn">+ AI Article</button>
+            </div>
           </div>
 
           <table class="table">
             <thead>
-              <tr><th>Title</th><th>Category</th><th>Access</th><th>Published</th><th></th></tr>
+              <tr><th>Title</th><th>Category</th><th>Access</th><th>Video</th><th>Published</th><th></th></tr>
             </thead>
             <tbody id="articlesBody">
               ${articles.map(a => `
@@ -248,6 +262,7 @@
                   <td><strong>${esc(a.title)}</strong><br><span style="color:var(--text-3);font-size:0.75rem">/${esc(a.slug)}</span></td>
                   <td>${esc(a.category)}</td>
                   <td><span class="badge ${a.is_premium ? 'badge--premium' : 'badge--free'}">${a.is_premium ? 'Premium' : 'Free'}</span></td>
+                  <td style="font-size:0.8125rem">${a.video_url ? '<span style="color:var(--accent)">&#9654; ' + (a.video_duration ? Math.round(a.video_duration) + 's' : 'Yes') + '</span>' : '<span style="color:var(--text-3)">-</span>'}</td>
                   <td style="color:var(--text-3);font-size:0.8125rem">${new Date(a.published_at).toLocaleDateString('de-DE')}</td>
                   <td>
                     <div class="table__actions">
@@ -264,21 +279,82 @@
       `;
 
       document.getElementById('newArticleBtn').onclick = () => showArticleForm(null);
-      document.getElementById('aiGenerateBtn').onclick = generateWithAI;
+      document.getElementById('aiArticleBtn').onclick = () => showAIModal();
       window._articles = articles;
+
+      // Search
+      document.getElementById('articleSearch').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#articlesBody tr');
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(q) ? '' : 'none';
+        });
+      });
     }
 
-    // ---- AI Generation ----
+    // ---- AI Article Modal ----
+    function showAIModal() {
+      document.getElementById('formContainer').innerHTML = `
+        <div class="form-overlay" id="aiOverlay">
+          <div class="form-panel">
+            <button type="button" class="form__close" id="aiClose">&times;</button>
+            <h3 class="form__title">Generate with AI</h3>
+            <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:20px">Describe what you want to write about. Claude will generate a full article you can review before publishing.</p>
+            <div class="form__group">
+              <label class="form__label">Prompt</label>
+              <textarea class="form__textarea" id="aiPrompt" placeholder="e.g. Top 5 AI tools for freelancers in Berlin..." style="min-height:100px"></textarea>
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label class="form__label">Category</label>
+                <select class="form__select" id="aiCategory">
+                  <option value="">Auto-detect</option>
+                  <option value="AI">AI</option>
+                  <option value="Fitness">Fitness</option>
+                  <option value="Trends">Trends</option>
+                  <option value="Recommendations">Recommendations</option>
+                  <option value="Lifestyle">Lifestyle</option>
+                  <option value="Future Tools">Future Tools</option>
+                </select>
+              </div>
+              <div class="form__group">
+                <label class="form__label">Access</label>
+                <label class="form__toggle" style="margin-top:8px">
+                  <input type="checkbox" id="aiPremium">
+                  <span>Premium only</span>
+                </label>
+              </div>
+            </div>
+            <div class="form__error" id="aiError" hidden></div>
+            <div class="ai-section__status" id="aiStatus" hidden></div>
+            <div class="form__actions">
+              <button type="button" class="btn btn--ai" id="aiGenerateBtn">Generate article</button>
+              <button type="button" class="btn btn--outline" id="aiCancelBtn">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('aiClose').onclick = closeForm;
+      document.getElementById('aiCancelBtn').onclick = closeForm;
+      document.getElementById('aiOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeForm();
+      });
+      document.getElementById('aiGenerateBtn').onclick = generateWithAI;
+    }
+
     async function generateWithAI() {
       const prompt = document.getElementById('aiPrompt').value.trim();
       if (!prompt) return;
 
       const btn = document.getElementById('aiGenerateBtn');
       const status = document.getElementById('aiStatus');
+      const errEl = document.getElementById('aiError');
+      errEl.hidden = true;
       btn.disabled = true;
       btn.textContent = 'Generating...';
       status.hidden = false;
-      status.className = 'ai-section__status';
       status.innerHTML = '<span class="ai-spinner"></span>AI is writing your article...';
 
       try {
@@ -294,10 +370,9 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        status.innerHTML = 'Article generated. Opening editor...';
-
-        // Open the article form pre-filled with AI content
+        status.innerHTML = 'Done. Opening editor...';
         setTimeout(() => {
+          closeForm();
           showArticleForm({
             title: data.title,
             slug: data.slug,
@@ -307,15 +382,13 @@
             is_premium: data.is_premium,
             _isAI: true,
           });
-          status.hidden = true;
-          document.getElementById('aiPrompt').value = '';
-        }, 500);
+        }, 400);
       } catch (err) {
-        status.className = 'ai-section__status ai-section__status--error';
-        status.textContent = err.message;
-      } finally {
+        errEl.textContent = err.message;
+        errEl.hidden = false;
+        status.hidden = true;
         btn.disabled = false;
-        btn.textContent = 'Generate with AI';
+        btn.textContent = 'Generate article';
       }
     }
 
@@ -356,6 +429,49 @@
                 <textarea class="form__textarea" id="f_body" required placeholder="Full article content...">${article ? esc(article.body) : ''}</textarea>
               </div>
               <div class="form__group">
+                <label class="form__label">Video Clip (max 30 seconds)</label>
+                <div class="video-source-tabs" id="videoSourceTabs">
+                  <button type="button" class="video-src-btn video-src-btn--active" data-src="upload">Upload file</button>
+                  <button type="button" class="video-src-btn" data-src="camera">Record from camera</button>
+                  <button type="button" class="video-src-btn" data-src="url">From URL</button>
+                </div>
+                <div class="video-upload ${article && article.video_url ? 'video-upload--has-video' : ''}" id="videoUpload">
+                  <div id="videoDropzone">
+                    <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" class="video-upload__input" id="f_video_file">
+                    <p class="video-upload__label"><strong>Click to upload</strong> or drag a video here<br>MP4, WebM, MOV - max 50MB, 30 seconds</p>
+                  </div>
+                  <div id="videoCameraZone" hidden>
+                    <div class="camera-container">
+                      <video id="cameraFeed" autoplay playsinline muted></video>
+                      <div class="camera-controls">
+                        <div class="camera-timer" id="cameraTimer">0:00 / 0:30</div>
+                        <button type="button" class="btn btn--primary btn--small" id="cameraStartBtn">Start recording</button>
+                        <button type="button" class="btn btn--outline btn--small" id="cameraStopBtn" hidden>Stop</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="videoUrlZone" hidden>
+                    <div class="video-url-input">
+                      <input type="text" class="form__input" id="f_video_ext_url" placeholder="Paste video URL (mp4, webm)">
+                      <button type="button" class="btn btn--primary btn--small" id="videoUrlLoadBtn">Load</button>
+                    </div>
+                  </div>
+                  <div class="video-preview" id="videoPreview" ${article && article.video_url ? '' : 'hidden'}>
+                    <video src="${article && article.video_url ? esc(article.video_url) : ''}" controls playsinline></video>
+                    <div class="video-preview__info">
+                      <span id="videoDurationText">${article && article.video_duration ? Math.round(article.video_duration) + 's' : ''}</span>
+                      <button type="button" class="video-preview__remove" id="videoRemoveBtn">Remove video</button>
+                    </div>
+                  </div>
+                  <div class="video-upload__error" id="videoError" hidden></div>
+                  <div class="video-upload__progress" id="videoProgress" hidden>
+                    <div class="video-upload__progress-bar"><div class="video-upload__progress-fill" id="videoProgressFill" style="width:0%"></div></div>
+                  </div>
+                </div>
+                <input type="hidden" id="f_video_url" value="${article && article.video_url ? esc(article.video_url) : ''}">
+                <input type="hidden" id="f_video_duration" value="${article && article.video_duration ? article.video_duration : ''}">
+              </div>
+              <div class="form__group">
                 <label class="form__toggle">
                   <input type="checkbox" id="f_premium" ${article && article.is_premium ? 'checked' : ''}>
                   <span>Premium content (visible only to premium subscribers)</span>
@@ -386,6 +502,220 @@
         if (e.target === e.currentTarget) closeForm();
       });
 
+      // ---- Video source tabs ----
+      let cameraStream = null;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let recordingTimer = null;
+      let recordingSeconds = 0;
+
+      document.getElementById('videoSourceTabs').querySelectorAll('.video-src-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('videoSourceTabs').querySelectorAll('.video-src-btn').forEach(b => b.classList.remove('video-src-btn--active'));
+          btn.classList.add('video-src-btn--active');
+          const src = btn.dataset.src;
+          document.getElementById('videoDropzone').hidden = src !== 'upload';
+          document.getElementById('videoCameraZone').hidden = src !== 'camera';
+          document.getElementById('videoUrlZone').hidden = src !== 'url';
+          // Stop camera if switching away
+          if (src !== 'camera' && cameraStream) {
+            cameraStream.getTracks().forEach(t => t.stop());
+            cameraStream = null;
+          }
+          // Start camera if switching to it
+          if (src === 'camera') startCamera();
+        });
+      });
+
+      async function startCamera() {
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          document.getElementById('cameraFeed').srcObject = cameraStream;
+          document.getElementById('cameraStartBtn').hidden = false;
+          document.getElementById('cameraStopBtn').hidden = true;
+        } catch (err) {
+          document.getElementById('videoError').textContent = 'Camera access denied. Please allow camera access and try again.';
+          document.getElementById('videoError').hidden = false;
+        }
+      }
+
+      document.getElementById('cameraStartBtn').addEventListener('click', () => {
+        if (!cameraStream) return;
+        recordedChunks = [];
+        recordingSeconds = 0;
+        const timerEl = document.getElementById('cameraTimer');
+        timerEl.textContent = '0:00 / 0:30';
+        document.querySelector('.camera-container').classList.add('camera-recording');
+
+        mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' });
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+        mediaRecorder.onstop = () => handleRecordedVideo();
+        mediaRecorder.start();
+
+        document.getElementById('cameraStartBtn').hidden = true;
+        document.getElementById('cameraStopBtn').hidden = false;
+
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const m = Math.floor(recordingSeconds / 60);
+          const s = String(recordingSeconds % 60).padStart(2, '0');
+          timerEl.textContent = m + ':' + s + ' / 0:30';
+          if (recordingSeconds >= 30) {
+            clearInterval(recordingTimer);
+            mediaRecorder.stop();
+            cameraStream.getTracks().forEach(t => t.stop());
+            cameraStream = null;
+          }
+        }, 1000);
+      });
+
+      document.getElementById('cameraStopBtn').addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          clearInterval(recordingTimer);
+          mediaRecorder.stop();
+          cameraStream.getTracks().forEach(t => t.stop());
+          cameraStream = null;
+        }
+      });
+
+      async function handleRecordedVideo() {
+        document.querySelector('.camera-container').classList.remove('camera-recording');
+        document.getElementById('cameraStartBtn').hidden = false;
+        document.getElementById('cameraStopBtn').hidden = true;
+
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const file = new File([blob], 'recording-' + Date.now() + '.webm', { type: 'video/webm' });
+        await uploadVideoFile(file, recordingSeconds);
+      }
+
+      // ---- URL video ----
+      document.getElementById('videoUrlLoadBtn').addEventListener('click', () => {
+        const url = document.getElementById('f_video_ext_url').value.trim();
+        if (!url) return;
+        const videoError = document.getElementById('videoError');
+        videoError.hidden = true;
+
+        // Validate it looks like a video URL
+        if (!url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i) && !url.includes('video')) {
+          videoError.textContent = 'URL does not appear to be a video file. Use a direct link to an mp4 or webm file.';
+          videoError.hidden = false;
+          return;
+        }
+
+        // Set directly as video URL (no upload needed - external source)
+        document.getElementById('f_video_url').value = url;
+        document.getElementById('f_video_duration').value = '';
+        const preview = document.getElementById('videoPreview');
+        const vid = preview.querySelector('video');
+        vid.src = url;
+        vid.onloadedmetadata = () => {
+          const dur = Math.round(vid.duration);
+          if (dur > 30) {
+            videoError.textContent = 'Video is ' + dur + 's long. Maximum is 30 seconds.';
+            videoError.hidden = false;
+            document.getElementById('f_video_url').value = '';
+            preview.hidden = true;
+            document.getElementById('videoUrlZone').hidden = false;
+            return;
+          }
+          document.getElementById('f_video_duration').value = dur;
+          document.getElementById('videoDurationText').textContent = dur + 's';
+        };
+        preview.hidden = false;
+        document.getElementById('videoDropzone').hidden = true;
+        document.getElementById('videoCameraZone').hidden = true;
+        document.getElementById('videoUrlZone').hidden = true;
+        document.getElementById('videoUpload').classList.add('video-upload--has-video');
+      });
+
+      // ---- Video file upload ----
+      async function uploadVideoFile(file, knownDuration) {
+        const videoError = document.getElementById('videoError');
+        const videoProgress = document.getElementById('videoProgress');
+        const videoUrlInput = document.getElementById('f_video_url');
+        const videoDurInput = document.getElementById('f_video_duration');
+        videoError.hidden = true;
+
+        const duration = knownDuration || await getVideoDuration(file);
+        if (duration > 30) {
+          videoError.textContent = 'Video is ' + Math.round(duration) + 's long. Maximum is 30 seconds.';
+          videoError.hidden = false;
+          return;
+        }
+
+        videoProgress.hidden = false;
+        const fill = document.getElementById('videoProgressFill');
+        fill.style.width = '30%';
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+          fill.style.width = '60%';
+          const res = await fetch(API + '/api/admin/upload-video', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+
+          fill.style.width = '100%';
+          videoUrlInput.value = data.url;
+          videoDurInput.value = Math.round(duration);
+
+          const preview = document.getElementById('videoPreview');
+          preview.querySelector('video').src = data.url;
+          document.getElementById('videoDurationText').textContent = Math.round(duration) + 's';
+          preview.hidden = false;
+          document.getElementById('videoDropzone').hidden = true;
+          document.getElementById('videoCameraZone').hidden = true;
+          document.getElementById('videoUrlZone').hidden = true;
+          document.getElementById('videoUpload').classList.add('video-upload--has-video');
+
+          setTimeout(() => { videoProgress.hidden = true; }, 500);
+        } catch (ex) {
+          videoError.textContent = ex.message;
+          videoError.hidden = false;
+          videoProgress.hidden = true;
+        }
+      }
+
+      const videoFileInput = document.getElementById('f_video_file');
+      const videoPreview = document.getElementById('videoPreview');
+      const videoError = document.getElementById('videoError');
+      const videoProgress = document.getElementById('videoProgress');
+      const videoUrlInput = document.getElementById('f_video_url');
+      const videoDurInput = document.getElementById('f_video_duration');
+
+      videoFileInput.addEventListener('change', async () => {
+        const file = videoFileInput.files[0];
+        if (!file) return;
+        await uploadVideoFile(file);
+      });
+
+      document.getElementById('videoRemoveBtn').addEventListener('click', () => {
+        document.getElementById('f_video_url').value = '';
+        document.getElementById('f_video_duration').value = '';
+        document.getElementById('videoPreview').hidden = true;
+        // Show active source tab zone
+        const activeTab = document.querySelector('.video-src-btn--active');
+        const src = activeTab ? activeTab.dataset.src : 'upload';
+        document.getElementById('videoDropzone').hidden = src !== 'upload';
+        document.getElementById('videoCameraZone').hidden = src !== 'camera';
+        document.getElementById('videoUrlZone').hidden = src !== 'url';
+        document.getElementById('videoUpload').classList.remove('video-upload--has-video');
+        videoFileInput.value = '';
+        if (src === 'camera') startCamera();
+      });
+
+      // If editing with existing video, hide all source zones
+      if (article && article.video_url) {
+        document.getElementById('videoDropzone').hidden = true;
+        document.getElementById('videoCameraZone').hidden = true;
+        document.getElementById('videoUrlZone').hidden = true;
+      }
+
       document.getElementById('articleForm').onsubmit = async (e) => {
         e.preventDefault();
         const err = document.getElementById('formErr');
@@ -398,6 +728,8 @@
           excerpt: document.getElementById('f_excerpt').value,
           body: document.getElementById('f_body').value,
           is_premium: document.getElementById('f_premium').checked,
+          video_url: videoUrlInput.value || null,
+          video_duration: videoDurInput.value ? parseFloat(videoDurInput.value) : null,
         };
 
         try {
@@ -413,6 +745,19 @@
           err.hidden = false;
         }
       };
+    }
+
+    function getVideoDuration(file) {
+      return new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          resolve(video.duration);
+        };
+        video.onerror = () => resolve(0);
+        video.src = URL.createObjectURL(file);
+      });
     }
 
     function closeForm() {
@@ -431,6 +776,30 @@
     }
 
     init();
+
+    // ---- WebSocket live updates ----
+    (function connectWS() {
+      const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`;
+      let ws, delay = 1000;
+      function connect() {
+        ws = new WebSocket(wsUrl);
+        ws.onopen = () => { delay = 1000; };
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type && msg.type.startsWith('article-')) {
+              // Only refresh if we're on the dashboard (not in a form)
+              if (!document.getElementById('formOverlay') && !document.getElementById('aiOverlay')) {
+                renderDashboard();
+              }
+            }
+          } catch(ex) {}
+        };
+        ws.onclose = () => { setTimeout(connect, delay); delay = Math.min(delay * 2, 15000); };
+        ws.onerror = () => ws.close();
+      }
+      connect();
+    })();
   </script>
 </body>
 </html>

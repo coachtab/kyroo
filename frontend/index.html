@@ -22,11 +22,9 @@
         <span></span>
       </button>
       <div class="nav__menu" id="navMenu">
-        <a href="#about" class="nav__link">About</a>
-        <a href="#free-content" class="nav__link">Free Content</a>
-        <a href="#premium" class="nav__link">Premium</a>
         <a href="#explore" class="nav__link">Explore</a>
         <a href="#articles" class="nav__link">Articles</a>
+        <a href="#premium" class="nav__link">Premium</a>
         <a href="#newsletter" class="btn btn--small btn--accent" id="navAuthBtn">Subscribe</a>
       </div>
     </div>
@@ -52,23 +50,30 @@
     </div>
   </section>
 
-  <!-- What is KYROO -->
+  <!-- What is KYROO - minimal, merged into flow -->
   <section class="about section" id="about">
     <div class="container">
-      <div class="section__header" data-animate="fade-up" id="aboutHeader"></div>
-      <div class="about__grid" id="aboutGrid"></div>
+      <div class="about__statement" data-animate="fade-up" id="aboutStatement"></div>
     </div>
   </section>
 
-  <!-- Free Content Section -->
-  <section class="free-content section section--dark" id="free-content">
+  <!-- Explore / Categories -->
+  <section class="explore section" id="explore">
     <div class="container">
-      <div class="section__header" data-animate="fade-up" id="freeContentHeader"></div>
-      <div class="free-content__grid" id="freeContentGrid"></div>
+      <div class="section__header" data-animate="fade-up" id="exploreHeader"></div>
+      <div class="explore__grid" id="exploreGrid"></div>
     </div>
   </section>
 
-  <!-- Premium Section -->
+  <!-- Articles -->
+  <section class="articles section section--dark" id="articles">
+    <div class="container">
+      <div class="section__header" data-animate="fade-up" id="articlesHeader"></div>
+      <div class="articles__grid" id="articlesGrid"></div>
+    </div>
+  </section>
+
+  <!-- Premium -->
   <section class="premium section" id="premium">
     <div class="container">
       <div class="section__header" data-animate="fade-up" id="premiumHeader"></div>
@@ -76,23 +81,7 @@
     </div>
   </section>
 
-  <!-- Explore / Categories Section -->
-  <section class="explore section section--dark" id="explore">
-    <div class="container">
-      <div class="section__header" data-animate="fade-up" id="exploreHeader"></div>
-      <div class="explore__grid" id="exploreGrid"></div>
-    </div>
-  </section>
-
-  <!-- Why Users Love KYROO -->
-  <section class="why section" id="why">
-    <div class="container">
-      <div class="section__header" data-animate="fade-up" id="whyHeader"></div>
-      <div class="why__grid" id="whyGrid"></div>
-    </div>
-  </section>
-
-  <!-- Newsletter / CTA Section -->
+  <!-- Newsletter -->
   <section class="newsletter section section--dark" id="newsletter">
     <div class="container">
       <div class="newsletter__inner" data-animate="fade-up">
@@ -118,13 +107,7 @@
     </div>
   </section>
 
-  <!-- Articles Section -->
-  <section class="articles section" id="articles">
-    <div class="container">
-      <div class="section__header" data-animate="fade-up" id="articlesHeader"></div>
-      <div class="articles__grid" id="articlesGrid"></div>
-    </div>
-  </section>
+
 
   <!-- Auth Modal -->
   <div class="modal-overlay" id="authModal" hidden>
@@ -214,12 +197,12 @@
         <div class="footer__brand">
           <a href="#" class="footer__logo">KYROO</a>
           <p class="footer__tagline">Your smart guide to what's next.</p>
+          <div class="footer__socials" id="footerSocials"></div>
         </div>
         <div class="footer__links" id="footerLinks"></div>
       </div>
       <div class="footer__bottom">
         <p class="footer__copy">&copy; 2026 KYROO. All rights reserved.</p>
-        <div class="footer__socials" id="footerSocials"></div>
       </div>
     </div>
   </footer>
