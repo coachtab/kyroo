@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYROO Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    :root {
+      --bg: #0a0a0a; --surface: #111; --surface-2: #181818; --surface-3: #1f1f1f;
+      --border: rgba(255,255,255,0.07); --text: #ede8e0; --text-2: #a09a90; --text-3: #6b665e;
+      --accent: #d4816b; --accent-light: #e09880; --accent-subtle: rgba(212,129,107,0.08);
+      --accent-2: #a3b18a; --red: #e57373;
+      --font: 'Space Grotesk', sans-serif; --font-d: 'DM Serif Display', serif;
+      --radius: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+
+    .admin { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+    .admin__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .admin__logo { font-family: var(--font-d); font-size: 1.5rem; color: var(--text); }
+    .admin__logo span { color: var(--accent); font-size: 0.75rem; font-family: var(--font); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-left: 10px; vertical-align: middle; }
+    .admin__user { font-size: 0.875rem; color: var(--text-2); }
+    .admin__back { font-size: 0.8125rem; color: var(--text-3); }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .stat__value { font-family: var(--font-d); font-size: 2rem; }
+    .stat__label { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .toolbar__title { font-family: var(--font-d); font-size: 1.25rem; }
+
+    /* Table */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .table td { padding: 14px 12px; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: top; }
+    .table tr:hover td { background: var(--surface); }
+
+    .badge { display: inline-block; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; }
+    .badge--free { color: var(--accent-2); background: rgba(163,177,138,0.12); }
+    .badge--premium { color: var(--accent); background: var(--accent-subtle); }
+
+    .table__actions { display: flex; gap: 8px; }
+    .table__btn { font-family: var(--font); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; }
+    .table__btn:hover { border-color: var(--accent); color: var(--accent); }
+    .table__btn--del:hover { border-color: var(--red); color: var(--red); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font); font-size: 0.875rem; font-weight: 600; padding: 10px 20px; border-radius: 999px; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn--primary { background: var(--accent); color: #fff; }
+    .btn--primary:hover { background: var(--accent-light); }
+    .btn--outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn--outline:hover { border-color: var(--accent); }
+    .btn--full { width: 100%; }
+    .btn--small { font-size: 0.8125rem; padding: 8px 14px; }
+    .btn--ai { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+    .btn--ai:hover { opacity: 0.9; }
+
+    /* Form */
+    .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .form-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; max-width: 600px; width: 100%; max-height: calc(100vh - 48px); overflow-y: auto; position: relative; }
+    .form-panel[hidden] { display: none; }
+    .form__title { font-family: var(--font-d); font-size: 1.375rem; margin-bottom: 20px; }
+    .form__close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--text-3); background: var(--surface-3); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+    .form__group { margin-bottom: 14px; }
+    .form__label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px; }
+    .form__input, .form__select, .form__textarea { width: 100%; padding: 12px 14px; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.9375rem; outline: none; }
+    .form__input:focus, .form__select:focus, .form__textarea:focus { border-color: var(--accent); }
+    .form__textarea { min-height: 200px; resize: vertical; line-height: 1.6; }
+    .form__select { appearance: none; cursor: pointer; }
+    .form__row { display: flex; gap: 12px; }
+    .form__row > .form__group { flex: 1; }
+    .form__toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.875rem; }
+    .form__toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .form__error { font-size: 0.8125rem; color: var(--red); padding: 8px 12px; background: rgba(229,115,115,0.08); border-radius: 6px; margin-bottom: 14px; }
+    .form__actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    /* AI Generator */
+    .ai-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
+    .ai-section__header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .ai-section__title { font-family: var(--font-d); font-size: 1.125rem; }
+    .ai-section__badge { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 999px; background: linear-gradient(135deg, var(--accent-subtle), rgba(163,177,138,0.1)); color: var(--accent); }
+    .ai-section__form { display: flex; flex-direction: column; gap: 12px; }
+    .ai-section__row { display: flex; gap: 12px; }
+    .ai-section__row > * { flex: 1; }
+    .ai-section__prompt { width: 100%; padding: 14px; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.9375rem; outline: none; resize: vertical; min-height: 80px; }
+    .ai-section__prompt:focus { border-color: var(--accent); }
+    .ai-section__prompt::placeholder { color: var(--text-3); }
+    .ai-section__status { font-size: 0.8125rem; color: var(--text-3); }
+    .ai-section__status--error { color: var(--red); }
+    .ai-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) { .ai-section__row { flex-direction: column; } }
+
+    /* Login */
+    .login { max-width: 380px; margin: 80px auto; padding: 24px; }
+    .login__title { font-family: var(--font-d); font-size: 1.75rem; margin-bottom: 6px; text-align: center; }
+    .login__sub { font-size: 0.875rem; color: var(--text-2); text-align: center; margin-bottom: 24px; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .table { font-size: 0.8125rem; }
+      .form__row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const API = window.location.origin;
+    let token = localStorage.getItem('kyroo_token');
+    let user = null;
+
+    function headers() {
+      return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    }
+
+    function esc(s) { const el = document.createElement('span'); el.textContent = s || ''; return el.innerHTML; }
+
+    // ---- Check auth ----
+    async function init() {
+      if (!token) return renderLogin();
+      try {
+        const res = await fetch(`${API}/api/auth/me`, { headers: headers() });
+        if (!res.ok) throw new Error();
+        user = await res.json();
+        if (!user.is_admin) {
+          document.getElementById('app').innerHTML = '<div class="login"><h2 class="login__title">Access Denied</h2><p class="login__sub">Admin privileges required.</p><a href="/">Back to KYROO</a></div>';
+          return;
+        }
+        renderDashboard();
+      } catch (e) {
+        renderLogin();
+      }
+    }
+
+    // ---- Login ----
+    function renderLogin() {
+      document.getElementById('app').innerHTML = `
+        <div class="login">
+          <h2 class="login__title">KYROO Admin</h2>
+          <p class="login__sub">Log in with your admin account</p>
+          <form id="loginForm" style="display:flex;flex-direction:column;gap:12px">
+            <input type="email" class="form__input" placeholder="Email" required id="email">
+            <input type="password" class="form__input" placeholder="Password" required id="password">
+            <div class="form__error" id="loginErr" hidden></div>
+            <button type="submit" class="btn btn--primary btn--full">Log in</button>
+          </form>
+          <p style="text-align:center;margin-top:16px"><a href="/">Back to KYROO</a></p>
+        </div>
+      `;
+      document.getElementById('loginForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const err = document.getElementById('loginErr');
+        err.hidden = true;
+        try {
+          const res = await fetch(`${API}/api/auth/login`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          if (!data.user.is_admin) throw new Error('Admin privileges required');
+          token = data.token;
+          user = data.user;
+          localStorage.setItem('kyroo_token', token);
+          renderDashboard();
+        } catch (ex) {
+          err.textContent = ex.message;
+          err.hidden = false;
+        }
+      };
+    }
+
+    // ---- Dashboard ----
+    async function renderDashboard() {
+      const [stats, articles] = await Promise.all([
+        fetch(`${API}/api/admin/stats`, { headers: headers() }).then(r => r.json()),
+        fetch(`${API}/api/admin/articles`, { headers: headers() }).then(r => r.json()),
+      ]);
+
+      document.getElementById('app').innerHTML = `
+        <div class="admin">
+          <div class="admin__header">
+            <div>
+              <div class="admin__logo">KYROO <span>Admin</span></div>
+              <a href="/" class="admin__back">Back to site</a>
+            </div>
+            <div class="admin__user">${esc(user.name || user.email)}</div>
+          </div>
+
+          <div class="stats">
+            <div class="stat"><div class="stat__value">${stats.total_users}</div><div class="stat__label">Users</div></div>
+            <div class="stat"><div class="stat__value">${stats.premium_users}</div><div class="stat__label">Premium</div></div>
+            <div class="stat"><div class="stat__value">${stats.total_articles}</div><div class="stat__label">Articles</div></div>
+            <div class="stat"><div class="stat__value">${stats.total_subscribers}</div><div class="stat__label">Subscribers</div></div>
+          </div>
+
+          <div class="ai-section">
+            <div class="ai-section__header">
+              <div class="ai-section__title">AI Article Generator</div>
+              <span class="ai-section__badge">Claude</span>
+            </div>
+            <div class="ai-section__form">
+              <textarea class="ai-section__prompt" id="aiPrompt" placeholder="Describe the article you want to generate...&#10;&#10;e.g. &quot;Top 5 AI productivity tools for freelancers in Berlin&quot; or &quot;A beginner guide to calisthenics in Prenzlauer Berg parks&quot;"></textarea>
+              <div class="ai-section__row">
+                <select class="form__select" id="aiCategory">
+                  <option value="">Auto-detect category</option>
+                  <option value="AI">AI</option>
+                  <option value="Fitness">Fitness</option>
+                  <option value="Trends">Trends</option>
+                  <option value="Recommendations">Recommendations</option>
+                  <option value="Lifestyle">Lifestyle</option>
+                  <option value="Future Tools">Future Tools</option>
+                </select>
+                <label class="form__toggle" style="white-space:nowrap">
+                  <input type="checkbox" id="aiPremium">
+                  <span>Premium</span>
+                </label>
+                <button type="button" class="btn btn--ai btn--small" id="aiGenerateBtn">Generate with AI</button>
+              </div>
+              <div class="ai-section__status" id="aiStatus" hidden></div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar__title">Articles</div>
+            <button class="btn btn--primary btn--small" id="newArticleBtn">+ New Article</button>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr><th>Title</th><th>Category</th><th>Access</th><th>Published</th><th></th></tr>
+            </thead>
+            <tbody id="articlesBody">
+              ${articles.map(a => `
+                <tr>
+                  <td><strong>${esc(a.title)}</strong><br><span style="color:var(--text-3);font-size:0.75rem">/${esc(a.slug)}</span></td>
+                  <td>${esc(a.category)}</td>
+                  <td><span class="badge ${a.is_premium ? 'badge--premium' : 'badge--free'}">${a.is_premium ? 'Premium' : 'Free'}</span></td>
+                  <td style="color:var(--text-3);font-size:0.8125rem">${new Date(a.published_at).toLocaleDateString('de-DE')}</td>
+                  <td>
+                    <div class="table__actions">
+                      <button class="table__btn" onclick="editArticle(${a.id})">Edit</button>
+                      <button class="table__btn table__btn--del" onclick="deleteArticle(${a.id}, '${esc(a.title).replace(/'/g, "\\'")}')">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div id="formContainer"></div>
+      `;
+
+      document.getElementById('newArticleBtn').onclick = () => showArticleForm(null);
+      document.getElementById('aiGenerateBtn').onclick = generateWithAI;
+      window._articles = articles;
+    }
+
+    // ---- AI Generation ----
+    async function generateWithAI() {
+      const prompt = document.getElementById('aiPrompt').value.trim();
+      if (!prompt) return;
+
+      const btn = document.getElementById('aiGenerateBtn');
+      const status = document.getElementById('aiStatus');
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      status.hidden = false;
+      status.className = 'ai-section__status';
+      status.innerHTML = '<span class="ai-spinner"></span>AI is writing your article...';
+
+      try {
+        const res = await fetch(`${API}/api/admin/generate`, {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({
+            prompt,
+            category: document.getElementById('aiCategory').value || null,
+            is_premium: document.getElementById('aiPremium').checked,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        status.innerHTML = 'Article generated. Opening editor...';
+
+        // Open the article form pre-filled with AI content
+        setTimeout(() => {
+          showArticleForm({
+            title: data.title,
+            slug: data.slug,
+            category: data.category,
+            excerpt: data.excerpt,
+            body: data.body,
+            is_premium: data.is_premium,
+            _isAI: true,
+          });
+          status.hidden = true;
+          document.getElementById('aiPrompt').value = '';
+        }, 500);
+      } catch (err) {
+        status.className = 'ai-section__status ai-section__status--error';
+        status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate with AI';
+      }
+    }
+
+    // ---- Article form ----
+    function showArticleForm(article) {
+      const isAI = article && article._isAI;
+      const isEdit = !!article && !isAI;
+      const categories = ['AI', 'Fitness', 'Trends', 'Recommendations', 'Lifestyle', 'Future Tools'];
+
+      document.getElementById('formContainer').innerHTML = `
+        <div class="form-overlay" id="formOverlay">
+          <div class="form-panel">
+            <button type="button" class="form__close" id="formClose">&times;</button>
+            <h3 class="form__title">${isEdit ? 'Edit Article' : isAI ? 'Review AI Article' : 'New Article'}</h3>
+            <form id="articleForm">
+              <div class="form__group">
+                <label class="form__label">Title</label>
+                <input type="text" class="form__input" id="f_title" required value="${article ? esc(article.title) : ''}">
+              </div>
+              <div class="form__row">
+                <div class="form__group">
+                  <label class="form__label">Slug (URL)</label>
+                  <input type="text" class="form__input" id="f_slug" required value="${article ? esc(article.slug) : ''}" placeholder="my-article-title">
+                </div>
+                <div class="form__group">
+                  <label class="form__label">Category</label>
+                  <select class="form__select" id="f_category">
+                    ${categories.map(c => `<option value="${c}" ${article && article.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="form__group">
+                <label class="form__label">Excerpt</label>
+                <input type="text" class="form__input" id="f_excerpt" required value="${article ? esc(article.excerpt) : ''}" placeholder="Short summary shown on cards">
+              </div>
+              <div class="form__group">
+                <label class="form__label">Body</label>
+                <textarea class="form__textarea" id="f_body" required placeholder="Full article content...">${article ? esc(article.body) : ''}</textarea>
+              </div>
+              <div class="form__group">
+                <label class="form__toggle">
+                  <input type="checkbox" id="f_premium" ${article && article.is_premium ? 'checked' : ''}>
+                  <span>Premium content (visible only to premium subscribers)</span>
+                </label>
+              </div>
+              <div class="form__error" id="formErr" hidden></div>
+              <div class="form__actions">
+                <button type="submit" class="btn btn--primary">${isEdit ? 'Save Changes' : isAI ? 'Publish AI Article' : 'Publish Article'}</button>
+                <button type="button" class="btn btn--outline" id="formCancel">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      // Auto-generate slug from title
+      if (!isEdit) {
+        document.getElementById('f_title').addEventListener('input', () => {
+          const slug = document.getElementById('f_title').value
+            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          document.getElementById('f_slug').value = slug;
+        });
+      }
+
+      document.getElementById('formClose').onclick = closeForm;
+      document.getElementById('formCancel').onclick = closeForm;
+      document.getElementById('formOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeForm();
+      });
+
+      document.getElementById('articleForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const err = document.getElementById('formErr');
+        err.hidden = true;
+
+        const payload = {
+          title: document.getElementById('f_title').value,
+          slug: document.getElementById('f_slug').value,
+          category: document.getElementById('f_category').value,
+          excerpt: document.getElementById('f_excerpt').value,
+          body: document.getElementById('f_body').value,
+          is_premium: document.getElementById('f_premium').checked,
+        };
+
+        try {
+          const url = isEdit ? `${API}/api/admin/articles/${article.id}` : `${API}/api/admin/articles`;
+          const method = isEdit ? 'PUT' : 'POST';
+          const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(payload) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          closeForm();
+          renderDashboard();
+        } catch (ex) {
+          err.textContent = ex.message;
+          err.hidden = false;
+        }
+      };
+    }
+
+    function closeForm() {
+      document.getElementById('formContainer').innerHTML = '';
+    }
+
+    async function editArticle(id) {
+      const article = window._articles.find(a => a.id === id);
+      if (article) showArticleForm(article);
+    }
+
+    async function deleteArticle(id, title) {
+      if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+      await fetch(`${API}/api/admin/articles/${id}`, { method: 'DELETE', headers: headers() });
+      renderDashboard();
+    }
+
+    init();
+  </script>
+</body>
+</html>
