@@ -1284,30 +1284,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // ---- Auth modal wiring ----
+  // ---- Modal wiring (close via X button or Escape only) ----
   document.getElementById('authModalClose').onclick = () => hideModal('authModal');
-  document.getElementById('authModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('authModal');
-  });
   document.getElementById('articleModalClose').onclick = () => hideModal('articleModal');
-  document.getElementById('articleModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('articleModal');
-  });
   document.getElementById('checkoutModalClose').onclick = () => hideModal('checkoutModal');
-  document.getElementById('checkoutModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('checkoutModal');
-  });
   document.getElementById('privacyModalClose').onclick = () => hideModal('privacyModal');
-  document.getElementById('privacyModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('privacyModal');
-  });
   document.getElementById('termsModalClose').onclick = () => hideModal('termsModal');
-  document.getElementById('termsModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('termsModal');
-  });
   document.getElementById('imprintModalClose').onclick = () => hideModal('imprintModal');
-  document.getElementById('imprintModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) hideModal('imprintModal');
+
+  // Escape key closes the topmost modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modals = ['checkoutModal', 'articleModal', 'authModal', 'privacyModal', 'termsModal', 'imprintModal'];
+      for (const id of modals) {
+        if (!document.getElementById(id).hidden) {
+          hideModal(id);
+          break;
+        }
+      }
+    }
   });
 
   // Auth button - direct listener as fallback
