@@ -1075,11 +1075,7 @@ function renderTrainTogether(locations, checkins) {
             ${count > 0 ? count + ' there now' : 'Nobody yet'}
           </div>
         </div>
-        <div class="train__card-map">
-          <a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=16/${loc.lat}/${loc.lng}" target="_blank" rel="noopener">
-            <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${loc.lat},${loc.lng}&zoom=15&size=400x120&markers=${loc.lat},${loc.lng},red-pushpin" alt="${esc(loc.name)}" loading="lazy">
-          </a>
-        </div>
+        <a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=16/${loc.lat}/${loc.lng}" target="_blank" rel="noopener" class="train__card-maplink">Open in Maps</a>
         <p class="train__card-desc">${esc(loc.description)}</p>
 
         ${count > 0 ? `
@@ -1096,14 +1092,16 @@ function renderTrainTogether(locations, checkins) {
           <div class="train__card-empty">Be the first one today.</div>
         `}
 
-        ${currentUser ? (isHere ? `
+        ${currentUser && (currentUser.is_premium || currentUser.is_admin) ? (isHere ? `
           <button type="button" class="train__checkin-btn train__checkin-btn--active" data-action="checkout">I'm leaving</button>
         ` : (myCheckin ? '' : `
           <div class="train__activities" data-location="${esc(loc.slug)}">
             ${activities.map(a => `<button type="button" class="train__activity-btn" data-activity="${esc(a)}">${esc(a)}</button>`).join('')}
           </div>
           <button type="button" class="train__checkin-btn" data-action="checkin" data-location="${esc(loc.slug)}">I'm here</button>
-        `)) : `
+        `)) : currentUser ? `
+          <button type="button" class="train__checkin-btn" data-action="upgrade">Premium feature - Upgrade</button>
+        ` : `
           <button type="button" class="train__checkin-btn" data-action="login">Log in to check in</button>
         `}
       </div>
@@ -1150,6 +1148,10 @@ function renderTrainTogether(locations, checkins) {
 
   grid.querySelectorAll('[data-action="login"]').forEach(btn => {
     btn.addEventListener('click', () => showAuthModal('login'));
+  });
+
+  grid.querySelectorAll('[data-action="upgrade"]').forEach(btn => {
+    btn.addEventListener('click', () => showCheckoutModal());
   });
 
   grid.querySelectorAll('.train__activity-btn').forEach(btn => {
