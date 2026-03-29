@@ -387,6 +387,62 @@ app.delete('/api/checkins', authRequired, async (req, res) => {
   res.json({ success: true });
 });
 
+// ---- 12-Week Programme Generator ----
+app.post('/api/programme/generate', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { level, experience_years, weight, height, age, sex, squat, bench, deadlift, ohp, days_per_week, session_minutes, equipment, primary_goal, secondary_goal } = req.body;
+
+  if (!level || !weight || !height || !age || !sex || !days_per_week || !session_minutes) {
+    return res.status(400).json({ error: 'Please fill in all required fields' });
+  }
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience working with intermediate natural athletes.
+
+Your client details:
+- Level: ${level} with ${experience_years || 'unknown'} years of consistent training experience
+- Stats: ${weight}kg, ${height}cm, ${age} years old, ${sex}
+- Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
+- Training availability: ${days_per_week} days per week, sessions no longer than ${session_minutes} minutes
+- Equipment: ${equipment || 'full commercial gym'}
+- Primary goal: ${primary_goal || 'hypertrophy'}
+- Secondary goal: ${secondary_goal || 'building raw strength'}
+
+Design a complete 12-week periodised training programme. Include:
+1. The overall periodisation model you are using and why
+2. The full weekly training split with reasoning
+3. Every session written out in full with exercise name, sets, reps, tempo, and rest periods
+4. A week-by-week progressive overload strategy
+5. Instructions for deload weeks including when and how to run them
+6. A note on why each exercise was selected
+
+Format this as a complete training plan that can be printed and followed from day one. Use clear headers, tables where appropriate, and make it easy to read. Write it as a professional document.
+
+Start with "KYROO 12-WEEK TRAINING PROGRAMME" as the title.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const programme = message.content[0].text;
+    res.json({ programme });
+  } catch (err) {
+    console.error('Programme generation error:', err.message);
+    res.status(500).json({ error: 'Failed to generate programme' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent

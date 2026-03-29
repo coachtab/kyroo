@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KYROO - 12-Week Programme</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#060606; --surface:#0d0d0d; --border:rgba(255,255,255,0.06); --text:#eae5de; --text-2:#7a756e; --text-3:#3d3a37; --accent:#c27a56; --sage:#7d8c68; --sans:'Space Grotesk',sans-serif; --serif:'DM Serif Display',serif; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    a{color:var(--accent);text-decoration:none}
+
+    .page{max-width:720px;margin:0 auto;padding:32px 24px}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:48px}
+    .logo{font-family:var(--serif);font-size:1rem;letter-spacing:0.12em;color:var(--text);opacity:0.7}
+    .back{font-size:0.75rem;color:var(--text-3)}
+
+    h1{font-family:var(--serif);font-size:2rem;margin-bottom:8px}
+    .subtitle{font-size:0.875rem;color:var(--text-2);margin-bottom:40px}
+
+    .form{display:flex;flex-direction:column;gap:24px}
+    .form__section{font-size:0.5625rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-3);padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .form__row{display:flex;gap:12px}
+    .form__row>*{flex:1}
+    .form__group{display:flex;flex-direction:column;gap:4px}
+    .form__label{font-size:0.6875rem;font-weight:600;color:var(--text-2);letter-spacing:0.02em}
+    .form__input,.form__select{padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:0.875rem;outline:none;transition:border-color 0.2s}
+    .form__input:focus,.form__select:focus{border-color:var(--accent)}
+    .form__input::placeholder{color:var(--text-3)}
+    .form__select{appearance:none;cursor:pointer}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;font-family:var(--sans);font-size:0.8125rem;font-weight:600;letter-spacing:0.03em;border-radius:999px;border:none;cursor:pointer;transition:all 0.2s}
+    .btn--primary{background:var(--accent);color:#fff;width:100%}
+    .btn--primary:hover{background:#d4906c}
+    .btn--primary:disabled{opacity:0.4;cursor:not-allowed}
+
+    .error{font-size:0.8125rem;color:#d46b6b;padding:8px 12px;background:rgba(212,107,107,0.06)}
+    .locked{text-align:center;padding:60px 20px}
+    .locked h2{font-family:var(--serif);font-size:1.5rem;margin-bottom:8px}
+    .locked p{color:var(--text-2);font-size:0.875rem;margin-bottom:24px}
+
+    /* Result */
+    .result{display:none}
+    .result__actions{display:flex;gap:12px;margin-bottom:32px}
+    .result__btn{padding:10px 20px;font-family:var(--sans);font-size:0.75rem;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;border-radius:999px;transition:all 0.2s}
+    .result__btn:hover{border-color:var(--accent);color:var(--accent)}
+    .result__body{font-size:0.875rem;line-height:1.8;color:var(--text);white-space:pre-wrap}
+    .result__body h1,.result__body h2,.result__body h3{font-family:var(--serif);font-weight:400;margin:28px 0 12px}
+    .result__body h1{font-size:1.5rem}
+    .result__body h2{font-size:1.25rem}
+    .result__body h3{font-size:1.0625rem}
+    .result__body table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.8125rem}
+    .result__body th{text-align:left;padding:8px;border-bottom:1px solid var(--border);font-size:0.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3)}
+    .result__body td{padding:8px;border-bottom:1px solid var(--border)}
+
+    .generating{text-align:center;padding:60px 20px}
+    .spinner{width:24px;height:24px;border:2px solid var(--text-3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .generating p{font-size:0.875rem;color:var(--text-2)}
+
+    /* Print */
+    @media print {
+      body{background:#fff;color:#111}
+      .header,.form,.result__actions,.locked{display:none !important}
+      .result{display:block !important}
+      .result__body{color:#111;font-size:11pt}
+      .result__body h1,.result__body h2,.result__body h3{color:#111}
+      .result__body td,.result__body th{border-bottom:1px solid #ddd}
+    }
+
+    @media(max-width:640px){.form__row{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <a href="/" class="logo">KYROO</a>
+      <a href="/" class="back">Back</a>
+    </div>
+
+    <div id="app">
+      <div id="lockedView" hidden>
+        <div class="locked">
+          <h2>Premium Feature</h2>
+          <p>The 12-week programme generator is available for KYROO Premium members.</p>
+          <a href="/" class="btn btn--primary" style="display:inline-flex;width:auto">Go to KYROO</a>
+        </div>
+      </div>
+
+      <div id="formView">
+        <h1>12-Week Programme</h1>
+        <p class="subtitle">Fill in your details. Our AI coach builds your personalised training plan.</p>
+
+        <form class="form" id="programmeForm">
+          <p class="form__section">About You</p>
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Level</label>
+              <select class="form__select" id="f_level" required>
+                <option value="">Select...</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate" selected>Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="professional">Professional</option>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Years Training</label>
+              <input type="number" class="form__input" id="f_years" placeholder="e.g. 3" min="0" max="30">
+            </div>
+          </div>
+
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Weight (kg)</label>
+              <input type="number" class="form__input" id="f_weight" placeholder="80" required>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Height (cm)</label>
+              <input type="number" class="form__input" id="f_height" placeholder="180" required>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Age</label>
+              <input type="number" class="form__input" id="f_age" placeholder="28" required>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Sex</label>
+              <select class="form__select" id="f_sex" required>
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="form__section">Current Strength (1RM in kg - optional)</p>
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Squat</label>
+              <input type="number" class="form__input" id="f_squat" placeholder="120">
+            </div>
+            <div class="form__group">
+              <label class="form__label">Bench</label>
+              <input type="number" class="form__input" id="f_bench" placeholder="80">
+            </div>
+            <div class="form__group">
+              <label class="form__label">Deadlift</label>
+              <input type="number" class="form__input" id="f_deadlift" placeholder="140">
+            </div>
+            <div class="form__group">
+              <label class="form__label">OHP</label>
+              <input type="number" class="form__input" id="f_ohp" placeholder="50">
+            </div>
+          </div>
+
+          <p class="form__section">Training Setup</p>
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Days per Week</label>
+              <select class="form__select" id="f_days" required>
+                <option value="3">3 days</option>
+                <option value="4" selected>4 days</option>
+                <option value="5">5 days</option>
+                <option value="6">6 days</option>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Session Length (min)</label>
+              <select class="form__select" id="f_minutes" required>
+                <option value="45">45 min</option>
+                <option value="60" selected>60 min</option>
+                <option value="75">75 min</option>
+                <option value="90">90 min</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Equipment</label>
+              <select class="form__select" id="f_equipment">
+                <option value="full commercial gym">Full commercial gym</option>
+                <option value="home gym with barbell and dumbbells">Home gym (barbell + dumbbells)</option>
+                <option value="dumbbells only">Dumbbells only</option>
+                <option value="bodyweight and calisthenics park">Bodyweight / calisthenics park</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="form__section">Goals</p>
+          <div class="form__row">
+            <div class="form__group">
+              <label class="form__label">Primary Goal</label>
+              <select class="form__select" id="f_primary">
+                <option value="hypertrophy">Hypertrophy (muscle growth)</option>
+                <option value="strength">Strength</option>
+                <option value="fat loss while maintaining muscle">Fat loss</option>
+                <option value="general fitness and conditioning">General fitness</option>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Secondary Goal</label>
+              <select class="form__select" id="f_secondary">
+                <option value="building raw strength">Raw strength</option>
+                <option value="improving conditioning">Conditioning</option>
+                <option value="mobility and injury prevention">Mobility</option>
+                <option value="aesthetics">Aesthetics</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="error" id="formError" hidden></div>
+          <button type="submit" class="btn btn--primary" id="generateBtn">Generate My Programme</button>
+        </form>
+      </div>
+
+      <div id="generatingView" hidden>
+        <div class="generating">
+          <div class="spinner"></div>
+          <p>Building your 12-week programme...</p>
+          <p style="color:var(--text-3);font-size:0.75rem;margin-top:8px">This takes about 30 seconds.</p>
+        </div>
+      </div>
+
+      <div class="result" id="resultView">
+        <div class="result__actions">
+          <button type="button" class="result__btn" onclick="window.print()">Print / Save PDF</button>
+          <button type="button" class="result__btn" onclick="document.getElementById('resultView').style.display='none';document.getElementById('formView').style.display='block'">New Programme</button>
+          <a href="/" class="result__btn">Back to KYROO</a>
+        </div>
+        <div class="result__body" id="resultBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+    const token = localStorage.getItem('kyroo_token');
+
+    async function init() {
+      if (!token) { showLocked(); return; }
+      try {
+        const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) { showLocked(); return; }
+        const user = await res.json();
+        if (!user.is_premium && !user.is_admin) { showLocked(); return; }
+      } catch (e) { showLocked(); }
+    }
+
+    function showLocked() {
+      document.getElementById('formView').hidden = true;
+      document.getElementById('lockedView').hidden = false;
+    }
+
+    document.getElementById('programmeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('formError');
+      err.hidden = true;
+
+      const payload = {
+        level: document.getElementById('f_level').value,
+        experience_years: document.getElementById('f_years').value,
+        weight: document.getElementById('f_weight').value,
+        height: document.getElementById('f_height').value,
+        age: document.getElementById('f_age').value,
+        sex: document.getElementById('f_sex').value,
+        squat: document.getElementById('f_squat').value,
+        bench: document.getElementById('f_bench').value,
+        deadlift: document.getElementById('f_deadlift').value,
+        ohp: document.getElementById('f_ohp').value,
+        days_per_week: document.getElementById('f_days').value,
+        session_minutes: document.getElementById('f_minutes').value,
+        equipment: document.getElementById('f_equipment').value,
+        primary_goal: document.getElementById('f_primary').value,
+        secondary_goal: document.getElementById('f_secondary').value,
+      };
+
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('generatingView').hidden = false;
+
+      try {
+        const res = await fetch(`${API}/api/programme/generate`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Convert markdown-ish text to HTML
+        let html = data.programme
+          .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+          .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+          .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+        html = '<p>' + html + '</p>';
+
+        document.getElementById('resultBody').innerHTML = html;
+        document.getElementById('generatingView').hidden = true;
+        document.getElementById('resultView').style.display = 'block';
+      } catch (ex) {
+        document.getElementById('generatingView').hidden = true;
+        document.getElementById('formView').style.display = 'block';
+        err.textContent = ex.message;
+        err.hidden = false;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
