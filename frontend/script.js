@@ -1030,6 +1030,141 @@ function updateHeroCTAs() {
   }
 }
 
+// ========================================
+// Train Together
+// ========================================
+
+let myCheckin = null;
+
+async function loadTrainTogether() {
+  try {
+    const [locations, checkins] = await Promise.all([
+      fetch(`${API_BASE}/api/locations`).then(r => r.json()),
+      fetch(`${API_BASE}/api/checkins`).then(r => r.json()),
+    ]);
+
+    // Check if current user has an active check-in
+    if (currentUser) {
+      const myActive = checkins.find(c => c.user_name === currentUser.name || c.user_name === currentUser.email?.split('@')[0]);
+      myCheckin = myActive || null;
+    }
+
+    renderTrainTogether(locations, checkins);
+  } catch (err) {
+    console.error('Failed to load train together:', err);
+  }
+}
+
+function renderTrainTogether(locations, checkins) {
+  const grid = document.getElementById('trainGrid');
+  if (!grid) return;
+
+  const activities = ['Calisthenics', 'Running', 'Yoga', 'Just hanging'];
+
+  grid.innerHTML = locations.map(loc => {
+    const locCheckins = checkins.filter(c => c.location === loc.slug);
+    const count = locCheckins.length;
+    const isHere = myCheckin && myCheckin.location === loc.slug;
+
+    return `
+      <div class="train__card" data-animate="fade-up">
+        <div class="train__card-header">
+          <h3 class="train__card-name">${esc(loc.short_name)}</h3>
+          <div class="train__card-count">
+            <span class="train__card-dot ${count > 0 ? 'train__card-dot--active' : ''}"></span>
+            ${count > 0 ? count + ' there now' : 'Nobody yet'}
+          </div>
+        </div>
+        <p class="train__card-desc">${esc(loc.description)}</p>
+
+        ${count > 0 ? `
+          <div class="train__card-people">
+            ${locCheckins.map(c => `
+              <div class="train__person">
+                <span class="train__person-name">${esc(c.user_name)}</span>
+                <span class="train__person-activity">${esc(c.activity || '')}</span>
+                <span class="train__person-time">${timeAgo(c.created_at)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="train__card-empty">Be the first one today.</div>
+        `}
+
+        ${currentUser ? (isHere ? `
+          <button type="button" class="train__checkin-btn train__checkin-btn--active" data-action="checkout">I'm leaving</button>
+        ` : (myCheckin ? '' : `
+          <div class="train__activities" data-location="${esc(loc.slug)}">
+            ${activities.map(a => `<button type="button" class="train__activity-btn" data-activity="${esc(a)}">${esc(a)}</button>`).join('')}
+          </div>
+          <button type="button" class="train__checkin-btn" data-action="checkin" data-location="${esc(loc.slug)}">I'm here</button>
+        `)) : `
+          <button type="button" class="train__checkin-btn" data-action="login">Log in to check in</button>
+        `}
+      </div>
+    `;
+  }).join('');
+
+  // Wire buttons
+  grid.querySelectorAll('[data-action="checkin"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const location = btn.dataset.location;
+      const selectedActivity = btn.closest('.train__card').querySelector('.train__activity-btn--selected');
+      const activity = selectedActivity ? selectedActivity.dataset.activity : null;
+      btn.textContent = 'Checking in...';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API_BASE}/api/checkins`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ location, activity }),
+        });
+        if (!res.ok) throw new Error();
+        loadTrainTogether();
+      } catch (e) {
+        btn.textContent = "I'm here";
+        btn.disabled = false;
+      }
+    });
+  });
+
+  grid.querySelectorAll('[data-action="checkout"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.textContent = 'Leaving...';
+      btn.disabled = true;
+      try {
+        await fetch(`${API_BASE}/api/checkins`, { method: 'DELETE', headers: authHeaders() });
+        myCheckin = null;
+        loadTrainTogether();
+      } catch (e) {
+        btn.textContent = "I'm leaving";
+        btn.disabled = false;
+      }
+    });
+  });
+
+  grid.querySelectorAll('[data-action="login"]').forEach(btn => {
+    btn.addEventListener('click', () => showAuthModal('login'));
+  });
+
+  grid.querySelectorAll('.train__activity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const parent = btn.closest('.train__activities');
+      parent.querySelectorAll('.train__activity-btn').forEach(b => b.classList.remove('train__activity-btn--selected'));
+      btn.classList.add('train__activity-btn--selected');
+    });
+  });
+
+  initAnimations();
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
+  if (diff < 1) return 'just now';
+  if (diff < 60) return diff + 'm ago';
+  return Math.floor(diff / 60) + 'h ago';
+}
+
 // ---- Scroll helper ----
 function scrollToSection(id) {
   const el = document.getElementById(id);
@@ -1292,6 +1427,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---- Load articles ----
   loadArticles();
 
+  // ---- Load train together ----
+  loadTrainTogether();
+
   // Allow auth modal only after page is fully initialized
   pageReady = true;
 
@@ -1349,6 +1487,10 @@ async function handleLiveUpdate(msg) {
     case 'article-updated':
     case 'article-deleted':
       loadArticles();
+      break;
+    case 'checkin':
+    case 'checkout':
+      loadTrainTogether();
       break;
     case 'content-updated':
       // Reload full site data

@@ -318,6 +318,75 @@ app.get('/api/auth/me', authRequired, async (req, res) => {
 // Premium Subscription Routes
 // ========================================
 
+// ---- Train Together ----
+
+// GET /api/locations - list training locations
+app.get('/api/locations', async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM training_locations ORDER BY sort_order');
+  res.json(rows);
+});
+
+// GET /api/checkins - get active check-ins
+app.get('/api/checkins', async (req, res) => {
+  // Clean expired
+  await pool.query('DELETE FROM checkins WHERE expires_at < NOW()');
+
+  const { rows } = await pool.query(`
+    SELECT c.id, c.location, c.activity, c.user_name, c.created_at, c.expires_at,
+           tl.name as location_name, tl.short_name
+    FROM checkins c
+    JOIN training_locations tl ON c.location = tl.slug
+    WHERE c.expires_at > NOW()
+    ORDER BY c.created_at DESC
+  `);
+  res.json(rows);
+});
+
+// GET /api/checkins/counts - get counts per location
+app.get('/api/checkins/counts', async (req, res) => {
+  await pool.query('DELETE FROM checkins WHERE expires_at < NOW()');
+  const { rows } = await pool.query(`
+    SELECT tl.slug, tl.name, tl.short_name, COUNT(c.id)::int as count
+    FROM training_locations tl
+    LEFT JOIN checkins c ON c.location = tl.slug AND c.expires_at > NOW()
+    GROUP BY tl.slug, tl.name, tl.short_name
+    ORDER BY tl.sort_order
+  `);
+  res.json(rows);
+});
+
+// POST /api/checkins - check in
+app.post('/api/checkins', authRequired, async (req, res) => {
+  const { location, activity } = req.body;
+  if (!location) return res.status(400).json({ error: 'Location required' });
+
+  // Verify location exists
+  const loc = await pool.query('SELECT slug FROM training_locations WHERE slug = $1', [location]);
+  if (loc.rows.length === 0) return res.status(400).json({ error: 'Invalid location' });
+
+  // Remove any existing check-in for this user
+  await pool.query('DELETE FROM checkins WHERE user_id = $1', [req.user.id]);
+
+  // Get user name
+  const user = await pool.query('SELECT name FROM users WHERE id = $1', [req.user.id]);
+  const userName = user.rows[0]?.name || req.user.email.split('@')[0];
+
+  const { rows } = await pool.query(
+    'INSERT INTO checkins (user_id, user_name, location, activity) VALUES ($1, $2, $3, $4) RETURNING *',
+    [req.user.id, userName, location, activity || null]
+  );
+
+  broadcast('checkin', { location, activity, user_name: userName });
+  res.status(201).json(rows[0]);
+});
+
+// DELETE /api/checkins - check out
+app.delete('/api/checkins', authRequired, async (req, res) => {
+  await pool.query('DELETE FROM checkins WHERE user_id = $1', [req.user.id]);
+  broadcast('checkout', { user_id: req.user.id });
+  res.json({ success: true });
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
