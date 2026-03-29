@@ -406,28 +406,44 @@ app.post('/api/programme/generate', authRequired, async (req, res) => {
     const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience working with intermediate natural athletes.
+    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programmes that even complete beginners can follow without confusion.
 
-Your client details:
-- Level: ${level} with ${experience_years || 'unknown'} years of consistent training experience
-- Stats: ${weight}kg, ${height}cm, ${age} years old, ${sex}
+Your client:
+- Level: ${level} with ${experience_years || 'some'} years of training
+- Body: ${weight}kg, ${height}cm, ${age} years old, ${sex}
 - Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
-- Training availability: ${days_per_week} days per week, sessions no longer than ${session_minutes} minutes
+- Schedule: ${days_per_week} days per week, max ${session_minutes} minutes per session
 - Equipment: ${equipment || 'full commercial gym'}
 - Primary goal: ${primary_goal || 'hypertrophy'}
 - Secondary goal: ${secondary_goal || 'building raw strength'}
 
-Design a complete 12-week periodised training programme. Include:
-1. The overall periodisation model you are using and why
-2. The full weekly training split with reasoning
-3. Every session written out in full with exercise name, sets, reps, tempo, and rest periods
-4. A week-by-week progressive overload strategy
-5. Instructions for deload weeks including when and how to run them
-6. A note on why each exercise was selected
+Design a complete 12-week periodised training programme.
 
-Format this as a complete training plan that can be printed and followed from day one. Use clear headers, tables where appropriate, and make it easy to read. Write it as a professional document.
+IMPORTANT FORMATTING RULES:
+- Write for someone who may have never followed a structured programme before
+- For EVERY exercise, include a one-line plain-English description of how to perform it (e.g. "Stand with feet shoulder-width apart, lower your hips until thighs are parallel to the floor, then stand back up")
+- Explain what "tempo 3-1-1-0" means the first time you use it
+- Explain what RPE means the first time you use it
+- Explain what a deload is and why it matters
+- Use simple language throughout - no jargon without explanation
+- Format each training day clearly with: Exercise Name, How To Do It (one line), Sets x Reps, Tempo, Rest
+- Use numbered lists for exercises within each session
+- Group weeks clearly: Week 1-4, Week 5-8, Week 9-12
 
-Start with "KYROO 12-WEEK TRAINING PROGRAMME" as the title.`;
+Include:
+1. A short overview of the programme approach (2-3 sentences, plain English)
+2. The weekly training split (which days train which body parts)
+3. Every session written out with exercise name, brief how-to, sets, reps, tempo, rest
+4. How to increase weight week by week (be specific: "add 2.5kg to upper body lifts, 5kg to lower body lifts each week")
+5. Deload instructions (when, what to change, why)
+6. A quick note on why key exercises were chosen
+
+Start with:
+
+# KYROO 12-WEEK TRAINING PROGRAMME
+Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}
+
+Make this a document someone can print, bring to the gym, and follow from day one without Googling anything.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
