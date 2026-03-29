@@ -506,17 +506,36 @@ async function showAccountModal() {
     </div>
   `;
 
+  // Build all HTML at once, then attach listeners
+  let actionsHtml = '';
+
   if (currentUser.is_admin) {
-    actions.innerHTML = '';
+    // No premium buttons for admin
   } else if (currentUser.is_premium) {
-    actions.innerHTML = `
-      <button type="button" class="btn btn--outline btn--full" id="cancelPremiumBtn">Cancel Premium</button>
-    `;
-    document.getElementById('cancelPremiumBtn').onclick = cancelPremium;
+    actionsHtml += `<button type="button" class="btn btn--outline btn--full" id="cancelPremiumBtn">Cancel Premium</button>`;
   } else {
-    actions.innerHTML = `
-      <button type="button" class="btn btn--primary btn--full" id="activatePremiumBtn">Upgrade to Premium</button>
-    `;
+    actionsHtml += `<button type="button" class="btn btn--primary btn--full" id="activatePremiumBtn">Upgrade to Premium</button>`;
+  }
+
+  actionsHtml += `
+    <button type="button" class="btn btn--ghost btn--full modal__logout" id="logoutBtn">Log out</button>
+    <div class="account-dsgvo">
+      <p class="account-dsgvo__title">Privacy (GDPR)</p>
+      <div class="account-dsgvo__actions">
+        <button type="button" class="account-dsgvo__btn" id="dataExportBtn">Export my data</button>
+        <button type="button" class="account-dsgvo__btn account-dsgvo__btn--danger" id="deleteAccountBtn">Delete account</button>
+      </div>
+    </div>
+  `;
+
+  actions.innerHTML = actionsHtml;
+
+  // Now attach all listeners
+  if (document.getElementById('cancelPremiumBtn')) {
+    document.getElementById('cancelPremiumBtn').addEventListener('click', cancelPremium);
+  }
+
+  if (document.getElementById('activatePremiumBtn')) {
     document.getElementById('activatePremiumBtn').addEventListener('click', async () => {
       hideModal('authModal');
       await new Promise(r => setTimeout(r, 300));
@@ -528,18 +547,6 @@ async function showAccountModal() {
       document.body.style.overflow = 'hidden';
     });
   }
-
-  // Logout + DSGVO
-  actions.innerHTML += `
-    <button type="button" class="btn btn--ghost btn--full modal__logout" id="logoutBtn">Log out</button>
-    <div class="account-dsgvo">
-      <p class="account-dsgvo__title">Privacy (GDPR)</p>
-      <div class="account-dsgvo__actions">
-        <button type="button" class="account-dsgvo__btn" id="dataExportBtn">Export my data</button>
-        <button type="button" class="account-dsgvo__btn account-dsgvo__btn--danger" id="deleteAccountBtn">Delete account</button>
-      </div>
-    </div>
-  `;
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
     clearAuth();
