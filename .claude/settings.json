@@ -67,7 +67,17 @@
       "Bash(curl -s \"http://localhost:3000/api/articles?category=Trends\")",
       "Bash(python -c \":*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ssh -i ~/.ssh/coachtap_strato -o StrictHostKeyChecking=no deploy@93.90.201.90 \"echo ''connected''\")",
+      "Bash(ssh -i ~/.ssh/coachtap_strato -o StrictHostKeyChecking=no root@93.90.201.90 \"echo ''connected''\")",
+      "Bash(ssh -i:*)",
+      "Bash(scp -i ~/.ssh/coachtap_strato db/seed-production.js root@93.90.201.90:/home/deploy/kyroo/db/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://93.90.201.90:3001)",
+      "Bash(curl -s http://93.90.201.90:3001/api/site)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''Sections:'''', len\\(d[''''sections'''']\\)\\); print\\(''''Categories:'''', len\\(d[''''categories'''']\\)\\); print\\(''''Articles will load from:'''', d[''''sections''''][''''hero''''][''''title'''']\\)\")",
+      "Bash(curl -s http://93.90.201.90:3001/api/articles)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de)"
     ]
   }
 }

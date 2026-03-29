@@ -742,26 +742,30 @@ function renderCheckout(methods) {
       </div>
     ` : ''}
 
-    <p class="checkout__section-title">${methods.length > 0 ? 'Or add a new payment method' : 'Add a payment method'}</p>
+    <p class="checkout__section-title">${methods.length > 0 ? 'Or add a new payment method' : 'Payment method'}</p>
     <div class="checkout__new-method">
       <div class="checkout__tabs">
-        <button type="button" class="checkout__tab checkout__tab--active" data-tab="card">Card</button>
-        <button type="button" class="checkout__tab" data-tab="paypal">PayPal</button>
-        <button type="button" class="checkout__tab" data-tab="sepa">SEPA</button>
+        <button type="button" class="checkout__tab checkout__tab--active" data-tab="card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Card
+        </button>
+        <button type="button" class="checkout__tab" data-tab="paypal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
+          PayPal
+        </button>
       </div>
       <div id="paymentForm">
         <div class="checkout__card-fields" id="cardForm">
-          <input type="text" class="modal__input" id="cardNumber" placeholder="Card number" maxlength="19">
+          <input type="text" class="modal__input" id="cardNumber" placeholder="Card number" maxlength="19" autocomplete="cc-number">
           <div class="checkout__card-row">
-            <input type="text" class="modal__input" id="cardExpiry" placeholder="MM/YY" maxlength="5">
-            <input type="text" class="modal__input" id="cardCVC" placeholder="CVC" maxlength="4">
+            <input type="text" class="modal__input" id="cardExpiry" placeholder="MM / YY" maxlength="5" autocomplete="cc-exp">
+            <input type="text" class="modal__input" id="cardCVC" placeholder="CVC" maxlength="4" autocomplete="cc-csc">
           </div>
+          <p class="checkout__card-note">Visa, Mastercard, Amex accepted</p>
         </div>
         <div class="checkout__card-fields" id="paypalForm" hidden>
-          <input type="email" class="modal__input" id="paypalEmail" placeholder="PayPal email address">
-        </div>
-        <div class="checkout__card-fields" id="sepaForm" hidden>
-          <input type="text" class="modal__input" id="sepaIBAN" placeholder="IBAN (e.g. DE89 3704 0044 0532 0130 00)">
+          <input type="email" class="modal__input" id="paypalEmail" placeholder="PayPal email address" autocomplete="email">
+          <p class="checkout__card-note">You will be charged via PayPal</p>
         </div>
       </div>
     </div>
@@ -775,7 +779,7 @@ function renderCheckout(methods) {
 
     <div class="modal__error" id="checkoutError" hidden></div>
     <button type="button" class="btn btn--primary btn--full" id="checkoutPayBtn">Start Premium</button>
-    <p class="checkout__guarantee">14-day free trial. Cancel anytime. Secure payment.</p>
+    <p class="checkout__guarantee">14-day free trial. Cancel anytime.</p>
   `;
 
   // Wire plan toggle
@@ -801,8 +805,6 @@ function renderCheckout(methods) {
       tab.classList.add('checkout__tab--active');
       document.getElementById('cardForm').hidden = tab.dataset.tab !== 'card';
       document.getElementById('paypalForm').hidden = tab.dataset.tab !== 'paypal';
-      document.getElementById('sepaForm').hidden = tab.dataset.tab !== 'sepa';
-      // Deselect saved method when adding new
       selectedPaymentMethodId = null;
       content.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('payment-method-option--selected'));
     });
@@ -854,9 +856,6 @@ async function processCheckout() {
       } else if (activeTab === 'paypal') {
         body.paypal_email = document.getElementById('paypalEmail').value;
         if (!body.paypal_email) throw new Error('Please enter your PayPal email');
-      } else if (activeTab === 'sepa') {
-        body.iban = document.getElementById('sepaIBAN').value;
-        if (!body.iban) throw new Error('Please enter your IBAN');
       }
 
       const pmRes = await fetch(`${API_BASE}/api/payment-methods`, {
