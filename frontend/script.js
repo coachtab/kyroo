@@ -517,9 +517,15 @@ async function showAccountModal() {
     actions.innerHTML = `
       <button type="button" class="btn btn--primary btn--full" id="activatePremiumBtn">Upgrade to Premium</button>
     `;
-    document.getElementById('activatePremiumBtn').addEventListener('click', () => {
+    document.getElementById('activatePremiumBtn').addEventListener('click', async () => {
       hideModal('authModal');
-      setTimeout(() => showCheckoutModal(), 200);
+      await new Promise(r => setTimeout(r, 300));
+      const methods = await fetch(`${API_BASE}/api/payment-methods`, { headers: authHeaders() }).then(r => r.json());
+      selectedPlan = 'yearly';
+      selectedPaymentMethodId = methods.find(m => m.is_default)?.id || null;
+      renderCheckout(methods);
+      document.getElementById('checkoutModal').hidden = false;
+      document.body.style.overflow = 'hidden';
     });
   }
 
