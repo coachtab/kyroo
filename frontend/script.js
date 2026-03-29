@@ -706,24 +706,29 @@ async function cancelPremium() {
 }
 
 // ========================================
-// Checkout flow
+// Stripe Checkout flow
 // ========================================
 let selectedPlan = 'yearly';
-let selectedPaymentMethodId = null;
+let stripeInstance = null;
+let stripeElements = null;
+let stripePaymentElement = null;
 
 async function showCheckoutModal() {
   if (!currentUser) return showAuthModal('login');
 
-  const methods = await fetch(`${API_BASE}/api/payment-methods`, { headers: authHeaders() }).then(r => r.json());
+  // Get Stripe publishable key
+  if (!stripeInstance) {
+    const keyRes = await fetch(`${API_BASE}/api/stripe/publishable-key`);
+    const { key } = await keyRes.json();
+    if (key) stripeInstance = Stripe(key);
+  }
 
   selectedPlan = 'yearly';
-  selectedPaymentMethodId = methods.find(m => m.is_default)?.id || null;
-
-  renderCheckout(methods);
+  renderCheckout();
   showModal('checkoutModal');
 }
 
-function renderCheckout(methods) {
+async function renderCheckout() {
   const content = document.getElementById('checkoutContent');
   const price = selectedPlan === 'yearly' ? '72 EUR' : '6 EUR';
   const period = selectedPlan === 'yearly' ? '/year' : '/month';
@@ -745,49 +750,9 @@ function renderCheckout(methods) {
       </div>
     </div>
 
-    ${methods.length > 0 ? `
-      <p class="checkout__section-title">Saved payment methods</p>
-      <div class="checkout__methods">
-        ${methods.map(m => `
-          <button type="button" class="payment-method-option ${selectedPaymentMethodId === m.id ? 'payment-method-option--selected' : ''}" data-pm-id="${m.id}">
-            <span class="payment-method-option__radio"></span>
-            <span class="payment-method-option__label">${esc(m.label)}</span>
-            <span class="payment-method-option__type">${esc(m.type.toUpperCase())}</span>
-          </button>
-        `).join('')}
-      </div>
-    ` : ''}
-
-    <p class="checkout__section-title">${methods.length > 0 ? 'Or add a new payment method' : 'Payment method'}</p>
-    <div class="checkout__new-method">
-      <div class="checkout__tabs">
-        <button type="button" class="checkout__tab checkout__tab--active" data-tab="card">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Card
-        </button>
-        <button type="button" class="checkout__tab" data-tab="paypal">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
-          PayPal
-        </button>
-      </div>
-      <div id="paymentForm">
-        <div id="cardForm">
-          <div class="checkout__card-fields">
-            <input type="text" class="modal__input" id="cardNumber" placeholder="Card number" maxlength="19" autocomplete="cc-number">
-            <div class="checkout__card-row">
-              <input type="text" class="modal__input" id="cardExpiry" placeholder="MM / YY" maxlength="5" autocomplete="cc-exp">
-              <input type="text" class="modal__input" id="cardCVC" placeholder="CVC" maxlength="4" autocomplete="cc-csc">
-            </div>
-            <p class="checkout__card-note">Visa, Mastercard, Amex accepted</p>
-          </div>
-        </div>
-        <div id="paypalForm" style="display:none">
-          <div class="checkout__card-fields">
-            <input type="email" class="modal__input" id="paypalEmail" placeholder="Your PayPal email address" autocomplete="email">
-            <p class="checkout__card-note">You will be charged via PayPal. No card needed.</p>
-          </div>
-        </div>
-      </div>
+    <p class="checkout__section-title">Payment</p>
+    <div class="checkout__stripe-container">
+      <div id="stripe-payment-element"></div>
     </div>
 
     <div class="checkout__divider"></div>
@@ -798,68 +763,57 @@ function renderCheckout(methods) {
     </div>
 
     <div class="modal__error" id="checkoutError" hidden></div>
-    <button type="button" class="btn btn--primary btn--full" id="checkoutPayBtn">Start Premium</button>
-    <p class="checkout__guarantee">14-day free trial. Cancel anytime.</p>
+    <button type="button" class="btn btn--primary btn--full" id="checkoutPayBtn">Pay ${price}</button>
+    <p class="checkout__guarantee">14-day free trial. Cancel anytime. Powered by Stripe.</p>
   `;
 
   // Wire plan toggle
   content.querySelectorAll('.plan-toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedPlan = btn.dataset.plan;
-      renderCheckout(methods);
+      renderCheckout();
     });
   });
 
-  // Wire saved payment method selection
-  content.querySelectorAll('.payment-method-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedPaymentMethodId = parseInt(btn.dataset.pmId);
-      renderCheckout(methods);
-    });
-  });
+  // Initialize Stripe Payment Element
+  if (stripeInstance) {
+    try {
+      const res = await fetch(`${API_BASE}/api/stripe/create-payment-intent`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ plan: selectedPlan }),
+      });
+      const { clientSecret } = await res.json();
 
-  // Wire payment type tabs
-  function updatePayButton() {
-    const btn = document.getElementById('checkoutPayBtn');
-    if (selectedPaymentMethodId) {
-      btn.textContent = 'Start Premium';
-    } else {
-      const tab = document.querySelector('.checkout__tab--active')?.dataset.tab || 'card';
-      btn.textContent = tab === 'card' ? 'Pay with Card' : 'Pay with PayPal';
+      stripeElements = stripeInstance.elements({
+        clientSecret,
+        appearance: {
+          theme: 'night',
+          variables: {
+            colorPrimary: '#c27a56',
+            colorBackground: '#111',
+            colorText: '#eae5de',
+            colorDanger: '#d46b6b',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            borderRadius: '0px',
+            spacingUnit: '4px',
+          },
+          rules: {
+            '.Input': { border: '1px solid rgba(255,255,255,0.06)', padding: '12px' },
+            '.Input:focus': { border: '1px solid #c27a56' },
+            '.Label': { fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#3d3a37' },
+          },
+        },
+      });
+
+      stripePaymentElement = stripeElements.create('payment', {
+        layout: 'tabs',
+        paymentMethodOrder: ['card', 'paypal'],
+      });
+      stripePaymentElement.mount('#stripe-payment-element');
+    } catch (err) {
+      console.error('Stripe init error:', err);
     }
-  }
-
-  content.querySelectorAll('.checkout__tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      content.querySelectorAll('.checkout__tab').forEach(t => t.classList.remove('checkout__tab--active'));
-      tab.classList.add('checkout__tab--active');
-      document.getElementById('cardForm').style.display = tab.dataset.tab === 'card' ? 'block' : 'none';
-      document.getElementById('paypalForm').style.display = tab.dataset.tab === 'paypal' ? 'block' : 'none';
-      selectedPaymentMethodId = null;
-      content.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('payment-method-option--selected'));
-      updatePayButton();
-    });
-  });
-
-  updatePayButton();
-
-  // Wire card number formatting
-  const cardInput = document.getElementById('cardNumber');
-  if (cardInput) {
-    cardInput.addEventListener('input', () => {
-      let v = cardInput.value.replace(/\D/g, '').slice(0, 16);
-      cardInput.value = v.replace(/(.{4})/g, '$1 ').trim();
-    });
-  }
-
-  // Wire expiry formatting
-  const expiryInput = document.getElementById('cardExpiry');
-  if (expiryInput) {
-    expiryInput.addEventListener('input', () => {
-      let v = expiryInput.value.replace(/\D/g, '').slice(0, 4);
-      if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
-      expiryInput.value = v;
-    });
   }
 
   // Wire pay button
@@ -867,6 +821,8 @@ function renderCheckout(methods) {
 }
 
 async function processCheckout() {
+  if (!stripeInstance || !stripeElements) return;
+
   const btn = document.getElementById('checkoutPayBtn');
   const errEl = document.getElementById('checkoutError');
   errEl.hidden = true;
@@ -874,64 +830,49 @@ async function processCheckout() {
   btn.disabled = true;
 
   try {
-    let pmId = selectedPaymentMethodId;
+    const { error, paymentIntent } = await stripeInstance.confirmPayment({
+      elements: stripeElements,
+      confirmParams: {
+        return_url: window.location.origin,
+      },
+      redirect: 'if_required',
+    });
 
-    // If no saved method selected, add the new one first
-    if (!pmId) {
-      const activeTab = document.querySelector('.checkout__tab--active')?.dataset.tab || 'card';
-      let body = { type: activeTab };
+    if (error) throw new Error(error.message);
 
-      if (activeTab === 'card') {
-        body.card_number = document.getElementById('cardNumber').value;
-        body.card_expiry = document.getElementById('cardExpiry').value;
-        body.card_cvc = document.getElementById('cardCVC').value;
-        if (!body.card_number || !body.card_expiry || !body.card_cvc) throw new Error('Please fill in all card fields');
-      } else if (activeTab === 'paypal') {
-        body.paypal_email = document.getElementById('paypalEmail').value;
-        if (!body.paypal_email) throw new Error('Please enter your PayPal email');
-      }
-
-      const pmRes = await fetch(`${API_BASE}/api/payment-methods`, {
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // Confirm with our backend
+      const res = await fetch(`${API_BASE}/api/stripe/confirm-payment`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify(body),
+        body: JSON.stringify({ payment_intent_id: paymentIntent.id, plan: selectedPlan }),
       });
-      const pmData = await pmRes.json();
-      if (!pmRes.ok) throw new Error(pmData.error);
-      pmId = pmData.id;
-    }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-    // Process checkout
-    const res = await fetch(`${API_BASE}/api/premium/checkout`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ payment_method_id: pmId, plan: selectedPlan }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+      setAuth(data.user, data.token);
+      loadArticles();
 
-    setAuth(data.user, data.token);
-    loadArticles();
-
-    // Show success
-    document.getElementById('checkoutContent').innerHTML = `
-      <div class="checkout__success">
-        <div class="checkout__success-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      // Show success
+      document.getElementById('checkoutContent').innerHTML = `
+        <div class="checkout__success">
+          <div class="checkout__success-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Welcome to Premium</h3>
+          <p>Payment confirmed. You now have full access to all KYROO content.</p>
+          <button type="button" class="btn btn--primary" id="checkoutDoneBtn">Start exploring</button>
         </div>
-        <h3>Welcome to Premium</h3>
-        <p>You now have full access to all KYROO content, deep dives, and member-only features.</p>
-        <button type="button" class="btn btn--primary" id="checkoutDoneBtn">Start exploring</button>
-      </div>
-    `;
-    document.getElementById('checkoutDoneBtn').addEventListener('click', () => {
-      hideModal('checkoutModal');
-      scrollToSection('articles');
-    });
+      `;
+      document.getElementById('checkoutDoneBtn').addEventListener('click', () => {
+        hideModal('checkoutModal');
+        scrollToSection('articles');
+      });
+    }
   } catch (err) {
     errEl.textContent = err.message;
     errEl.hidden = false;
-    btn.textContent = 'Start Premium';
+    btn.textContent = `Pay ${selectedPlan === 'yearly' ? '72 EUR' : '6 EUR'}`;
     btn.disabled = false;
   }
 }

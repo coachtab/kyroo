@@ -981,6 +981,7 @@ input { font-family: inherit; }
 .checkout__tabs { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid var(--border); }
 .checkout__tab { flex: 1; padding: 10px; font-family: var(--sans); font-size: 0.75rem; font-weight: 600; border: none; background: transparent; color: var(--text-3); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .checkout__tab--active { background: rgba(255,255,255,0.04); color: var(--text); }
+.checkout__stripe-container { min-height: 100px; margin-bottom: 8px; }
 .checkout__card-fields { display: flex; flex-direction: column; gap: 10px; }
 .checkout__card-note { font-size: 0.6875rem; color: var(--text-3); margin-top: 2px; }
 .checkout__card-row { display: flex; gap: 8px; }

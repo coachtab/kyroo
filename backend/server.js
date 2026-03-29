@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const WebSocket = require('ws');
 const crypto = require('crypto');
+const Stripe = require('stripe');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const fs = require('fs');
@@ -381,26 +383,55 @@ app.delete('/api/payment-methods/:id', authRequired, async (req, res) => {
   res.json({ success: true });
 });
 
-// ---- Premium Checkout ----
+// ---- Stripe Checkout ----
 
-// POST /api/premium/checkout
-app.post('/api/premium/checkout', authRequired, async (req, res) => {
-  const { payment_method_id, plan } = req.body;
+// POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
+app.post('/api/stripe/create-payment-intent', authRequired, async (req, res) => {
+  const { plan } = req.body;
+  if (!plan || !['monthly', 'yearly'].includes(plan)) {
+    return res.status(400).json({ error: 'Invalid plan' });
+  }
+
+  const amount = plan === 'yearly' ? 7200 : 600; // Stripe uses cents
+  const desc = plan === 'yearly' ? 'KYROO Premium - Annual' : 'KYROO Premium - Monthly';
 
   try {
-    // Verify payment method belongs to user
-    const pm = await pool.query('SELECT * FROM payment_methods WHERE id = $1 AND user_id = $2', [payment_method_id, req.user.id]);
-    if (pm.rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid payment method' });
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'eur',
+      description: desc,
+      metadata: {
+        user_id: String(req.user.id),
+        user_email: req.user.email,
+        plan,
+      },
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error('Stripe error:', err.message);
+    res.status(500).json({ error: 'Payment setup failed' });
+  }
+});
+
+// POST /api/stripe/confirm-payment - confirm payment and activate premium
+app.post('/api/stripe/confirm-payment', authRequired, async (req, res) => {
+  const { payment_intent_id, plan } = req.body;
+
+  try {
+    // Verify payment with Stripe
+    const intent = await stripe.paymentIntents.retrieve(payment_intent_id);
+    if (intent.status !== 'succeeded') {
+      return res.status(400).json({ error: 'Payment not completed' });
     }
 
     const amount = plan === 'yearly' ? 72.00 : 6.00;
     const desc = plan === 'yearly' ? 'KYROO Premium - Annual (72 EUR/year)' : 'KYROO Premium - Monthly (6 EUR/month)';
 
-    // Record payment
+    // Record payment in our database
     await pool.query(
-      'INSERT INTO payments (user_id, payment_method_id, amount, currency, description, status) VALUES ($1, $2, $3, $4, $5, $6)',
-      [req.user.id, payment_method_id, amount, 'EUR', desc, 'completed']
+      'INSERT INTO payments (user_id, amount, currency, description, status) VALUES ($1, $2, $3, $4, $5)',
+      [req.user.id, amount, 'EUR', desc, 'completed']
     );
 
     // Activate premium
@@ -418,7 +449,7 @@ app.post('/api/premium/checkout', authRequired, async (req, res) => {
     );
 
     const { rows } = await pool.query(
-      'SELECT id, email, name, is_premium, premium_started_at, premium_expires_at FROM users WHERE id = $1',
+      'SELECT id, email, name, is_premium, is_admin, premium_started_at, premium_expires_at FROM users WHERE id = $1',
       [req.user.id]
     );
     const user = rows[0];
@@ -426,9 +457,14 @@ app.post('/api/premium/checkout', authRequired, async (req, res) => {
     res.json({ user, token, message: 'Premium activated! Welcome to KYROO Premium.' });
     broadcast('premium-activated', { userId: req.user.id });
   } catch (err) {
-    console.error('Checkout error:', err);
-    res.status(500).json({ error: 'Checkout failed' });
+    console.error('Payment confirmation error:', err);
+    res.status(500).json({ error: 'Payment confirmation failed' });
   }
+});
+
+// GET /api/stripe/publishable-key - expose publishable key to frontend
+app.get('/api/stripe/publishable-key', (req, res) => {
+  res.json({ key: process.env.STRIPE_PUBLISHABLE_KEY || '' });
 });
 
 // POST /api/premium/cancel
