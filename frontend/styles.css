@@ -230,9 +230,10 @@ input { font-family: inherit; }
 .hero__subtitle {
   font-size: 0.9375rem;
   color: var(--text-2);
-  max-width: 400px;
+  max-width: 600px;
   margin: 0 auto 40px;
   line-height: 1.7;
+  white-space: nowrap;
 }
 
 .hero__actions {
