@@ -145,7 +145,7 @@ function updatePremiumCTA() {
   const btn = document.getElementById('premiumCTA');
   if (!btn) return;
 
-  if (currentUser && currentUser.is_premium) {
+  if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
     btn.textContent = 'You have Premium';
     btn.className = 'btn btn--outline btn--full';
     btn.onclick = () => showAccountModal();
@@ -435,9 +435,11 @@ async function showAccountModal() {
       <div class="account-info__row">
         <span class="account-info__label">Plan</span>
         <span class="account-info__value">
-          ${currentUser.is_premium
-            ? '<span class="account-badge account-badge--premium">Premium</span>'
-            : '<span class="account-badge account-badge--free">Free</span>'}
+          ${currentUser.is_admin
+            ? '<span class="account-badge account-badge--premium">Admin</span>'
+            : currentUser.is_premium
+              ? '<span class="account-badge account-badge--premium">Premium</span>'
+              : '<span class="account-badge account-badge--free">Free</span>'}
         </span>
       </div>
       ${expiresDate ? `
@@ -449,7 +451,9 @@ async function showAccountModal() {
     </div>
   `;
 
-  if (currentUser.is_premium) {
+  if (currentUser.is_admin) {
+    actions.innerHTML = '';
+  } else if (currentUser.is_premium) {
     actions.innerHTML = `
       <button type="button" class="btn btn--outline btn--full" id="cancelPremiumBtn">Cancel Premium</button>
     `;
@@ -460,6 +464,104 @@ async function showAccountModal() {
     `;
     document.getElementById('activatePremiumBtn').onclick = () => { hideModal('authModal'); activatePremium(); };
   }
+
+  // Logout + DSGVO
+  actions.innerHTML += `
+    <button type="button" class="btn btn--ghost btn--full modal__logout" id="logoutBtn">Log out</button>
+    <div class="account-dsgvo">
+      <p class="account-dsgvo__title">Privacy (GDPR)</p>
+      <div class="account-dsgvo__actions">
+        <button type="button" class="account-dsgvo__btn" id="dataExportBtn">Export my data</button>
+        <button type="button" class="account-dsgvo__btn account-dsgvo__btn--danger" id="deleteAccountBtn">Delete account</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearAuth();
+    hideModal('authModal');
+    loadArticles();
+  });
+
+  document.getElementById('dataExportBtn').addEventListener('click', async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/account/data-export`, { headers: authHeaders() });
+      const d = await res.json();
+      const u = d.user_data || {};
+      const nl = d.newsletter_subscription;
+      const fmtDate = (s) => s ? new Date(s).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+
+      const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>KYROO Data Export</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background:#f8f7f5; color:#1a1a1a; padding:48px 24px; }
+  .doc { max-width:640px; margin:0 auto; background:#fff; border:1px solid #e5e2dd; padding:56px 48px; }
+  .logo { font-size:14px; letter-spacing:0.15em; font-weight:700; color:#999; margin-bottom:8px; }
+  h1 { font-size:24px; font-weight:400; margin-bottom:4px; font-family:Georgia,serif; }
+  .subtitle { font-size:13px; color:#888; margin-bottom:40px; }
+  .section-title { font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:#999; margin:32px 0 12px; padding-top:24px; border-top:1px solid #eee; }
+  .section-title:first-of-type { border-top:none; margin-top:0; padding-top:0; }
+  table { width:100%; border-collapse:collapse; }
+  td { padding:8px 0; font-size:13px; vertical-align:top; border-bottom:1px solid #f5f3f0; }
+  td:first-child { color:#888; width:160px; }
+  td:last-child { font-weight:500; }
+  .empty { font-size:13px; color:#bbb; font-style:italic; }
+  .footer { margin-top:40px; padding-top:20px; border-top:1px solid #eee; font-size:11px; color:#aaa; line-height:1.7; }
+  .badge { display:inline-block; font-size:10px; font-weight:700; letter-spacing:0.06em; padding:2px 8px; border-radius:3px; }
+  .badge--yes { background:#e8f5e9; color:#4a7c59; }
+  .badge--no { background:#fef3f0; color:#c27a56; }
+  @media print { body { background:#fff; padding:0; } .doc { border:none; padding:40px 0; } }
+</style></head><body><div class="doc">
+  <div class="logo">KYROO</div>
+  <h1>Data Export</h1>
+  <p class="subtitle">Generated ${fmtDate(d.export_date)} | GDPR Art. 15 & 20</p>
+
+  <p class="section-title">Personal Data</p>
+  <table>
+    <tr><td>Name</td><td>${esc(u.name || '-')}</td></tr>
+    <tr><td>E-Mail</td><td>${esc(u.email || '-')}</td></tr>
+    <tr><td>Email verified</td><td><span class="badge ${u.email_verified ? 'badge--yes' : 'badge--no'}">${u.email_verified ? 'Yes' : 'No'}</span></td></tr>
+    <tr><td>Account created</td><td>${fmtDate(u.created_at)}</td></tr>
+    <tr><td>Plan</td><td><span class="badge ${u.is_premium ? 'badge--yes' : 'badge--no'}">${u.is_premium ? 'Premium' : 'Free'}</span></td></tr>
+    ${u.premium_started_at ? '<tr><td>Premium since</td><td>' + fmtDate(u.premium_started_at) + '</td></tr>' : ''}
+    ${u.premium_expires_at ? '<tr><td>Renews</td><td>' + fmtDate(u.premium_expires_at) + '</td></tr>' : ''}
+  </table>
+
+  <p class="section-title">Newsletter</p>
+  ${nl ? '<table><tr><td>Email</td><td>' + esc(nl.email) + '</td></tr><tr><td>Subscribed</td><td>' + fmtDate(nl.subscribed_at) + '</td></tr><tr><td>Consent</td><td><span class="badge badge--yes">Given ' + fmtDate(nl.consent_date) + '</span></td></tr></table>' : '<p class="empty">No newsletter subscription.</p>'}
+
+  <p class="section-title">Payment Methods</p>
+  ${d.payment_methods.length ? '<table>' + d.payment_methods.map(pm => '<tr><td>' + esc(pm.type) + '</td><td>' + esc(pm.label) + (pm.is_default ? ' (Default)' : '') + '</td></tr>').join('') + '</table>' : '<p class="empty">No payment methods saved.</p>'}
+
+  <p class="section-title">Payment History</p>
+  ${d.payment_history.length ? '<table><tr style="border-bottom:1px solid #eee"><td style="font-weight:700;color:#1a1a1a">Date</td><td style="font-weight:700;color:#1a1a1a">Description</td></tr>' + d.payment_history.map(p => '<tr><td>' + fmtDate(p.created_at) + '</td><td>' + esc(p.description) + ' - ' + p.amount + ' ' + p.currency + '</td></tr>').join('') + '</table>' : '<p class="empty">No payments.</p>'}
+
+  <div class="footer">
+    <strong>Data Controller</strong><br>
+    ${esc(d.data_controller)}<br>
+    ${esc(d.contact)}<br><br>
+    This export was generated in accordance with GDPR Art. 15 (Right of Access) and Art. 20 (Data Portability).
+    You can delete your data at any time through your account settings (Art. 17 GDPR).
+  </div>
+</div></body></html>`;
+
+      const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (e) {}
+  });
+
+  document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+    if (!confirm('Are you sure? All your data will be permanently deleted.')) return;
+    if (!confirm('Final warning: This cannot be undone.')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/account`, { method: 'DELETE', headers: authHeaders() });
+      if (!res.ok) throw new Error();
+      clearAuth();
+      hideModal('authModal');
+      loadArticles();
+    } catch (e) {}
+  });
 
   showAuthModal('account');
 }
@@ -781,6 +883,10 @@ function renderArticles(articles) {
           <span class="article-card__play">&#9654;</span>
           ${a.video_duration ? `<span class="article-card__duration">${Math.round(a.video_duration)}s</span>` : ''}
         </div>
+      ` : a.thumbnail ? `
+        <div class="article-card__thumb">
+          <img src="${esc(a.thumbnail)}" alt="" loading="lazy">
+        </div>
       ` : ''}
       <div class="article-card__top">
         <span class="article-card__category">${esc(a.category)}</span>
@@ -789,7 +895,7 @@ function renderArticles(articles) {
       </div>
       <h3 class="article-card__title">${esc(a.title)}</h3>
       <p class="article-card__excerpt">${esc(a.excerpt)}</p>
-      <span class="article-card__cta">${a.is_premium && (!currentUser || !currentUser.is_premium) ? 'Unlock' : a.video_url ? 'Watch' : 'Read'} ${ARROW_SVG}</span>
+      <span class="article-card__cta">${a.is_premium && (!currentUser || (!currentUser.is_premium && !currentUser.is_admin)) ? 'Unlock' : a.video_url ? 'Watch' : 'Read'} ${ARROW_SVG}</span>
     </div>
   `).join('');
 
@@ -840,6 +946,16 @@ async function openArticle(slug) {
           </div>
         ` : ''}
         <p class="article-reader__excerpt">${esc(article.excerpt)}</p>
+        ${article.images && article.images.length ? `
+          <div class="article-reader__gallery">
+            ${article.images.map(img => `
+              <figure class="article-reader__image">
+                <img src="${esc(img.url)}" alt="${esc(img.caption || '')}" loading="lazy">
+                ${img.caption ? `<figcaption>${esc(img.caption)}</figcaption>` : ''}
+              </figure>
+            `).join('')}
+          </div>
+        ` : ''}
         <div class="article-reader__body">${esc(article.body)}</div>
       `;
     }
@@ -856,7 +972,7 @@ function updateHeroCTAs() {
   const cta2 = document.getElementById('heroCTA2');
   if (!cta1 || !cta2) return;
 
-  if (currentUser && currentUser.is_premium) {
+  if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
     cta1.textContent = 'Read';
     cta1.href = '#articles';
     cta1.onclick = (e) => { e.preventDefault(); scrollToSection('articles'); };
@@ -1023,8 +1139,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('showLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
   document.getElementById('showForgot').onclick = (e) => { e.preventDefault(); showAuthModal('forgot'); };
   document.getElementById('backToLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
-  document.getElementById('logoutBtn').onclick = () => { clearAuth(); hideModal('authModal'); loadArticles(); };
-
   // Forgot password form
   document.getElementById('forgotForm').onsubmit = async (e) => {
     e.preventDefault();
@@ -1139,6 +1253,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Allow auth modal only after page is fully initialized
   pageReady = true;
+
+  // ---- DSGVO Cookie Banner ----
+  if (!localStorage.getItem('kyroo_cookie_consent')) {
+    const banner = document.getElementById('cookieBanner');
+    banner.hidden = false;
+    document.getElementById('cookieAccept').addEventListener('click', () => {
+      localStorage.setItem('kyroo_cookie_consent', Date.now());
+      banner.hidden = true;
+    });
+    document.getElementById('cookiePrivacyLink').addEventListener('click', () => {
+      // Need siteData for showPrivacy - fetch it
+      fetch(`${API_BASE}/api/site`).then(r => r.json()).then(d => showPrivacy(d));
+    });
+  }
 
   // ---- WebSocket live updates ----
   connectWebSocket();

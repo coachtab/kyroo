@@ -33,19 +33,20 @@ const mailTransport = nodemailer.createTransport({
 async function sendEmail(to, subject, html) {
   // If SMTP not configured, log to console instead
   if (!process.env.SMTP_USER) {
-    console.log(`\n--- EMAIL (no SMTP configured) ---`);
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Body: ${html.replace(/<[^>]*>/g, '')}`);
-    console.log(`-----------------------------------\n`);
+    console.log(`[EMAIL] To: ${to} | Subject: ${subject}`);
     return;
   }
-  await mailTransport.sendMail({
-    from: `"KYROO" <${process.env.SMTP_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await mailTransport.sendMail({
+      from: `"KYROO" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html,
+    });
+    console.log(`[EMAIL] Sent to ${to}`);
+  } catch (err) {
+    console.log(`[EMAIL] Failed to send to ${to}: ${err.code || err.message}`);
+  }
 }
 
 // Database connection with retry logic
@@ -160,16 +161,16 @@ app.post('/api/auth/signup', async (req, res) => {
     const user = rows[0];
     const token = generateToken(user);
 
-    // Send verification email
+    // Send verification email (non-blocking - don't fail signup if email fails)
     const verifyUrl = `${BASE_URL}/api/auth/verify?token=${verifyToken}`;
-    await sendEmail(email, 'Welcome to KYROO - Verify your email', `
+    sendEmail(email, 'Welcome to KYROO - Verify your email', `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
         <h1 style="font-size:24px;margin-bottom:8px">Welcome to KYROO${name ? ', ' + name : ''}</h1>
         <p style="color:#666;margin-bottom:32px">Verify your email to get full access.</p>
         <a href="${verifyUrl}" style="display:inline-block;background:#c27a56;color:#fff;padding:12px 32px;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px">Verify email</a>
         <p style="color:#999;font-size:12px;margin-top:32px">Or copy this link: ${verifyUrl}</p>
       </div>
-    `);
+    `).catch(err => console.error('Verification email failed:', err.message));
 
     res.status(201).json({ user, token });
   } catch (err) {
@@ -218,7 +219,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         <a href="${resetUrl}" style="display:inline-block;background:#c27a56;color:#fff;padding:12px 32px;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px">Reset password</a>
         <p style="color:#999;font-size:12px;margin-top:32px">If you didn't request this, ignore this email.</p>
       </div>
-    `);
+    `).catch(err => console.error('Reset email failed:', err.message));
 
     res.json({ success: true });
   } catch (err) {
@@ -438,6 +439,53 @@ app.get('/api/payments', authRequired, async (req, res) => {
 });
 
 // ========================================
+// DSGVO Routes (Art. 15, 17, 20 DSGVO)
+// ========================================
+
+// GET /api/account/data-export - Art. 15 & 20 DSGVO (Auskunftsrecht & Datenportabilitaet)
+app.get('/api/account/data-export', authRequired, async (req, res) => {
+  try {
+    const [user, payments, paymentMethods, subscriber] = await Promise.all([
+      pool.query('SELECT id, email, name, is_premium, email_verified, premium_started_at, premium_expires_at, created_at FROM users WHERE id = $1', [req.user.id]),
+      pool.query('SELECT amount, currency, description, status, created_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]),
+      pool.query('SELECT type, label, last_four, is_default, created_at FROM payment_methods WHERE user_id = $1', [req.user.id]),
+      pool.query('SELECT email, subscribed_at, consent_given, consent_date FROM subscribers WHERE email = $1', [req.user.email]),
+    ]);
+
+    res.json({
+      export_date: new Date().toISOString(),
+      data_controller: 'KYROO UG, Schoenhauser Allee 100, 10119 Berlin',
+      contact: 'info@kyroo.de',
+      user_data: user.rows[0] || null,
+      payment_history: payments.rows,
+      payment_methods: paymentMethods.rows,
+      newsletter_subscription: subscriber.rows[0] || null,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Data export failed' });
+  }
+});
+
+// DELETE /api/account - Art. 17 DSGVO (Recht auf Loeschung)
+app.delete('/api/account', authRequired, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const email = req.user.email;
+
+    // Delete in order (foreign key constraints)
+    await pool.query('DELETE FROM payments WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM payment_methods WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM subscribers WHERE email = $1', [email]);
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    res.json({ success: true, message: 'Alle Daten wurden geloescht. (All data has been deleted.)' });
+  } catch (err) {
+    console.error('Account deletion error:', err);
+    res.status(500).json({ error: 'Account deletion failed' });
+  }
+});
+
+// ========================================
 // Admin Routes
 // ========================================
 
@@ -482,6 +530,57 @@ app.delete('/api/admin/delete-video', adminRequired, (req, res) => {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   res.json({ success: true });
 });
+
+// ---- Image upload ----
+const imageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `img-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Only image files are allowed (jpg, png, gif, webp, svg)'));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+// POST /api/admin/upload-image
+app.post('/api/admin/upload-image', adminRequired, (req, res) => {
+  imageUpload.single('image')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+    res.json({ url: `/uploads/${req.file.filename}`, filename: req.file.filename });
+  });
+});
+
+// POST /api/admin/articles/:id/images - attach images to article
+app.post('/api/admin/articles/:id/images', adminRequired, async (req, res) => {
+  const { images } = req.body;
+  if (!images || !Array.isArray(images)) return res.status(400).json({ error: 'images array required' });
+  try {
+    // Clear existing and re-insert
+    await pool.query('DELETE FROM article_images WHERE article_id = $1', [req.params.id]);
+    for (let i = 0; i < images.length; i++) {
+      await pool.query(
+        'INSERT INTO article_images (article_id, url, caption, sort_order) VALUES ($1, $2, $3, $4)',
+        [req.params.id, images[i].url, images[i].caption || null, i]
+      );
+    }
+    const { rows } = await pool.query('SELECT * FROM article_images WHERE article_id = $1 ORDER BY sort_order', [req.params.id]);
+    res.json(rows);
+    broadcast('article-updated', { id: parseInt(req.params.id) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save images' });
+  }
+});
+
+// GET /api/articles/:slug images are included in the article response
+// (handled below in the existing route)
 
 // POST /api/admin/generate - AI article generation
 app.post('/api/admin/generate', adminRequired, async (req, res) => {
@@ -542,7 +641,12 @@ Return ONLY valid JSON, no markdown, no code fences.`;
 
 // GET /api/admin/articles - list all articles with full body
 app.get('/api/admin/articles', adminRequired, async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM premium_articles ORDER BY published_at DESC');
+  const { rows } = await pool.query(`
+    SELECT pa.*,
+      (SELECT COUNT(*) FROM article_images WHERE article_id = pa.id)::int as image_count,
+      (SELECT url FROM article_images WHERE article_id = pa.id ORDER BY sort_order LIMIT 1) as thumbnail
+    FROM premium_articles pa ORDER BY pa.published_at DESC
+  `);
   res.json(rows);
 });
 
@@ -621,13 +725,13 @@ app.get('/api/admin/stats', adminRequired, async (req, res) => {
 app.get('/api/articles', authOptional, async (req, res) => {
   try {
     const { category } = req.query;
-    let query = 'SELECT id, slug, category, title, excerpt, is_premium, video_url, video_duration, published_at FROM premium_articles';
+    let query = 'SELECT pa.id, pa.slug, pa.category, pa.title, pa.excerpt, pa.is_premium, pa.video_url, pa.video_duration, pa.published_at, (SELECT url FROM article_images WHERE article_id = pa.id ORDER BY sort_order LIMIT 1) as thumbnail FROM premium_articles pa';
     const params = [];
     if (category) {
-      query += ' WHERE category = $1';
+      query += ' WHERE pa.category = $1';
       params.push(category);
     }
-    query += ' ORDER BY published_at DESC';
+    query += ' ORDER BY pa.published_at DESC';
     const { rows } = await pool.query(query, params);
     res.json(rows);
   } catch (err) {
@@ -642,9 +746,11 @@ app.get('/api/articles/:slug', authOptional, async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Article not found' });
 
     const article = rows[0];
+    const images = await pool.query('SELECT id, url, caption, sort_order FROM article_images WHERE article_id = $1 ORDER BY sort_order', [article.id]);
+    article.images = images.rows;
 
     if (article.is_premium) {
-      const isPremiumUser = req.user && req.user.is_premium;
+      const isPremiumUser = req.user && (req.user.is_premium || req.user.is_admin);
       if (!isPremiumUser) {
         // Return excerpt only, hide full body
         return res.json({

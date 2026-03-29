@@ -117,7 +117,7 @@
           </form>
           <p class="modal__switch"><a href="#" id="backToLogin">Back to log in</a></p>
           <div id="forgotSuccess" hidden>
-            <p class="modal__success-msg">Check your inbox. If an account exists, we sent a reset link.</p>
+            <p class="modal__success-msg">If an account exists with that email, we sent a reset link.</p>
           </div>
         </div>
         <div id="signupView" hidden>
@@ -135,7 +135,6 @@
           <h2 class="modal__title">Account</h2>
           <div id="accountInfo"></div>
           <div id="accountActions"></div>
-          <button type="button" class="btn btn--ghost btn--full modal__logout" id="logoutBtn">Log out</button>
         </div>
       </div>
     </div>
@@ -163,6 +162,16 @@
   </div>
   <div class="modal-overlay" id="imprintModal" hidden>
     <div class="modal"><button type="button" class="modal__close" id="imprintModalClose">&times;</button><div id="imprintContent"></div></div>
+  </div>
+
+  <!-- DSGVO Cookie Consent -->
+  <div class="cookie-banner" id="cookieBanner" hidden>
+    <div class="cookie-banner__inner container">
+      <p class="cookie-banner__text">We only use essential cookies. No tracking, no ads. <a href="javascript:void(0)" id="cookiePrivacyLink">Privacy Policy</a></p>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn--primary btn--small" id="cookieAccept">Got it</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>

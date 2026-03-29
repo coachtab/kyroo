@@ -26,7 +26,9 @@
     .admin__logo { font-family: var(--font-d); font-size: 1.5rem; color: var(--text); }
     .admin__logo span { color: var(--accent); font-size: 0.75rem; font-family: var(--font); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-left: 10px; vertical-align: middle; }
     .admin__user { font-size: 0.875rem; color: var(--text-2); }
-    .admin__back { font-size: 0.8125rem; color: var(--text-3); }
+    .admin__nav { display: flex; align-items: center; gap: 14px; }
+    .admin__back { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; color: var(--text-3); border: 1px solid var(--border); transition: all 0.15s; }
+    .admin__back:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
 
     /* Stats */
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
@@ -105,6 +107,20 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 640px) { .ai-section__row { flex-direction: column; } }
+
+    /* Image upload */
+    .image-upload__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-bottom: 8px; }
+    .image-upload__item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+    .image-upload__item img { width: 100%; height: 100%; object-fit: cover; }
+    .image-upload__item-remove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: #fff; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
+    .image-upload__item:hover .image-upload__item-remove { opacity: 1; }
+    .image-upload__item-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 4px 6px; background: rgba(0,0,0,0.6); }
+    .image-upload__item-caption input { width: 100%; border: none; background: transparent; color: #fff; font-size: 10px; font-family: var(--font); outline: none; }
+    .image-upload__item-caption input::placeholder { color: rgba(255,255,255,0.5); }
+    .image-upload__add { display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; transition: border-color 0.15s; }
+    .image-upload__add:hover { border-color: var(--accent); }
+    .image-upload__add span { font-size: 0.75rem; color: var(--text-3); }
+    .image-upload__add:hover span { color: var(--accent); }
 
     /* Video source tabs */
     .video-source-tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--surface-3); border-radius: var(--radius); padding: 3px; }
@@ -229,9 +245,9 @@
       document.getElementById('app').innerHTML = `
         <div class="admin">
           <div class="admin__header">
-            <div>
-              <div class="admin__logo">KYROO <span>Admin</span></div>
-              <a href="/" class="admin__back">Back to site</a>
+            <div class="admin__nav">
+              <a href="/" class="admin__back" title="Back to site"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></a>
+              <a href="/admin.html" class="admin__logo">KYROO <span>Admin</span></a>
             </div>
             <div class="admin__user">${esc(user.name || user.email)}</div>
           </div>
@@ -254,7 +270,7 @@
 
           <table class="table">
             <thead>
-              <tr><th>Title</th><th>Category</th><th>Access</th><th>Video</th><th>Published</th><th></th></tr>
+              <tr><th>Title</th><th>Category</th><th>Access</th><th>Media</th><th>Published</th><th></th></tr>
             </thead>
             <tbody id="articlesBody">
               ${articles.map(a => `
@@ -262,7 +278,7 @@
                   <td><strong>${esc(a.title)}</strong><br><span style="color:var(--text-3);font-size:0.75rem">/${esc(a.slug)}</span></td>
                   <td>${esc(a.category)}</td>
                   <td><span class="badge ${a.is_premium ? 'badge--premium' : 'badge--free'}">${a.is_premium ? 'Premium' : 'Free'}</span></td>
-                  <td style="font-size:0.8125rem">${a.video_url ? '<span style="color:var(--accent)">&#9654; ' + (a.video_duration ? Math.round(a.video_duration) + 's' : 'Yes') + '</span>' : '<span style="color:var(--text-3)">-</span>'}</td>
+                  <td style="font-size:0.8125rem">${[a.video_url ? '&#9654; ' + (a.video_duration ? Math.round(a.video_duration) + 's' : 'Video') : '', a.image_count ? '&#9638; ' + a.image_count + ' img' : ''].filter(Boolean).join(', ') || '<span style="color:var(--text-3)">-</span>'}</td>
                   <td style="color:var(--text-3);font-size:0.8125rem">${new Date(a.published_at).toLocaleDateString('de-DE')}</td>
                   <td>
                     <div class="table__actions">
@@ -472,6 +488,16 @@
                 <input type="hidden" id="f_video_duration" value="${article && article.video_duration ? article.video_duration : ''}">
               </div>
               <div class="form__group">
+                <label class="form__label">Images</label>
+                <div class="image-upload" id="imageUploadArea">
+                  <div class="image-upload__grid" id="imageGrid"></div>
+                  <label class="image-upload__add" id="imageAddBtn">
+                    <input type="file" accept="image/*" multiple hidden id="f_image_files">
+                    <span>+ Add images</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form__group">
                 <label class="form__toggle">
                   <input type="checkbox" id="f_premium" ${article && article.is_premium ? 'checked' : ''}>
                   <span>Premium content (visible only to premium subscribers)</span>
@@ -500,6 +526,66 @@
       document.getElementById('formCancel').onclick = closeForm;
       document.getElementById('formOverlay').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) closeForm();
+      });
+
+      // ---- Image upload ----
+      let articleImages = (article && article._images) ? [...article._images] : [];
+
+      // Load existing images if editing
+      if (isEdit && article.id) {
+        fetch(`${API}/api/articles/${article.slug}`, { headers: headers() })
+          .then(r => r.json())
+          .then(data => { if (data.images) { articleImages = data.images; renderImageGrid(); } });
+      }
+
+      function renderImageGrid() {
+        const grid = document.getElementById('imageGrid');
+        grid.innerHTML = articleImages.map((img, i) => `
+          <div class="image-upload__item" data-idx="${i}">
+            <img src="${esc(img.url)}" alt="">
+            <button type="button" class="image-upload__item-remove" data-idx="${i}">&times;</button>
+            <div class="image-upload__item-caption">
+              <input type="text" placeholder="Caption" value="${esc(img.caption || '')}" data-idx="${i}" class="image-caption-input">
+            </div>
+          </div>
+        `).join('');
+
+        grid.querySelectorAll('.image-upload__item-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            articleImages.splice(parseInt(btn.dataset.idx), 1);
+            renderImageGrid();
+          });
+        });
+
+        grid.querySelectorAll('.image-caption-input').forEach(input => {
+          input.addEventListener('change', () => {
+            articleImages[parseInt(input.dataset.idx)].caption = input.value;
+          });
+        });
+      }
+
+      renderImageGrid();
+
+      document.getElementById('f_image_files').addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append('image', file);
+          try {
+            const res = await fetch(`${API}/api/admin/upload-image`, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token },
+              body: formData,
+            });
+            const data = await res.json();
+            if (res.ok) {
+              articleImages.push({ url: data.url, caption: '' });
+              renderImageGrid();
+            }
+          } catch (ex) {}
+        }
+        e.target.value = '';
       });
 
       // ---- Video source tabs ----
@@ -738,6 +824,17 @@
           const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(payload) });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error);
+
+          // Save images
+          if (articleImages.length > 0 || isEdit) {
+            const articleId = data.id || article.id;
+            await fetch(`${API}/api/admin/articles/${articleId}/images`, {
+              method: 'POST',
+              headers: headers(),
+              body: JSON.stringify({ images: articleImages }),
+            });
+          }
+
           closeForm();
           renderDashboard();
         } catch (ex) {

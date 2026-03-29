@@ -54,7 +54,12 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/api-docs/)",
       "Bash(start http://localhost:3000/api-docs/)",
       "Bash(curl -s http://localhost:3000)",
-      "Bash(curl -s -X POST http://localhost:3000/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\"}')"
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"test-signup@test.com\"\",\"\"password\"\":\"\"test123\"\",\"\"name\"\":\"\"Test\"\"}')",
+      "Bash(bash smoke-test.sh)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''Explore section:'''', d[''''sections''''].get\\(''''explore'''',{}\\).get\\(''''title''''\\)\\); print\\(''''Categories:'''', len\\(d.get\\(''''categories'''',[]\\)\\)\\)\")",
+      "Bash(curl -s http://localhost:3000/script.js)",
+      "WebSearch"
     ]
   }
 }
