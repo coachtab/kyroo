@@ -24,7 +24,7 @@
     .hub__title{font-family:var(--serif);font-size:2.25rem;line-height:1.1;margin-bottom:8px}
     .hub__desc{font-size:0.8125rem;color:var(--text-3)}
 
-    .hub__grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+    .hub__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
     .hub__card{background:var(--bg);padding:32px 28px;cursor:pointer;transition:all 0.3s var(--ease)}
     .hub__card:hover{background:var(--surface)}
     .hub__card-icon{font-size:1.75rem;margin-bottom:16px;opacity:0.4}
@@ -145,6 +145,12 @@
             <p class="hub__card-desc">Stuck on your lifts? Get a diagnostic and an 8-week plan to break through.</p>
             <span class="hub__card-badge">8 weeks</span>
           </div>
+          <div class="hub__card" onclick="showWizard('weakpoint')">
+            <div class="hub__card-icon">&#9881;</div>
+            <h3 class="hub__card-title">Weak Point Fixer</h3>
+            <p class="hub__card-desc">Identify underdeveloped muscles or lift breakdowns. Get a targeted fix plan.</p>
+            <span class="hub__card-badge">Action plan</span>
+          </div>
         </div>
       </div>
 
@@ -179,6 +185,55 @@
           <div class="card card--active" data-step="1"><p class="card__title">Where are you stuck?</p><p class="card__desc">Your current numbers and how long you have been stalled.</p><div class="input-group"><label class="input-label">Weeks stuck</label><input type="number" class="input" id="wp_weeks" placeholder="6"></div><div class="input-row"><div class="input-group"><label class="input-label">Squat (kg)</label><input type="number" class="input" id="wp_squat" placeholder="120"></div><div class="input-group"><label class="input-label">Bench (kg)</label><input type="number" class="input" id="wp_bench" placeholder="80"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift (kg)</label><input type="number" class="input" id="wp_deadlift" placeholder="140"></div><div class="input-group"><label class="input-label">OHP (kg)</label><input type="number" class="input" id="wp_ohp" placeholder="50"></div></div><div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
           <div class="card" data-step="2"><p class="card__title">Your current training.</p><p class="card__desc">What does your program look like right now?</p><div class="input-group"><label class="input-label">Current program</label><textarea class="textarea" id="wp_program" placeholder="e.g. Upper/Lower split, 4 days, been running it for 3 months..."></textarea></div><div class="input-group"><label class="input-label">Typical training week</label><textarea class="textarea" id="wp_week" placeholder="e.g. Monday: Squat 5x5, Bench 4x8... Tuesday: Rest..."></textarea></div><div class="input-group"><label class="input-label">Years lifting</label><input type="number" class="input" id="wp_years" placeholder="3"></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
           <div class="card" data-step="3"><p class="card__title">Your recovery.</p><p class="card__desc">Sleep, stress, nutrition - the stuff outside the gym.</p><div class="input-row"><div class="input-group"><label class="input-label">Sleep (hours/night)</label><input type="number" class="input" id="wp_sleep" placeholder="7"></div><div class="input-group"><label class="input-label">Stress level</label><div class="selector" id="wp_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Moderate</button><button type="button" class="selector__btn" data-value="high">High</button></div></div></div><div class="input-group"><label class="input-label">Main stress source</label><input type="text" class="input" id="wp_stressReason" placeholder="e.g. work, family, finances"></div><div class="input-group"><label class="input-label">Nutrition overview</label><textarea class="textarea" id="wp_nutrition" placeholder="e.g. ~2500 cal, 150g protein, 3 meals a day, no tracking..."></textarea></div><p class="error" id="errP" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" id="genPBtn" onclick="generateP()">Diagnose and fix</button></div></div>
+        </div>
+      </div>
+
+      <!-- Weak Point Wizard -->
+      <div class="wizard" id="wizardWeakpoint">
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
+        <div class="hero">
+          <p class="hero__tag">WEAK POINT FIXER</p>
+          <h1 class="hero__title">Fix what's lagging.</h1>
+          <p class="hero__desc">Tell us what's weak. Get a targeted action plan.</p>
+        </div>
+        <div class="steps" id="stepsWeak"></div>
+        <div id="cardsWeak">
+          <div class="card card--active" data-step="1">
+            <p class="card__title">Aesthetic weak points.</p>
+            <p class="card__desc">Which muscle groups look underdeveloped compared to the rest of your body?</p>
+            <div class="input-group">
+              <label class="input-label">Lagging muscles</label>
+              <textarea class="textarea" id="ww_aesthetic" placeholder="e.g. rear delts, upper chest, hamstrings, calves..."></textarea>
+            </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn--primary" onclick="nextW()">Continue</button>
+            </div>
+          </div>
+          <div class="card" data-step="2">
+            <p class="card__title">Performance weak points.</p>
+            <p class="card__desc">Where do your lifts break down or fail?</p>
+            <div class="input-group">
+              <label class="input-label">Lift breakdowns</label>
+              <textarea class="textarea" id="ww_performance" placeholder="e.g. squat collapses at the bottom, bench stalls off the chest, deadlift hitches at the knee..."></textarea>
+            </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn--ghost" onclick="prevW()">Back</button>
+              <button type="button" class="btn btn--primary" onclick="nextW()">Continue</button>
+            </div>
+          </div>
+          <div class="card" data-step="3">
+            <p class="card__title">Your current training.</p>
+            <p class="card__desc">What are you doing right now?</p>
+            <div class="input-group">
+              <label class="input-label">Current program</label>
+              <textarea class="textarea" id="ww_program" placeholder="e.g. Push/Pull/Legs, 5 days, been running for 4 months..."></textarea>
+            </div>
+            <p class="error" id="errW" hidden></p>
+            <div class="card__actions">
+              <button type="button" class="btn btn--ghost" onclick="prevW()">Back</button>
+              <button type="button" class="btn btn--primary" id="genWBtn" onclick="generateW()">Build fix plan</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -231,25 +286,33 @@
     function showWizard(type) {
       document.getElementById('hubView').style.display = 'none';
       document.getElementById('resultView').style.display = 'none';
-      const w = document.getElementById(type === '12week' ? 'wizard12week' : 'wizardPlateau');
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', weakpoint: 'wizardWeakpoint' };
+      const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
       initSteps(type);
     }
 
     // Steps
-    let step12 = 1, stepP = 1;
+    let step12 = 1, stepP = 1, stepW = 1;
+
+    const wizardConfig = {
+      '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
+      plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
+      weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
+    };
 
     function initSteps(type) {
-      const count = type === '12week' ? 5 : 3;
-      const container = document.getElementById(type === '12week' ? 'steps12' : 'stepsPlateau');
-      container.innerHTML = Array.from({length: count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === '12week') step12 = 1; else stepP = 1;
+      const cfg = wizardConfig[type];
+      const container = document.getElementById(cfg.steps);
+      container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
+      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else stepW = 1;
       showCard(type, 1);
     }
 
     function showCard(type, n) {
-      const prefix = type === '12week' ? 'cards12' : 'cardsPlateau';
-      const stepsId = type === '12week' ? 'steps12' : 'stepsPlateau';
+      const cfg = wizardConfig[type];
+      const prefix = cfg.cards;
+      const stepsId = cfg.steps;
       document.querySelectorAll('#'+prefix+' .card').forEach(c => c.classList.remove('card--active'));
       const card = document.querySelector('#'+prefix+' [data-step="'+n+'"]');
       if (card) card.classList.add('card--active');
@@ -264,6 +327,8 @@
     function prev12() { if (step12 > 1) { step12--; showCard('12week', step12); } }
     function nextP() { if (stepP < 3) { stepP++; showCard('plateau', stepP); } }
     function prevP() { if (stepP > 1) { stepP--; showCard('plateau', stepP); } }
+    function nextW() { if (stepW < 3) { stepW++; showCard('weakpoint', stepW); } }
+    function prevW() { if (stepW > 1) { stepW--; showCard('weakpoint', stepW); } }
 
     // Generate 12-week
     async function generate12() {
@@ -323,6 +388,36 @@
       } catch (ex) { showError('plateau', ex.message); }
     }
 
+    // Generate weak point fix
+    async function generateW() {
+      const err = document.getElementById('errW');
+      err.hidden = true;
+      if (!val('ww_aesthetic') && !val('ww_performance')) {
+        err.textContent = 'Please describe at least one weak point.'; err.hidden = false; return;
+      }
+      document.getElementById('wizardWeakpoint').classList.remove('wizard--active');
+      document.getElementById('generatingView').hidden = false;
+      document.getElementById('genText').textContent = 'Analyzing your weak points...';
+
+      try {
+        const freshToken = localStorage.getItem('kyroo_token');
+        if (!freshToken) throw new Error('Please log in first.');
+        const res = await fetch(`${API}/api/program/weakpoints`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            aesthetic_weakpoints: val('ww_aesthetic'),
+            performance_weakpoints: val('ww_performance'),
+            current_program: val('ww_program'),
+          }),
+        });
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        showResult(data.program);
+      } catch (ex) { showError('weakpoint', ex.message); }
+    }
+
     function showResult(text) {
       let html = text.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
       document.getElementById('resultBody').innerHTML = '<p>' + html + '</p>';
@@ -332,9 +427,10 @@
 
     function showError(type, msg) {
       document.getElementById('generatingView').hidden = true;
-      const w = document.getElementById(type === '12week' ? 'wizard12week' : 'wizardPlateau');
-      w.classList.add('wizard--active');
-      const err = document.getElementById(type === '12week' ? 'err12' : 'errP');
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', weakpoint: 'wizardWeakpoint' };
+      const errIds = { '12week': 'err12', plateau: 'errP', weakpoint: 'errW' };
+      document.getElementById(ids[type]).classList.add('wizard--active');
+      const err = document.getElementById(errIds[type]);
       err.textContent = msg; err.hidden = false;
     }
 

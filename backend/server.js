@@ -518,6 +518,61 @@ Write this so a beginner can understand every instruction. No unexplained jargon
   }
 });
 
+// ---- Weak Point Fixer ----
+app.post('/api/program/weakpoints', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { aesthetic_weakpoints, performance_weakpoints, current_program } = req.body;
+
+  if (!aesthetic_weakpoints && !performance_weakpoints) {
+    return res.status(400).json({ error: 'Please describe at least one weak point' });
+  }
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are a physique coach and movement specialist with extensive experience helping lifters identify and fix weak points. Write clearly so even beginners can follow every instruction.
+
+Client's weak points:
+
+Aesthetic weak points (underdeveloped muscle groups): ${aesthetic_weakpoints || 'Not specified'}
+
+Performance weak points (where lifts break down): ${performance_weakpoints || 'Not specified'}
+
+Current program: ${current_program || 'Not specified'}
+
+For EACH weak point listed, provide:
+1. The most likely root cause - is it a muscle imbalance, technique flaw, programming error, or structural limitation? Explain in plain English.
+2. Specific corrective and strengthening exercises with sets, reps, tempo, and detailed coaching cues. For every exercise, include a one-line description of how to perform it.
+3. Clear instructions on how to integrate these into the existing program without excessive fatigue
+4. A realistic timeline for noticeable improvement
+5. Measurable markers - numbers, movement quality standards, or visual indicators - that confirm the weak point is genuinely improving
+
+Format this as a prioritized action plan that can be started this week.
+
+Start with: # KYROO WEAK POINT ACTION PLAN
+
+Write so someone can print this, bring it to the gym, and follow it without confusion. Explain all terminology.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    res.json({ program: message.content[0].text });
+  } catch (err) {
+    console.error('Weak point generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate plan' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
