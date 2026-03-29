@@ -413,6 +413,9 @@ function setAuth(user, token) {
 
 function clearAuth() {
   setAuth(null, null);
+  localStorage.removeItem('kyroo_token');
+  localStorage.removeItem('kyroo_cookie_consent');
+  sessionStorage.clear();
 }
 
 let pageReady = false;
