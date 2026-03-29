@@ -384,8 +384,10 @@
             secondary_goal: getSelected('goalSecSelect') || 'building raw strength',
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch (e) { throw new Error('Session expired. Please log out and log in again.'); }
+        if (!res.ok) throw new Error(data.error || 'Generation failed');
 
         let html = data.programme
           .replace(/^### (.+)$/gm, '<h3>$1</h3>')

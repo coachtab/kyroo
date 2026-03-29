@@ -83,7 +83,8 @@
       "Bash(curl -s https://kyroo.de/api/locations)",
       "Bash(python -c \"import sys,json; locs=json.load\\(sys.stdin\\); [print\\(f''''  {l[\"\"short_name\"\"]}''''\\) for l in locs]\")",
       "Bash(python -c \"import sys,json; print\\(len\\(json.load\\(sys.stdin\\)\\), ''''locations''''\\)\")",
-      "Bash(curl -s https://kyroo.de/api/checkins)"
+      "Bash(curl -s https://kyroo.de/api/checkins)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST https://kyroo.de/api/programme/generate -H \"Content-Type: application/json\" -d '{\"\"level\"\":\"\"test\"\"}')"
     ]
   }
 }
