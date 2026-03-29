@@ -445,7 +445,7 @@ function updateAuthUI() {
       progLink.id = 'navProgLink';
       progLink.href = '/programme.html';
       progLink.className = 'nav__link';
-      progLink.textContent = 'Programme';
+      progLink.textContent = 'Program';
       btn.parentNode.insertBefore(progLink, btn);
     }
   } else if (progLink) {

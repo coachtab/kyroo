@@ -387,8 +387,8 @@ app.delete('/api/checkins', authRequired, async (req, res) => {
   res.json({ success: true });
 });
 
-// ---- 12-Week Programme Generator ----
-app.post('/api/programme/generate', authRequired, async (req, res) => {
+// ---- 12-Week Program Generator ----
+app.post('/api/program/generate', authRequired, async (req, res) => {
   if (!req.user.is_premium && !req.user.is_admin) {
     return res.status(403).json({ error: 'Premium required' });
   }
@@ -406,7 +406,7 @@ app.post('/api/programme/generate', authRequired, async (req, res) => {
     const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programmes that even complete beginners can follow without confusion.
+    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programs that even complete beginners can follow without confusion.
 
 Your client:
 - Level: ${level} with ${experience_years || 'some'} years of training
@@ -417,10 +417,10 @@ Your client:
 - Primary goal: ${primary_goal || 'hypertrophy'}
 - Secondary goal: ${secondary_goal || 'building raw strength'}
 
-Design a complete 12-week periodised training programme.
+Design a complete 12-week periodized training program.
 
 IMPORTANT FORMATTING RULES:
-- Write for someone who may have never followed a structured programme before
+- Write for someone who may have never followed a structured program before
 - For EVERY exercise, include a one-line plain-English description of how to perform it (e.g. "Stand with feet shoulder-width apart, lower your hips until thighs are parallel to the floor, then stand back up")
 - Explain what "tempo 3-1-1-0" means the first time you use it
 - Explain what RPE means the first time you use it
@@ -431,7 +431,7 @@ IMPORTANT FORMATTING RULES:
 - Group weeks clearly: Week 1-4, Week 5-8, Week 9-12
 
 Include:
-1. A short overview of the programme approach (2-3 sentences, plain English)
+1. A short overview of the program approach (2-3 sentences, plain English)
 2. The weekly training split (which days train which body parts)
 3. Every session written out with exercise name, brief how-to, sets, reps, tempo, rest
 4. How to increase weight week by week (be specific: "add 2.5kg to upper body lifts, 5kg to lower body lifts each week")
@@ -451,16 +451,16 @@ Make this a document someone can print, bring to the gym, and follow from day on
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const programme = message.content[0].text;
-    res.json({ programme });
+    const program = message.content[0].text;
+    res.json({ program });
   } catch (err) {
-    console.error('Programme generation error:', err.message);
-    res.status(500).json({ error: 'Failed to generate programme' });
+    console.error('Program generation error:', err.message);
+    res.status(500).json({ error: 'Failed to generate program' });
   }
 });
 
 // ---- Plateau Breaker Generator ----
-app.post('/api/programme/plateau', authRequired, async (req, res) => {
+app.post('/api/program/plateau', authRequired, async (req, res) => {
   if (!req.user.is_premium && !req.user.is_admin) {
     return res.status(403).json({ error: 'Premium required' });
   }
@@ -468,7 +468,7 @@ app.post('/api/programme/plateau', authRequired, async (req, res) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
 
-  const { weeks_stuck, squat, bench, deadlift, ohp, current_programme, training_week, sleep_hours, stress_level, stress_reason, nutrition, years_lifting } = req.body;
+  const { weeks_stuck, squat, bench, deadlift, ohp, current_program, training_week, sleep_hours, stress_level, stress_reason, nutrition, years_lifting } = req.body;
 
   try {
     const Anthropic = require('@anthropic-ai/sdk');
@@ -479,7 +479,7 @@ app.post('/api/programme/plateau', authRequired, async (req, res) => {
 Client situation:
 - Stuck on lifts for ${weeks_stuck || 'several'} weeks despite consistent training
 - Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
-- Current programme: ${current_programme || 'Not specified'}
+- Current program: ${current_program || 'Not specified'}
 - Typical training week: ${training_week || 'Not specified'}
 - Sleep: ${sleep_hours || 'unknown'} hours per night
 - Stress: ${stress_level || 'moderate'} due to ${stress_reason || 'general life'}
@@ -511,7 +511,7 @@ Write this so a beginner can understand every instruction. No unexplained jargon
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ programme: message.content[0].text });
+    res.json({ program: message.content[0].text });
   } catch (err) {
     console.error('Plateau generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYROO - Programme</title>
+  <title>KYROO - Program</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <style>
@@ -120,7 +120,7 @@
       <div id="lockedView" hidden>
         <div class="locked">
           <p class="locked__title">Premium Feature</p>
-          <p class="locked__desc">Training programmes are for KYROO Premium members.</p>
+          <p class="locked__desc">Training programs are for KYROO Premium members.</p>
           <a href="/" class="locked__btn">Go to KYROO</a>
         </div>
       </div>
@@ -129,14 +129,14 @@
       <div id="hubView">
         <div class="hub__header">
           <p class="hub__tag">PREMIUM</p>
-          <h1 class="hub__title">Programme.</h1>
+          <h1 class="hub__title">Program.</h1>
           <p class="hub__desc">AI-powered training plans built for you.</p>
         </div>
         <div class="hub__grid">
           <div class="hub__card" onclick="showWizard('12week')">
             <div class="hub__card-icon">&#9776;</div>
             <h3 class="hub__card-title">12-Week Plan</h3>
-            <p class="hub__card-desc">Complete periodised training programme. Personalised to your level, schedule, and goals.</p>
+            <p class="hub__card-desc">Complete periodized training program. Personalized to your level, schedule, and goals.</p>
             <span class="hub__card-badge">12 weeks</span>
           </div>
           <div class="hub__card" onclick="showWizard('plateau')">
@@ -150,10 +150,10 @@
 
       <!-- 12-Week Wizard -->
       <div class="wizard" id="wizard12week">
-        <span class="wizard__back" onclick="showHub()">Back to programmes</span>
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
         <div class="hero">
           <p class="hero__tag">12-WEEK PLAN</p>
-          <h1 class="hero__title">Build your programme.</h1>
+          <h1 class="hero__title">Build your program.</h1>
           <p class="hero__desc">Five questions. One complete plan.</p>
         </div>
         <div class="steps" id="steps12"></div>
@@ -162,13 +162,13 @@
           <div class="card" data-step="2"><p class="card__title">Your body.</p><p class="card__desc">The basics for your plan.</p><div class="input-row"><div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="w12_weight" placeholder="80"></div><div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="w12_height" placeholder="180"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="w12_age" placeholder="28"></div><div class="input-group"><label class="input-label">Sex</label><div class="selector" id="w12_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button><button type="button" class="selector__btn" data-value="diverse">Diverse</button></div></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
           <div class="card" data-step="3"><p class="card__title">Your strength.</p><p class="card__desc">Current 1RM estimates. Skip if unsure.</p><div class="input-row"><div class="input-group"><label class="input-label">Squat</label><input type="number" class="input" id="w12_squat" placeholder="--"><p class="input-hint">kg</p></div><div class="input-group"><label class="input-label">Bench</label><input type="number" class="input" id="w12_bench" placeholder="--"><p class="input-hint">kg</p></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift</label><input type="number" class="input" id="w12_deadlift" placeholder="--"><p class="input-hint">kg</p></div><div class="input-group"><label class="input-label">OHP</label><input type="number" class="input" id="w12_ohp" placeholder="--"><p class="input-hint">kg</p></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
           <div class="card" data-step="4"><p class="card__title">Your schedule.</p><p class="card__desc">How much time can you commit?</p><div class="input-group"><label class="input-label">Days per week</label><div class="selector" id="w12_days"><button type="button" class="selector__btn" data-value="3">3</button><button type="button" class="selector__btn selector__btn--selected" data-value="4">4</button><button type="button" class="selector__btn" data-value="5">5</button><button type="button" class="selector__btn" data-value="6">6</button></div></div><div class="input-group"><label class="input-label">Session length</label><div class="selector" id="w12_mins"><button type="button" class="selector__btn" data-value="45">45 min</button><button type="button" class="selector__btn selector__btn--selected" data-value="60">60 min</button><button type="button" class="selector__btn" data-value="75">75 min</button><button type="button" class="selector__btn" data-value="90">90 min</button></div></div><div class="input-group"><label class="input-label">Equipment</label><div class="selector" id="w12_equip"><button type="button" class="selector__btn selector__btn--selected" data-value="full commercial gym">Full gym</button><button type="button" class="selector__btn" data-value="home gym with barbell and dumbbells">Home gym</button><button type="button" class="selector__btn" data-value="bodyweight and calisthenics park">Bodyweight</button></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
-          <div class="card" data-step="5"><p class="card__title">Your goal.</p><p class="card__desc">What matters most?</p><div class="input-group"><label class="input-label">Primary</label><div class="selector" id="w12_goal1"><button type="button" class="selector__btn selector__btn--selected" data-value="hypertrophy">Muscle growth</button><button type="button" class="selector__btn" data-value="strength">Strength</button><button type="button" class="selector__btn" data-value="fat loss while maintaining muscle">Fat loss</button></div></div><div class="input-group"><label class="input-label">Secondary</label><div class="selector" id="w12_goal2"><button type="button" class="selector__btn selector__btn--selected" data-value="building raw strength">Raw strength</button><button type="button" class="selector__btn" data-value="improving conditioning">Conditioning</button><button type="button" class="selector__btn" data-value="mobility and injury prevention">Mobility</button></div></div><p class="error" id="err12" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" id="gen12Btn" onclick="generate12()">Generate programme</button></div></div>
+          <div class="card" data-step="5"><p class="card__title">Your goal.</p><p class="card__desc">What matters most?</p><div class="input-group"><label class="input-label">Primary</label><div class="selector" id="w12_goal1"><button type="button" class="selector__btn selector__btn--selected" data-value="hypertrophy">Muscle growth</button><button type="button" class="selector__btn" data-value="strength">Strength</button><button type="button" class="selector__btn" data-value="fat loss while maintaining muscle">Fat loss</button></div></div><div class="input-group"><label class="input-label">Secondary</label><div class="selector" id="w12_goal2"><button type="button" class="selector__btn selector__btn--selected" data-value="building raw strength">Raw strength</button><button type="button" class="selector__btn" data-value="improving conditioning">Conditioning</button><button type="button" class="selector__btn" data-value="mobility and injury prevention">Mobility</button></div></div><p class="error" id="err12" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" id="gen12Btn" onclick="generate12()">Generate program</button></div></div>
         </div>
       </div>
 
       <!-- Plateau Wizard -->
       <div class="wizard" id="wizardPlateau">
-        <span class="wizard__back" onclick="showHub()">Back to programmes</span>
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
         <div class="hero">
           <p class="hero__tag">PLATEAU BREAKER</p>
           <h1 class="hero__title">Break through.</h1>
@@ -177,7 +177,7 @@
         <div class="steps" id="stepsPlateau"></div>
         <div id="cardsPlateau">
           <div class="card card--active" data-step="1"><p class="card__title">Where are you stuck?</p><p class="card__desc">Your current numbers and how long you have been stalled.</p><div class="input-group"><label class="input-label">Weeks stuck</label><input type="number" class="input" id="wp_weeks" placeholder="6"></div><div class="input-row"><div class="input-group"><label class="input-label">Squat (kg)</label><input type="number" class="input" id="wp_squat" placeholder="120"></div><div class="input-group"><label class="input-label">Bench (kg)</label><input type="number" class="input" id="wp_bench" placeholder="80"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift (kg)</label><input type="number" class="input" id="wp_deadlift" placeholder="140"></div><div class="input-group"><label class="input-label">OHP (kg)</label><input type="number" class="input" id="wp_ohp" placeholder="50"></div></div><div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
-          <div class="card" data-step="2"><p class="card__title">Your current training.</p><p class="card__desc">What does your programme look like right now?</p><div class="input-group"><label class="input-label">Current programme</label><textarea class="textarea" id="wp_programme" placeholder="e.g. Upper/Lower split, 4 days, been running it for 3 months..."></textarea></div><div class="input-group"><label class="input-label">Typical training week</label><textarea class="textarea" id="wp_week" placeholder="e.g. Monday: Squat 5x5, Bench 4x8... Tuesday: Rest..."></textarea></div><div class="input-group"><label class="input-label">Years lifting</label><input type="number" class="input" id="wp_years" placeholder="3"></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
+          <div class="card" data-step="2"><p class="card__title">Your current training.</p><p class="card__desc">What does your program look like right now?</p><div class="input-group"><label class="input-label">Current program</label><textarea class="textarea" id="wp_program" placeholder="e.g. Upper/Lower split, 4 days, been running it for 3 months..."></textarea></div><div class="input-group"><label class="input-label">Typical training week</label><textarea class="textarea" id="wp_week" placeholder="e.g. Monday: Squat 5x5, Bench 4x8... Tuesday: Rest..."></textarea></div><div class="input-group"><label class="input-label">Years lifting</label><input type="number" class="input" id="wp_years" placeholder="3"></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
           <div class="card" data-step="3"><p class="card__title">Your recovery.</p><p class="card__desc">Sleep, stress, nutrition - the stuff outside the gym.</p><div class="input-row"><div class="input-group"><label class="input-label">Sleep (hours/night)</label><input type="number" class="input" id="wp_sleep" placeholder="7"></div><div class="input-group"><label class="input-label">Stress level</label><div class="selector" id="wp_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Moderate</button><button type="button" class="selector__btn" data-value="high">High</button></div></div></div><div class="input-group"><label class="input-label">Main stress source</label><input type="text" class="input" id="wp_stressReason" placeholder="e.g. work, family, finances"></div><div class="input-group"><label class="input-label">Nutrition overview</label><textarea class="textarea" id="wp_nutrition" placeholder="e.g. ~2500 cal, 150g protein, 3 meals a day, no tracking..."></textarea></div><p class="error" id="errP" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" id="genPBtn" onclick="generateP()">Diagnose and fix</button></div></div>
         </div>
       </div>
@@ -195,7 +195,7 @@
       <div class="result" id="resultView">
         <div class="result__actions">
           <button type="button" class="result__btn" onclick="window.print()">Print / PDF</button>
-          <button type="button" class="result__btn" onclick="showHub()">New programme</button>
+          <button type="button" class="result__btn" onclick="showHub()">New program</button>
           <a href="/" class="result__btn">Back to KYROO</a>
         </div>
         <div class="result__body" id="resultBody"></div>
@@ -279,7 +279,7 @@
       try {
         const freshToken = localStorage.getItem('kyroo_token');
         if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/programme/generate`, {
+        const res = await fetch(`${API}/api/program/generate`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -292,7 +292,7 @@
         const text = await res.text();
         let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
         if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.programme);
+        showResult(data.program);
       } catch (ex) { showError('12week', ex.message); }
     }
 
@@ -307,19 +307,19 @@
       try {
         const freshToken = localStorage.getItem('kyroo_token');
         if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/programme/plateau`, {
+        const res = await fetch(`${API}/api/program/plateau`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             weeks_stuck: val('wp_weeks'), squat: val('wp_squat'), bench: val('wp_bench'), deadlift: val('wp_deadlift'), ohp: val('wp_ohp'),
-            current_programme: val('wp_programme'), training_week: val('wp_week'), years_lifting: val('wp_years'),
+            current_program: val('wp_program'), training_week: val('wp_week'), years_lifting: val('wp_years'),
             sleep_hours: val('wp_sleep'), stress_level: sel('wp_stress') || 'moderate', stress_reason: val('wp_stressReason'), nutrition: val('wp_nutrition'),
           }),
         });
         const text = await res.text();
         let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
         if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.programme);
+        showResult(data.program);
       } catch (ex) { showError('plateau', ex.message); }
     }
 
