@@ -741,6 +741,74 @@ Write this so someone can start tomorrow morning. No fluff. Every instruction is
   }
 });
 
+// ---- Injury Prevention Generator ----
+app.post('/api/program/injury', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { main_lifts, current_niggles, training_age, prehab_experience, injury_history } = req.body;
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are a sports physiotherapist and strength coach who specializes in keeping lifters healthy, pain-free, and training consistently for the long term. Write so anyone can follow every instruction - no medical jargon without explanation.
+
+Client:
+- Main lifts: ${main_lifts || 'squat, bench press, deadlift, overhead press, barbell rows'}
+- Current niggles or discomfort: ${current_niggles || 'none reported'}
+- Training age: ${training_age || 'not specified'}
+- Prehab experience: ${prehab_experience || 'none'}
+- Injury history: ${injury_history || 'none reported'}
+
+Build a comprehensive injury prevention plan covering:
+
+1. COMMON INJURIES PER LIFT
+For each of the main lifts, explain: the most common injuries, what causes them (movement dysfunction, muscle imbalance, or technique error), and how to spot the warning signs in yourself before injury occurs.
+
+2. 20-MINUTE PREHAB ROUTINE (3x per week)
+Cover shoulders, hips, knees, lower back, and elbows. For each exercise include:
+- Exercise name and one-line description of how to do it
+- Sets x Reps
+- Coaching cues (what to feel, what to avoid)
+Keep the total routine under 20 minutes.
+
+3. SMART WARM-UP PROTOCOL
+A warm-up for heavy training sessions that prepares the nervous system and protects joints WITHOUT fatiguing you before working sets. Include specific steps and timing.
+
+4. TRAINING AROUND NIGGLES
+A framework for modifying exercises, reducing load, and managing discomfort without making things worse. Include specific exercise swaps for each main lift.
+
+5. RED FLAGS vs NORMAL SORENESS
+Clear guidelines to distinguish real injury requiring rest or professional assessment from normal training soreness or fatigue. Use a simple traffic light system (green/amber/red).
+
+6. RETURN TO TRAINING PROTOCOL
+How to come back after a short layoff due to illness or injury. Week-by-week guide with specific percentage-based loading.
+
+7. TECHNIQUE ADJUSTMENTS
+For each main lift, give 2-3 technique tweaks that reduce joint stress without hurting performance. Explain why each adjustment helps.
+
+Start with: # KYROO INJURY PREVENTION PLAN
+
+Format this as a practical document someone can print and reference. Make it feel like a thorough physiotherapy consultation, but written in plain English.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    res.json({ program: message.content[0].text });
+  } catch (err) {
+    console.error('Injury prevention generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate plan' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
