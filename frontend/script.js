@@ -1059,90 +1059,61 @@ function renderTrainTogether(locations, checkins) {
   const grid = document.getElementById('trainGrid');
   if (!grid) return;
 
-  const activities = ['Workout', 'Running', 'Mobility'];
-
   grid.innerHTML = locations.map(loc => {
     const locCheckins = checkins.filter(c => c.location === loc.slug);
     const count = locCheckins.length;
     const isHere = myCheckin && myCheckin.location === loc.slug;
+    const canCheckin = currentUser && (currentUser.is_premium || currentUser.is_admin);
 
     return `
-      <div class="train__card" data-animate="fade-up">
-        <div class="train__card-header">
-          <h3 class="train__card-name">${esc(loc.short_name)}</h3>
-          <div class="train__card-count">
-            <span class="train__card-dot ${count > 0 ? 'train__card-dot--active' : ''}"></span>
-            ${count > 0 ? count + ' there now' : 'Nobody yet'}
-          </div>
+      <div class="train__card ${count > 0 ? 'train__card--active' : ''}" data-animate="fade-up">
+        <div class="train__card-top">
+          <span class="train__card-dot ${count > 0 ? 'train__card-dot--active' : ''}"></span>
+          <span class="train__card-count">${count > 0 ? count : ''}</span>
         </div>
-        <a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=16/${loc.lat}/${loc.lng}" target="_blank" rel="noopener" class="train__card-maplink">Open in Maps</a>
-        <p class="train__card-desc">${esc(loc.description)}</p>
-
+        <h3 class="train__card-name">${esc(loc.short_name)}</h3>
         ${count > 0 ? `
           <div class="train__card-people">
-            ${locCheckins.map(c => `
-              <div class="train__person">
-                <span class="train__person-name">${esc(c.user_name)}</span>
-                <span class="train__person-activity">${esc(c.activity || '')}</span>
-                <span class="train__person-time">${timeAgo(c.created_at)}</span>
-              </div>
-            `).join('')}
+            ${locCheckins.map(c => `<span class="train__person">${esc(c.user_name)} <em>${timeAgo(c.created_at)}</em></span>`).join('')}
           </div>
-        ` : `
-          <div class="train__card-empty">Be the first one today.</div>
-        `}
-
-        ${currentUser && (currentUser.is_premium || currentUser.is_admin) ? (isHere ? `
-          <button type="button" class="train__checkin-btn train__checkin-btn--active" data-action="checkout">I'm leaving</button>
+        ` : ''}
+        ${canCheckin ? (isHere ? `
+          <button type="button" class="train__btn train__btn--here" data-action="checkout">Leave</button>
         ` : (myCheckin ? '' : `
-          <div class="train__activities" data-location="${esc(loc.slug)}">
-            ${activities.map(a => `<button type="button" class="train__activity-btn" data-activity="${esc(a)}">${esc(a)}</button>`).join('')}
-          </div>
-          <button type="button" class="train__checkin-btn" data-action="checkin" data-location="${esc(loc.slug)}">I'm here</button>
+          <button type="button" class="train__btn" data-action="checkin" data-location="${esc(loc.slug)}">Join</button>
         `)) : currentUser ? `
-          <button type="button" class="train__checkin-btn" data-action="upgrade">Premium feature - Upgrade</button>
+          <button type="button" class="train__btn train__btn--upgrade" data-action="upgrade">Premium</button>
         ` : `
-          <button type="button" class="train__checkin-btn" data-action="login">Log in to check in</button>
+          <button type="button" class="train__btn" data-action="login">Log in</button>
         `}
       </div>
     `;
   }).join('');
 
-  // Wire buttons
+  // Wire all buttons
   grid.querySelectorAll('[data-action="checkin"]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const location = btn.dataset.location;
-      const selectedActivity = btn.closest('.train__card').querySelector('.train__activity-btn--selected');
-      const activity = selectedActivity ? selectedActivity.dataset.activity : null;
-      btn.textContent = 'Checking in...';
+      btn.textContent = '...';
       btn.disabled = true;
       try {
-        const res = await fetch(`${API_BASE}/api/checkins`, {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({ location, activity }),
+        await fetch(`${API_BASE}/api/checkins`, {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ location: btn.dataset.location, activity: 'Workout' }),
         });
-        if (!res.ok) throw new Error();
         loadTrainTogether();
-      } catch (e) {
-        btn.textContent = "I'm here";
-        btn.disabled = false;
-      }
+      } catch (e) { btn.textContent = 'Join'; btn.disabled = false; }
     });
   });
 
   grid.querySelectorAll('[data-action="checkout"]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      btn.textContent = 'Leaving...';
+      btn.textContent = '...';
       btn.disabled = true;
       try {
         await fetch(`${API_BASE}/api/checkins`, { method: 'DELETE', headers: authHeaders() });
         myCheckin = null;
         loadTrainTogether();
-      } catch (e) {
-        btn.textContent = "I'm leaving";
-        btn.disabled = false;
-      }
+      } catch (e) { btn.textContent = 'Leave'; btn.disabled = false; }
     });
   });
 
@@ -1152,14 +1123,6 @@ function renderTrainTogether(locations, checkins) {
 
   grid.querySelectorAll('[data-action="upgrade"]').forEach(btn => {
     btn.addEventListener('click', () => showCheckoutModal());
-  });
-
-  grid.querySelectorAll('.train__activity-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const parent = btn.closest('.train__activities');
-      parent.querySelectorAll('.train__activity-btn').forEach(b => b.classList.remove('train__activity-btn--selected'));
-      btn.classList.add('train__activity-btn--selected');
-    });
   });
 
   initAnimations();

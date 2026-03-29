@@ -1010,34 +1010,21 @@ input { font-family: inherit; }
   border: 1px solid var(--border);
 }
 
-@media (max-width: 1024px) {
-  .train__grid { grid-template-columns: repeat(2, 1fr); }
-}
-
 .train__card {
   background: var(--bg);
-  padding: 36px 32px;
+  padding: 28px 24px;
+  text-align: center;
   transition: all 0.3s var(--ease);
 }
 
-.train__card-header {
+.train__card--active { background: var(--surface); }
+
+.train__card-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.train__card-name {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-}
-
-.train__card-count {
-  display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  margin-bottom: 14px;
 }
 
 .train__card-dot {
@@ -1058,56 +1045,40 @@ input { font-family: inherit; }
   50% { opacity: 0.5; }
 }
 
-.train__card-maplink {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.04em;
-  margin-bottom: 12px;
-  transition: color 0.2s;
-}
-.train__card-maplink:hover { color: var(--accent); }
-
-.train__card-desc {
+.train__card-count {
   font-size: 0.8125rem;
-  color: var(--text-3);
-  line-height: 1.6;
-  margin-bottom: 20px;
+  font-weight: 700;
+  color: var(--sage);
+}
+
+.train__card-name {
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  margin-bottom: 12px;
 }
 
 .train__card-people {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 16px;
 }
 
 .train__person {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  padding: 8px 0;
-  border-top: 1px solid var(--border);
+  font-size: 0.6875rem;
+  color: var(--text-2);
 }
 
-.train__person-name { color: var(--text); font-weight: 500; }
-.train__person-activity { color: var(--text-3); }
-.train__person-time { color: var(--text-3); font-size: 0.6875rem; }
-
-.train__card-empty {
-  font-size: 0.75rem;
+.train__person em {
+  font-style: normal;
   color: var(--text-3);
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
 }
 
-.train__checkin-btn {
-  width: 100%;
-  padding: 12px;
+.train__btn {
+  padding: 9px 20px;
   font-family: var(--sans);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1116,40 +1087,30 @@ input { font-family: inherit; }
   color: var(--text-2);
   cursor: pointer;
   transition: all 0.2s;
+  margin-top: 4px;
 }
 
-.train__checkin-btn:hover {
+.train__btn:hover {
   border-color: var(--sage);
   color: var(--sage);
 }
 
-.train__checkin-btn--active {
+.train__btn--here {
   border-color: var(--sage);
-  background: rgba(125, 140, 104, 0.08);
   color: var(--sage);
 }
 
-.train__activities {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
+.train__btn--upgrade {
+  color: var(--accent);
+  border-color: rgba(194,122,86,0.2);
+}
+.train__btn--upgrade:hover {
+  border-color: var(--accent);
 }
 
-.train__activity-btn {
-  padding: 6px 12px;
-  font-family: var(--sans);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-3);
-  cursor: pointer;
-  transition: all 0.15s;
+@media (max-width: 1024px) {
+  .train__grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-.train__activity-btn:hover { border-color: var(--text-2); color: var(--text-2); }
-.train__activity-btn--selected { border-color: var(--sage); color: var(--sage); background: rgba(125,140,104,0.06); }
-
 @media (max-width: 640px) {
   .train__grid { grid-template-columns: 1fr; }
 }
