@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 
 const http = require('http');
 const WebSocket = require('ws');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const multer = require('multer');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
@@ -15,6 +17,36 @@ const swaggerSpec = require('./swagger.json');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'kyroo-secret-change-in-production';
+const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+
+// Email transporter
+const mailTransport = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+  },
+});
+
+async function sendEmail(to, subject, html) {
+  // If SMTP not configured, log to console instead
+  if (!process.env.SMTP_USER) {
+    console.log(`\n--- EMAIL (no SMTP configured) ---`);
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Body: ${html.replace(/<[^>]*>/g, '')}`);
+    console.log(`-----------------------------------\n`);
+    return;
+  }
+  await mailTransport.sendMail({
+    from: `"KYROO" <${process.env.SMTP_USER}>`,
+    to,
+    subject,
+    html,
+  });
+}
 
 // Database connection with retry logic
 const pool = new Pool({
@@ -120,16 +152,101 @@ app.post('/api/auth/signup', async (req, res) => {
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
     const hash = await bcrypt.hash(password, 10);
+    const verifyToken = crypto.randomBytes(32).toString('hex');
     const { rows } = await pool.query(
-      'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name, is_premium, is_admin, created_at',
-      [email, hash, name || null]
+      'INSERT INTO users (email, password_hash, name, verify_token) VALUES ($1, $2, $3, $4) RETURNING id, email, name, is_premium, is_admin, email_verified, created_at',
+      [email, hash, name || null, verifyToken]
     );
     const user = rows[0];
     const token = generateToken(user);
+
+    // Send verification email
+    const verifyUrl = `${BASE_URL}/api/auth/verify?token=${verifyToken}`;
+    await sendEmail(email, 'Welcome to KYROO - Verify your email', `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
+        <h1 style="font-size:24px;margin-bottom:8px">Welcome to KYROO${name ? ', ' + name : ''}</h1>
+        <p style="color:#666;margin-bottom:32px">Verify your email to get full access.</p>
+        <a href="${verifyUrl}" style="display:inline-block;background:#c27a56;color:#fff;padding:12px 32px;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px">Verify email</a>
+        <p style="color:#999;font-size:12px;margin-top:32px">Or copy this link: ${verifyUrl}</p>
+      </div>
+    `);
+
     res.status(201).json({ user, token });
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Signup failed' });
+  }
+});
+
+// GET /api/auth/verify - email verification
+app.get('/api/auth/verify', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).send('Invalid link');
+  try {
+    const { rowCount } = await pool.query(
+      'UPDATE users SET email_verified = true, verify_token = NULL WHERE verify_token = $1',
+      [token]
+    );
+    if (rowCount === 0) return res.send('<html><body style="font-family:sans-serif;text-align:center;padding:80px"><h2>Link expired or already used.</h2><a href="/">Go to KYROO</a></body></html>');
+    res.send('<html><body style="font-family:sans-serif;text-align:center;padding:80px"><h2>Email verified.</h2><p style="color:#666">You can close this tab.</p><a href="/">Go to KYROO</a></body></html>');
+  } catch (err) {
+    res.status(500).send('Verification failed');
+  }
+});
+
+// POST /api/auth/forgot-password
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+  try {
+    const { rows } = await pool.query('SELECT id, email, name FROM users WHERE email = $1', [email]);
+    // Always return success to prevent email enumeration
+    if (rows.length === 0) return res.json({ success: true });
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await pool.query(
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+      [resetToken, expires, rows[0].id]
+    );
+
+    const resetUrl = `${BASE_URL}/reset-password.html?token=${resetToken}`;
+    await sendEmail(email, 'KYROO - Reset your password', `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
+        <h1 style="font-size:24px;margin-bottom:8px">Reset your password</h1>
+        <p style="color:#666;margin-bottom:32px">Click below to set a new password. This link expires in 1 hour.</p>
+        <a href="${resetUrl}" style="display:inline-block;background:#c27a56;color:#fff;padding:12px 32px;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px">Reset password</a>
+        <p style="color:#999;font-size:12px;margin-top:32px">If you didn't request this, ignore this email.</p>
+      </div>
+    `);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
+// POST /api/auth/reset-password
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ error: 'Token and new password are required' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  try {
+    const { rows } = await pool.query(
+      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+    if (rows.length === 0) return res.status(400).json({ error: 'Invalid or expired reset link' });
+
+    const hash = await bcrypt.hash(password, 10);
+    await pool.query(
+      'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [hash, rows[0].id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Password reset failed' });
   }
 });
 

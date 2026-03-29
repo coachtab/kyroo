@@ -37,8 +37,9 @@ function esc(str) {
   return el.innerHTML;
 }
 
-// ---- Render section header ----
+// ---- Render section label ----
 function renderSectionHeader(container, section) {
+  if (!container) return;
   container.innerHTML = `
     <span class="section__tag">${esc(section.tag)}</span>
     <h2 class="section__title">${esc(section.title)}</h2>
@@ -50,22 +51,10 @@ function renderSectionHeader(container, section) {
 
 function renderHero(data) {
   const hero = data.sections.hero;
-  document.getElementById('heroBadge').textContent = hero.tag;
-
   const titleEl = document.getElementById('heroTitle');
-  titleEl.innerHTML = `Your smart guide to<br><span class="hero__title--accent">${esc(hero.title)}</span>`;
-
+  titleEl.innerHTML = `<span class="hero__title--accent">${esc(hero.title)}</span>`;
   document.getElementById('heroSubtitle').textContent = hero.description;
   updateHeroCTAs();
-
-  const statsEl = document.getElementById('heroStats');
-  statsEl.innerHTML = data.heroStats.map((s, i) => `
-    ${i > 0 ? '<div class="hero__stat-divider"></div>' : ''}
-    <div class="hero__stat">
-      <span class="hero__stat-number">${esc(s.value)}</span>
-      <span class="hero__stat-label">${esc(s.label)}</span>
-    </div>
-  `).join('');
 }
 
 function renderAbout(data) {
@@ -206,9 +195,9 @@ function renderWhy(data) {
 
 function renderNewsletter(data) {
   const section = data.sections.newsletter;
-  document.getElementById('newsletterTag').textContent = section.tag;
-  document.getElementById('newsletterTitle').innerHTML = esc(section.title).replace(/\n/g, '<br>');
-  document.getElementById('newsletterText').textContent = section.description;
+  const today = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
+  const title = section.title.replace(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/gi, today);
+  document.getElementById('newsletterTitle').innerHTML = esc(title);
   updateNewsletterUI();
 }
 
@@ -217,13 +206,14 @@ function updateNewsletterUI() {
   const success = document.getElementById('newsletterSuccess');
   if (!form || !success) return;
 
+  // Only hide the form if the user just subscribed (in this session)
+  // Don't override the form for logged-in users - they might want to subscribe too
   if (currentUser) {
-    form.hidden = true;
-    success.hidden = false;
-    success.querySelector('h3').textContent = `Welcome, ${currentUser.name || currentUser.email.split('@')[0]}.`;
-    success.querySelector('p').textContent = currentUser.is_premium
-      ? 'You are a Premium member. You have full access to everything.'
-      : 'You are signed in. Upgrade to Premium for the full experience.';
+    // Pre-fill email if form is visible
+    const emailInput = document.getElementById('emailInput');
+    if (emailInput && !emailInput.value) {
+      emailInput.value = currentUser.email;
+    }
   }
 }
 
@@ -383,7 +373,6 @@ function updateAuthUI() {
   btn.href = 'javascript:void(0)';
   btn.onclick = (e) => {
     e.preventDefault();
-    if (!pageReady) return;
     if (currentUser) showAccountModal();
     else showAuthModal('login');
   };
@@ -411,6 +400,7 @@ function showAuthModal(view) {
   document.getElementById('loginView').hidden = view !== 'login';
   document.getElementById('signupView').hidden = view !== 'signup';
   document.getElementById('accountView').hidden = view !== 'account';
+  document.getElementById('forgotView').hidden = view !== 'forgot';
   document.getElementById('loginError').hidden = true;
   document.getElementById('signupError').hidden = true;
   showModal('authModal');
@@ -867,23 +857,23 @@ function updateHeroCTAs() {
   if (!cta1 || !cta2) return;
 
   if (currentUser && currentUser.is_premium) {
-    cta1.textContent = 'Read Articles';
+    cta1.textContent = 'Read';
     cta1.href = '#articles';
     cta1.onclick = (e) => { e.preventDefault(); scrollToSection('articles'); };
-    cta2.textContent = 'Your Account';
+    cta2.textContent = 'Account';
     cta2.href = 'javascript:void(0)';
     cta2.onclick = (e) => { e.preventDefault(); showAccountModal(); };
   } else if (currentUser) {
-    cta1.textContent = 'Read Articles';
-    cta1.href = '#articles';
-    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('articles'); };
+    cta1.textContent = 'Explore';
+    cta1.href = '#explore';
+    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('explore'); };
     cta2.textContent = 'Go Premium';
     cta2.href = 'javascript:void(0)';
     cta2.onclick = (e) => { e.preventDefault(); scrollToSection('premium'); };
   } else {
-    cta1.textContent = 'Explore Free';
-    cta1.href = '#free-content';
-    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('free-content'); };
+    cta1.textContent = 'Explore';
+    cta1.href = '#explore';
+    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('explore'); };
     cta2.textContent = 'Subscribe';
     cta2.href = '#premium';
     cta2.onclick = (e) => { e.preventDefault(); scrollToSection('premium'); };
@@ -1021,9 +1011,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target === e.currentTarget) hideModal('imprintModal');
   });
 
+  // Auth button - direct listener as fallback
+  document.getElementById('navAuthBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentUser) showAccountModal();
+    else showAuthModal('login');
+  });
+
   document.getElementById('showSignup').onclick = (e) => { e.preventDefault(); showAuthModal('signup'); };
   document.getElementById('showLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
+  document.getElementById('showForgot').onclick = (e) => { e.preventDefault(); showAuthModal('forgot'); };
+  document.getElementById('backToLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
   document.getElementById('logoutBtn').onclick = () => { clearAuth(); hideModal('authModal'); loadArticles(); };
+
+  // Forgot password form
+  document.getElementById('forgotForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('forgotError');
+    const successEl = document.getElementById('forgotSuccess');
+    errEl.hidden = true;
+    successEl.hidden = true;
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: document.getElementById('forgotEmail').value }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      e.target.hidden = true;
+      successEl.hidden = false;
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.hidden = false;
+      btn.textContent = 'Send reset link';
+      btn.disabled = false;
+    }
+  };
 
   // Login form
   document.getElementById('loginForm').onsubmit = async (e) => {
@@ -1095,7 +1123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await res.json();
 
     renderHero(data);
-    renderAbout(data);
     renderExplore(data);
     renderArticlesHeader(data);
     renderPremium(data);

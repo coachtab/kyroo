@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYROO - Discover What's Next</title>
-  <meta name="description" content="KYROO is a next-generation discovery platform for trends, AI, fitness, and curated recommendations. Stay ahead of what's next.">
+  <title>KYROO</title>
+  <meta name="description" content="KYROO - curated trends, AI, fitness, and culture. From Berlin.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -12,153 +12,142 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
-  <!-- Navigation -->
+
   <nav class="nav" id="nav">
     <div class="nav__container container">
-      <a href="#" class="nav__logo">KYROO</a>
-      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
-        <span></span>
-        <span></span>
-        <span></span>
+      <a href="/" class="nav__logo">KYROO</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Menu">
+        <span></span><span></span>
       </button>
       <div class="nav__menu" id="navMenu">
         <a href="#explore" class="nav__link">Explore</a>
         <a href="#articles" class="nav__link">Articles</a>
         <a href="#premium" class="nav__link">Premium</a>
-        <a href="#newsletter" class="btn btn--small btn--accent" id="navAuthBtn">Subscribe</a>
+        <a href="javascript:void(0)" class="nav__link nav__auth" id="navAuthBtn">Log in</a>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
   <section class="hero" id="hero">
-    <div class="hero__bg">
-      <div class="hero__orb hero__orb--1"></div>
-      <div class="hero__orb hero__orb--2"></div>
-      <div class="hero__orb hero__orb--3"></div>
-      <div class="hero__grid-lines"></div>
-    </div>
     <div class="hero__container container">
-      <div class="hero__badge" data-animate="fade-up" id="heroBadge"></div>
-      <h1 class="hero__title" data-animate="fade-up" data-delay="100" id="heroTitle"></h1>
-      <p class="hero__subtitle" data-animate="fade-up" data-delay="200" id="heroSubtitle"></p>
+      <h1 class="hero__title" data-animate="fade-up" id="heroTitle"></h1>
+      <p class="hero__subtitle" data-animate="fade-up" data-delay="150" id="heroSubtitle"></p>
       <div class="hero__actions" data-animate="fade-up" data-delay="300" id="heroActions">
-        <a href="#free-content" class="btn btn--primary" id="heroCTA1">Explore Free</a>
-        <a href="#premium" class="btn btn--outline" id="heroCTA2">Subscribe</a>
+        <a href="#explore" class="btn btn--primary" id="heroCTA1">Explore</a>
+        <a href="#premium" class="btn btn--ghost" id="heroCTA2">Subscribe</a>
       </div>
-      <div class="hero__stats" data-animate="fade-up" data-delay="400" id="heroStats"></div>
     </div>
   </section>
 
-  <!-- What is KYROO - minimal, merged into flow -->
-  <section class="about section" id="about">
-    <div class="container">
-      <div class="about__statement" data-animate="fade-up" id="aboutStatement"></div>
-    </div>
-  </section>
-
-  <!-- Explore / Categories -->
   <section class="explore section" id="explore">
     <div class="container">
-      <div class="section__header" data-animate="fade-up" id="exploreHeader"></div>
+      <div class="section__label" data-animate="fade-up" id="exploreHeader"></div>
       <div class="explore__grid" id="exploreGrid"></div>
     </div>
   </section>
 
-  <!-- Articles -->
-  <section class="articles section section--dark" id="articles">
+  <section class="articles section" id="articles">
     <div class="container">
-      <div class="section__header" data-animate="fade-up" id="articlesHeader"></div>
+      <div class="section__label" data-animate="fade-up" id="articlesHeader"></div>
       <div class="articles__grid" id="articlesGrid"></div>
     </div>
   </section>
 
-  <!-- Premium -->
   <section class="premium section" id="premium">
     <div class="container">
-      <div class="section__header" data-animate="fade-up" id="premiumHeader"></div>
-      <div class="premium__grid" id="premiumGrid"></div>
+      <div class="section__label" data-animate="fade-up" id="premiumHeader"></div>
+      <div class="premium__content" id="premiumGrid"></div>
     </div>
   </section>
 
-  <!-- Newsletter -->
-  <section class="newsletter section section--dark" id="newsletter">
+  <section class="newsletter section" id="newsletter">
     <div class="container">
       <div class="newsletter__inner" data-animate="fade-up">
-        <div class="newsletter__glow"></div>
-        <span class="section__tag" id="newsletterTag"></span>
         <h2 class="newsletter__title" id="newsletterTitle"></h2>
-        <p class="newsletter__text" id="newsletterText"></p>
         <form class="newsletter__form" id="newsletterForm">
           <div class="newsletter__input-wrap">
-            <input type="email" class="newsletter__input" placeholder="Enter your email" required aria-label="Email address" id="emailInput">
-            <button type="submit" class="btn btn--primary newsletter__btn">Subscribe</button>
+            <input type="email" class="newsletter__input" placeholder="your@email.com" required aria-label="Email" id="emailInput">
+            <button type="submit" class="btn btn--primary">Join</button>
           </div>
-          <p class="newsletter__note">Free forever. No spam. Unsubscribe anytime.</p>
         </form>
         <div class="newsletter__success" id="newsletterSuccess" hidden>
-          <div class="newsletter__success-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </div>
-          <h3>You're in.</h3>
-          <p>Check your inbox for a welcome from KYROO.</p>
+          <p>Done. Check your inbox.</p>
         </div>
       </div>
     </div>
   </section>
 
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a href="/" class="footer__logo">KYROO</a>
+          <div class="footer__socials" id="footerSocials"></div>
+        </div>
+        <div class="footer__links" id="footerLinks"></div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copy">&copy; 2026 KYROO. Berlin.</p>
+      </div>
+    </div>
+  </footer>
 
-
-  <!-- Auth Modal -->
+  <!-- Modals -->
   <div class="modal-overlay" id="authModal" hidden>
     <div class="modal">
       <button type="button" class="modal__close" id="authModalClose">&times;</button>
       <div id="authModalContent">
-        <!-- Login Form -->
         <div id="loginView">
           <h2 class="modal__title">Welcome back</h2>
-          <p class="modal__subtitle">Log in to your KYROO account</p>
           <form id="loginForm" class="modal__form">
             <input type="email" placeholder="Email" required class="modal__input" id="loginEmail">
             <input type="password" placeholder="Password" required minlength="6" class="modal__input" id="loginPassword">
             <div class="modal__error" id="loginError" hidden></div>
             <button type="submit" class="btn btn--primary btn--full">Log in</button>
           </form>
-          <p class="modal__switch">No account yet? <a href="#" id="showSignup">Sign up</a></p>
+          <p class="modal__switch">New here? <a href="#" id="showSignup">Create account</a></p>
+          <p class="modal__switch"><a href="#" id="showForgot">Forgot password?</a></p>
         </div>
-        <!-- Signup Form -->
+        <div id="forgotView" hidden>
+          <h2 class="modal__title">Reset password</h2>
+          <form id="forgotForm" class="modal__form">
+            <input type="email" placeholder="Email" required class="modal__input" id="forgotEmail">
+            <div class="modal__error" id="forgotError" hidden></div>
+            <button type="submit" class="btn btn--primary btn--full">Send reset link</button>
+          </form>
+          <p class="modal__switch"><a href="#" id="backToLogin">Back to log in</a></p>
+          <div id="forgotSuccess" hidden>
+            <p class="modal__success-msg">Check your inbox. If an account exists, we sent a reset link.</p>
+          </div>
+        </div>
         <div id="signupView" hidden>
           <h2 class="modal__title">Join KYROO</h2>
-          <p class="modal__subtitle">Create your free account</p>
           <form id="signupForm" class="modal__form">
-            <input type="text" placeholder="Name (optional)" class="modal__input" id="signupName">
+            <input type="text" placeholder="Name" class="modal__input" id="signupName">
             <input type="email" placeholder="Email" required class="modal__input" id="signupEmail">
-            <input type="password" placeholder="Password (min 6 chars)" required minlength="6" class="modal__input" id="signupPassword">
+            <input type="password" placeholder="Password" required minlength="6" class="modal__input" id="signupPassword">
             <div class="modal__error" id="signupError" hidden></div>
             <button type="submit" class="btn btn--primary btn--full">Create account</button>
           </form>
-          <p class="modal__switch">Already have an account? <a href="#" id="showLogin">Log in</a></p>
+          <p class="modal__switch">Have an account? <a href="#" id="showLogin">Log in</a></p>
         </div>
-        <!-- Account View -->
         <div id="accountView" hidden>
-          <h2 class="modal__title">Your Account</h2>
+          <h2 class="modal__title">Account</h2>
           <div id="accountInfo"></div>
           <div id="accountActions"></div>
-          <button type="button" class="btn btn--outline btn--full modal__logout" id="logoutBtn">Log out</button>
+          <button type="button" class="btn btn--ghost btn--full modal__logout" id="logoutBtn">Log out</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Article Reader Modal -->
   <div class="modal-overlay" id="articleModal" hidden>
-    <div class="modal modal--article">
+    <div class="modal modal--wide">
       <button type="button" class="modal__close" id="articleModalClose">&times;</button>
       <div id="articleContent"></div>
     </div>
   </div>
 
-  <!-- Checkout Modal -->
   <div class="modal-overlay" id="checkoutModal" hidden>
     <div class="modal modal--checkout">
       <button type="button" class="modal__close" id="checkoutModalClose">&times;</button>
@@ -166,46 +155,15 @@
     </div>
   </div>
 
-  <!-- Privacy Policy Modal -->
   <div class="modal-overlay" id="privacyModal" hidden>
-    <div class="modal modal--legal">
-      <button type="button" class="modal__close" id="privacyModalClose">&times;</button>
-      <div id="privacyContent"></div>
-    </div>
+    <div class="modal modal--wide"><button type="button" class="modal__close" id="privacyModalClose">&times;</button><div id="privacyContent"></div></div>
   </div>
-
-  <!-- Terms of Service Modal -->
   <div class="modal-overlay" id="termsModal" hidden>
-    <div class="modal modal--legal">
-      <button type="button" class="modal__close" id="termsModalClose">&times;</button>
-      <div id="termsContent"></div>
-    </div>
+    <div class="modal modal--wide"><button type="button" class="modal__close" id="termsModalClose">&times;</button><div id="termsContent"></div></div>
   </div>
-
-  <!-- Imprint Modal -->
   <div class="modal-overlay" id="imprintModal" hidden>
-    <div class="modal">
-      <button type="button" class="modal__close" id="imprintModalClose">&times;</button>
-      <div id="imprintContent"></div>
-    </div>
+    <div class="modal"><button type="button" class="modal__close" id="imprintModalClose">&times;</button><div id="imprintContent"></div></div>
   </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer__top">
-        <div class="footer__brand">
-          <a href="#" class="footer__logo">KYROO</a>
-          <p class="footer__tagline">Your smart guide to what's next.</p>
-          <div class="footer__socials" id="footerSocials"></div>
-        </div>
-        <div class="footer__links" id="footerLinks"></div>
-      </div>
-      <div class="footer__bottom">
-        <p class="footer__copy">&copy; 2026 KYROO. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
 
   <script src="script.js"></script>
 </body>
