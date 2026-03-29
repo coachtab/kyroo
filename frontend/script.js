@@ -237,8 +237,13 @@ function renderWhy(data) {
 
 function renderNewsletter(data) {
   const section = data.sections.newsletter;
-  const today = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
-  const title = section.title.replace(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/gi, today);
+  const now = new Date();
+  const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(now);
+  const hour = now.getHours();
+  const daytime = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  const title = section.title
+    .replace(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/gi, day)
+    .replace(/morning|afternoon|evening|night/gi, daytime);
   document.getElementById('newsletterTitle').innerHTML = esc(title);
   updateNewsletterUI();
 }
