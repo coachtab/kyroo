@@ -900,6 +900,13 @@ app.post('/api/subscribe', async (req, res) => {
   }
 });
 
+app.get('/api/subscribe/check', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.json({ subscribed: false });
+  const { rows } = await pool.query('SELECT id FROM subscribers WHERE email = $1', [email]);
+  res.json({ subscribed: rows.length > 0 });
+});
+
 app.get('/api/subscribers/count', async (req, res) => {
   const { rows } = await pool.query('SELECT COUNT(*) as count FROM subscribers');
   res.json({ count: parseInt(rows[0].count) });

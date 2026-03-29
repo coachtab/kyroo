@@ -243,19 +243,28 @@ function renderNewsletter(data) {
   updateNewsletterUI();
 }
 
-function updateNewsletterUI() {
+async function updateNewsletterUI() {
   const form = document.getElementById('newsletterForm');
   const success = document.getElementById('newsletterSuccess');
   if (!form || !success) return;
 
-  // Only hide the form if the user just subscribed (in this session)
-  // Don't override the form for logged-in users - they might want to subscribe too
+  const emailInput = document.getElementById('emailInput');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
   if (currentUser) {
-    // Pre-fill email if form is visible
-    const emailInput = document.getElementById('emailInput');
-    if (emailInput && !emailInput.value) {
-      emailInput.value = currentUser.email;
-    }
+    emailInput.value = currentUser.email;
+    // Check if already subscribed
+    try {
+      const res = await fetch(`${API_BASE}/api/subscribe/check?email=${encodeURIComponent(currentUser.email)}`);
+      const data = await res.json();
+      if (data.subscribed) {
+        emailInput.readOnly = true;
+        emailInput.style.opacity = '0.5';
+        submitBtn.textContent = 'Subscribed';
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+      }
+    } catch (e) {}
   }
 }
 
