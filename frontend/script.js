@@ -1429,8 +1429,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---- Load articles ----
   loadArticles();
 
-  // ---- Load train together ----
-  loadTrainTogether();
+  // Train Together (disabled for launch - enable later)
+  // loadTrainTogether();
 
   // Allow auth modal only after page is fully initialized
   pageReady = true;
