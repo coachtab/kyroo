@@ -77,7 +77,9 @@
       "Bash(curl -s http://93.90.201.90:3001/api/site)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''Sections:'''', len\\(d[''''sections'''']\\)\\); print\\(''''Categories:'''', len\\(d[''''categories'''']\\)\\); print\\(''''Articles will load from:'''', d[''''sections''''][''''hero''''][''''title'''']\\)\")",
       "Bash(curl -s http://93.90.201.90:3001/api/articles)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de)",
+      "Bash(curl -s -X POST https://kyroo.de/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\",\"\"password\"\":\"\"Apache2008//!!\"\"}')",
+      "Bash(curl -s -X POST https://kyroo.de/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"okamara@gmail.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"KyrooAdmin2026\"\"\"\"}')"
     ]
   }
 }
