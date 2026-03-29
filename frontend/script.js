@@ -1075,6 +1075,11 @@ function renderTrainTogether(locations, checkins) {
             ${count > 0 ? count + ' there now' : 'Nobody yet'}
           </div>
         </div>
+        <div class="train__card-map">
+          <a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=16/${loc.lat}/${loc.lng}" target="_blank" rel="noopener">
+            <img src="https://staticmap.openstreetmap.de/staticmap.php?center=${loc.lat},${loc.lng}&zoom=15&size=400x120&markers=${loc.lat},${loc.lng},red-pushpin" alt="${esc(loc.name)}" loading="lazy">
+          </a>
+        </div>
         <p class="train__card-desc">${esc(loc.description)}</p>
 
         ${count > 0 ? `
