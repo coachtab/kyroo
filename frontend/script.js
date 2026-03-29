@@ -808,6 +808,16 @@ function renderCheckout(methods) {
   });
 
   // Wire payment type tabs
+  function updatePayButton() {
+    const btn = document.getElementById('checkoutPayBtn');
+    if (selectedPaymentMethodId) {
+      btn.textContent = 'Start Premium';
+    } else {
+      const tab = document.querySelector('.checkout__tab--active')?.dataset.tab || 'card';
+      btn.textContent = tab === 'card' ? 'Pay with Card' : 'Pay with PayPal';
+    }
+  }
+
   content.querySelectorAll('.checkout__tab').forEach(tab => {
     tab.addEventListener('click', () => {
       content.querySelectorAll('.checkout__tab').forEach(t => t.classList.remove('checkout__tab--active'));
@@ -816,8 +826,11 @@ function renderCheckout(methods) {
       document.getElementById('paypalForm').hidden = tab.dataset.tab !== 'paypal';
       selectedPaymentMethodId = null;
       content.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('payment-method-option--selected'));
+      updatePayButton();
     });
   });
+
+  updatePayButton();
 
   // Wire card number formatting
   const cardInput = document.getElementById('cardNumber');
