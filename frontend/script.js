@@ -771,17 +771,21 @@ function renderCheckout(methods) {
         </button>
       </div>
       <div id="paymentForm">
-        <div class="checkout__card-fields" id="cardForm">
-          <input type="text" class="modal__input" id="cardNumber" placeholder="Card number" maxlength="19" autocomplete="cc-number">
-          <div class="checkout__card-row">
-            <input type="text" class="modal__input" id="cardExpiry" placeholder="MM / YY" maxlength="5" autocomplete="cc-exp">
-            <input type="text" class="modal__input" id="cardCVC" placeholder="CVC" maxlength="4" autocomplete="cc-csc">
+        <div id="cardForm">
+          <div class="checkout__card-fields">
+            <input type="text" class="modal__input" id="cardNumber" placeholder="Card number" maxlength="19" autocomplete="cc-number">
+            <div class="checkout__card-row">
+              <input type="text" class="modal__input" id="cardExpiry" placeholder="MM / YY" maxlength="5" autocomplete="cc-exp">
+              <input type="text" class="modal__input" id="cardCVC" placeholder="CVC" maxlength="4" autocomplete="cc-csc">
+            </div>
+            <p class="checkout__card-note">Visa, Mastercard, Amex accepted</p>
           </div>
-          <p class="checkout__card-note">Visa, Mastercard, Amex accepted</p>
         </div>
-        <div class="checkout__card-fields" id="paypalForm" hidden>
-          <input type="email" class="modal__input" id="paypalEmail" placeholder="PayPal email address" autocomplete="email">
-          <p class="checkout__card-note">You will be charged via PayPal</p>
+        <div id="paypalForm" style="display:none">
+          <div class="checkout__card-fields">
+            <input type="email" class="modal__input" id="paypalEmail" placeholder="Your PayPal email address" autocomplete="email">
+            <p class="checkout__card-note">You will be charged via PayPal. No card needed.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -829,8 +833,8 @@ function renderCheckout(methods) {
     tab.addEventListener('click', () => {
       content.querySelectorAll('.checkout__tab').forEach(t => t.classList.remove('checkout__tab--active'));
       tab.classList.add('checkout__tab--active');
-      document.getElementById('cardForm').hidden = tab.dataset.tab !== 'card';
-      document.getElementById('paypalForm').hidden = tab.dataset.tab !== 'paypal';
+      document.getElementById('cardForm').style.display = tab.dataset.tab === 'card' ? 'block' : 'none';
+      document.getElementById('paypalForm').style.display = tab.dataset.tab === 'paypal' ? 'block' : 'none';
       selectedPaymentMethodId = null;
       content.querySelectorAll('.payment-method-option').forEach(o => o.classList.remove('payment-method-option--selected'));
       updatePayButton();
