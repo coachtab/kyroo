@@ -105,7 +105,7 @@
     .locked__btn{display:inline-flex;padding:14px 32px;background:var(--accent);color:#fff;font-family:var(--sans);font-size:0.8125rem;font-weight:600;border-radius:999px}
 
     @media print{body{background:#fff;color:#111}.nav,.steps,.card__actions,.result__actions,.locked,.hub,.wizard__back{display:none!important}.result{display:block!important}.result__body,.result__body *{color:#111!important}.result__body h2{border-top:1px solid #ddd}.page{max-width:100%;padding:0}}
-    @media(max-width:480px){.input-row{flex-direction:column}.hub__grid{grid-template-columns:1fr}.selector__btn{min-width:0}}
+    @media(max-width:640px){.input-row{flex-direction:column}.hub__grid{grid-template-columns:1fr}.selector__btn{min-width:0}}
   </style>
 </head>
 <body>
@@ -150,6 +150,12 @@
             <h3 class="hub__card-title">Progress Tracker</h3>
             <p class="hub__card-desc">Professional tracking system for bodyweight, lifts, photos, measurements, and decisions.</p>
             <span class="hub__card-badge">Monitoring</span>
+          </div>
+          <div class="hub__card" onclick="showWizard('summer')">
+            <div class="hub__card-icon">&#9728;</div>
+            <h3 class="hub__card-title">90-Day Summer Shred</h3>
+            <p class="hub__card-desc">Deficit, diet, training, steps, sleep. Five steps, no BS. Start tomorrow.</p>
+            <span class="hub__card-badge">90 days</span>
           </div>
           <div class="hub__card" onclick="showWizard('weakpoint')">
             <div class="hub__card-icon">&#9881;</div>
@@ -257,6 +263,92 @@
         </div>
       </div>
 
+      <!-- Summer Shred Wizard -->
+      <div class="wizard" id="wizardSummer">
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
+        <div class="hero">
+          <p class="hero__tag">90-DAY SUMMER SHRED</p>
+          <h1 class="hero__title">Get lean. No BS.</h1>
+          <p class="hero__desc">Five steps. Personalized to you. Start tomorrow.</p>
+        </div>
+        <div class="steps" id="stepsSummer"></div>
+        <div id="cardsSummer">
+          <div class="card card--active" data-step="1">
+            <p class="card__title">Where you are now.</p>
+            <p class="card__desc">Be honest. Better data means a better plan.</p>
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label">Bodyweight (kg)</label>
+                <input type="number" class="input" id="ws_weight" placeholder="85">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Body fat estimate</label>
+                <div class="selector" id="ws_bf">
+                  <button type="button" class="selector__btn" data-value="15-20%">15-20%</button>
+                  <button type="button" class="selector__btn selector__btn--selected" data-value="20-25%">20-25%</button>
+                  <button type="button" class="selector__btn" data-value="25-30%">25-30%</button>
+                  <button type="button" class="selector__btn" data-value="30%+">30%+</button>
+                </div>
+              </div>
+            </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn--primary" onclick="nextS()">Continue</button>
+            </div>
+          </div>
+          <div class="card" data-step="2">
+            <p class="card__title">Your lifestyle.</p>
+            <p class="card__desc">Training, steps, sleep - what does your week look like?</p>
+            <div class="input-group">
+              <label class="input-label">Training days per week</label>
+              <div class="selector" id="ws_days">
+                <button type="button" class="selector__btn" data-value="3">3</button>
+                <button type="button" class="selector__btn selector__btn--selected" data-value="4">4</button>
+                <button type="button" class="selector__btn" data-value="5">5</button>
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label">Current daily steps</label>
+                <input type="number" class="input" id="ws_steps" placeholder="5000">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Sleep (hours/night)</label>
+                <input type="number" class="input" id="ws_sleep" placeholder="7">
+              </div>
+            </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn--ghost" onclick="prevS()">Back</button>
+              <button type="button" class="btn btn--primary" onclick="nextS()">Continue</button>
+            </div>
+          </div>
+          <div class="card" data-step="3">
+            <p class="card__title">Your biggest challenge.</p>
+            <p class="card__desc">What has stopped you before?</p>
+            <div class="input-group">
+              <label class="input-label">Biggest obstacle</label>
+              <div class="selector" id="ws_challenge">
+                <button type="button" class="selector__btn selector__btn--selected" data-value="staying consistent after week 2">Consistency</button>
+                <button type="button" class="selector__btn" data-value="not knowing what to eat">Diet confusion</button>
+                <button type="button" class="selector__btn" data-value="no structured training plan">No plan</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Diet preference</label>
+              <div class="selector" id="ws_diet">
+                <button type="button" class="selector__btn selector__btn--selected" data-value="no preference, just effective">No preference</button>
+                <button type="button" class="selector__btn" data-value="high protein, moderate carb">High protein</button>
+                <button type="button" class="selector__btn" data-value="meal prep friendly, simple meals">Meal prep</button>
+              </div>
+            </div>
+            <p class="error" id="errS" hidden></p>
+            <div class="card__actions">
+              <button type="button" class="btn btn--ghost" onclick="prevS()">Back</button>
+              <button type="button" class="btn btn--primary" onclick="generateS()">Build my shred plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Weak Point Wizard -->
       <div class="wizard" id="wizardWeakpoint">
         <span class="wizard__back" onclick="showHub()">Back to programs</span>
@@ -355,19 +447,20 @@
     function showWizard(type) {
       document.getElementById('hubView').style.display = 'none';
       document.getElementById('resultView').style.display = 'none';
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', weakpoint: 'wizardWeakpoint' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', weakpoint: 'wizardWeakpoint' };
       const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
       initSteps(type);
     }
 
     // Steps
-    let step12 = 1, stepP = 1, stepW = 1, stepT = 1;
+    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1;
 
     const wizardConfig = {
       '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
       plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
       tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
+      summer: { cards: 'cardsSummer', steps: 'stepsSummer', count: 3 },
       weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
     };
 
@@ -375,7 +468,7 @@
       const cfg = wizardConfig[type];
       const container = document.getElementById(cfg.steps);
       container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else stepW = 1;
+      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'summer') stepS = 1; else stepW = 1;
       showCard(type, 1);
     }
 
@@ -399,6 +492,8 @@
     function prevP() { if (stepP > 1) { stepP--; showCard('plateau', stepP); } }
     function nextT() { if (stepT < 2) { stepT++; showCard('tracker', stepT); } }
     function prevT() { if (stepT > 1) { stepT--; showCard('tracker', stepT); } }
+    function nextS() { if (stepS < 3) { stepS++; showCard('summer', stepS); } }
+    function prevS() { if (stepS > 1) { stepS--; showCard('summer', stepS); } }
     function nextW() { if (stepW < 3) { stepW++; showCard('weakpoint', stepW); } }
     function prevW() { if (stepW > 1) { stepW--; showCard('weakpoint', stepW); } }
 
@@ -458,6 +553,37 @@
         if (!res.ok) throw new Error(data.error || 'Failed');
         showResult(data.program);
       } catch (ex) { showError('plateau', ex.message); }
+    }
+
+    // Generate summer shred
+    async function generateS() {
+      const err = document.getElementById('errS');
+      err.hidden = true;
+      document.getElementById('wizardSummer').classList.remove('wizard--active');
+      document.getElementById('generatingView').hidden = false;
+      document.getElementById('genText').textContent = 'Building your shred plan...';
+
+      try {
+        const freshToken = localStorage.getItem('kyroo_token');
+        if (!freshToken) throw new Error('Please log in first.');
+        const res = await fetch(`${API}/api/program/summer`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bodyweight: val('ws_weight'),
+            body_fat_estimate: sel('ws_bf') || '20-25%',
+            training_days: sel('ws_days') || '4',
+            current_steps: val('ws_steps'),
+            sleep_hours: val('ws_sleep'),
+            biggest_challenge: sel('ws_challenge') || 'staying consistent',
+            diet_preference: sel('ws_diet') || 'no preference',
+          }),
+        });
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        showResult(data.program);
+      } catch (ex) { showError('summer', ex.message); }
     }
 
     // Generate tracker
@@ -528,8 +654,8 @@
 
     function showError(type, msg) {
       document.getElementById('generatingView').hidden = true;
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', weakpoint: 'wizardWeakpoint' };
-      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', weakpoint: 'errW' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', weakpoint: 'wizardWeakpoint' };
+      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', summer: 'errS', weakpoint: 'errW' };
       document.getElementById(ids[type]).classList.add('wizard--active');
       const err = document.getElementById(errIds[type]);
       err.textContent = msg; err.hidden = false;

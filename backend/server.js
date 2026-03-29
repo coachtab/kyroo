@@ -657,6 +657,90 @@ Make this feel like the monitoring system of a professional athlete, but written
   }
 });
 
+// ---- 90-Day Summer Shred ----
+app.post('/api/program/summer', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { bodyweight, body_fat_estimate, training_days, current_steps, sleep_hours, biggest_challenge, diet_preference } = req.body;
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are a no-BS body recomposition coach who specializes in 90-day summer transformations for men. Your tone is direct, motivating, and practical - like a friend who is also a coach. No jargon without explanation. Write for someone who has tried and failed before.
+
+Client:
+- Bodyweight: ${bodyweight || 'not specified'}kg
+- Body fat estimate: ${body_fat_estimate || 'not specified'}
+- Training days available: ${training_days || '4'} per week
+- Current daily steps: ${current_steps || 'not specified'}
+- Sleep: ${sleep_hours || 'not specified'} hours per night
+- Biggest challenge: ${biggest_challenge || 'staying consistent'}
+- Diet preference: ${diet_preference || 'no preference'}
+
+Build a COMPLETE personalized 90-day summer shred plan using this 5-step framework:
+
+STEP 1: CALORIE DEFICIT
+- Calculate their specific maintenance calories based on their bodyweight
+- Set their specific deficit number (300-500 below maintenance)
+- Give them their exact daily calorie target
+- Tell them exactly how to track using MyFitnessPal
+- Include the weekly weight loss target (0.5-1% bodyweight)
+- Include adjustment rules: what to do if weight stalls, what to do if losing too fast
+
+STEP 2: DIET
+- Calculate their exact protein target (1g per lb bodyweight)
+- Calculate carb and fat ranges
+- Give them 5 specific high-protein meal ideas they can make in under 15 minutes
+- Include a sample full day of eating with exact macros
+- One autopilot meal they can repeat daily
+
+STEP 3: PROGRESSIVE OVERLOAD TRAINING
+- Design a specific ${training_days || '4'}-day training split
+- Write out every session: exercise, sets, reps
+- For every exercise, one line on how to do it
+- Include progression rules: when to add weight, how much
+- Explain what to do when lifts stall on a cut
+
+STEP 4: STEP MAXXING
+- Their specific daily step target based on current activity
+- A realistic plan to build up if they are currently low
+- Best times and methods for getting steps in
+- Incline treadmill protocol if they have gym access
+
+STEP 5: SLEEP PROTOCOL
+- Their target sleep hours
+- A specific wind-down routine
+- What to avoid before bed
+- Why this matters more on a cut (cortisol, muscle recovery)
+
+Then add:
+- A week-by-week timeline showing what to expect at weeks 2, 4, 8, and 12
+- Three rules for when motivation drops
+- What to do about social events, alcohol, and eating out
+
+Start with: # KYROO 90-DAY SUMMER SHRED
+
+Write this so someone can start tomorrow morning. No fluff. Every instruction is actionable.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    res.json({ program: message.content[0].text });
+  } catch (err) {
+    console.error('Summer shred generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate plan' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
