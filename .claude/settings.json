@@ -65,7 +65,9 @@
       "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\",\"\"password\"\":\"\"Apache2008//!!\"\",\"\"name\"\":\"\"Email Test\"\"}')",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"kamaro.business@gmail.com\"\"}')",
       "Bash(curl -s \"http://localhost:3000/api/articles?category=Trends\")",
-      "Bash(python -c \":*)"
+      "Bash(python -c \":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
