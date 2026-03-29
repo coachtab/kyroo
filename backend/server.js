@@ -573,6 +573,90 @@ Write so someone can print this, bring it to the gym, and follow it without conf
   }
 });
 
+// ---- Progress Tracker Generator ----
+app.post('/api/program/tracker', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { program_type, duration_weeks, primary_goal, tracking_experience, current_bodyweight, key_lifts } = req.body;
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are a high-performance coach who specializes in data-driven accountability systems for lifters. Write so even someone who has never tracked anything can follow every instruction.
+
+Client details:
+- Program type: ${program_type || '12-week muscle-building program'}
+- Duration: ${duration_weeks || '12'} weeks
+- Primary goal: ${primary_goal || 'muscle growth'}
+- Tracking experience: ${tracking_experience || 'beginner'}
+- Current bodyweight: ${current_bodyweight || 'not specified'}
+- Key lifts to track: ${key_lifts || 'squat, bench, deadlift, OHP'}
+
+Design a complete monitoring framework that includes:
+
+1. WEEKLY CHECK-IN TEMPLATE
+- Bodyweight tracking: how to weigh yourself accurately, when to weigh, how to handle daily fluctuations (use weekly averages)
+- Key lift numbers: how to log them meaningfully
+- Subjective scores (1-10) for: energy, recovery quality, mood, training performance
+- Sleep quality and duration tracking
+- Nutritional adherence score
+
+2. PHOTO PROGRESS PROTOCOL
+- Which angles to use (front relaxed, front flexed, side, back)
+- Lighting and background guidelines
+- Timing relative to food and water
+- How to make accurate comparisons over time
+
+3. MUSCLE MEASUREMENT PROTOCOL
+- Which body parts to measure and exactly how
+- How to measure consistently (include landmarks on the body)
+- How often to take measurements
+- How to interpret the data
+
+4. DATA-DRIVEN DECISION GUIDE
+Give specific if/then rules, for example:
+- If bodyweight hasn't moved in 2 weeks -> do X
+- If strength is dropping despite adequate calories -> do Y
+- If measurements are increasing but weight is stable -> interpret as Z
+- If subjective scores are consistently low -> do W
+Include at least 8 specific scenarios with clear actions.
+
+5. MONTHLY REVIEW FRAMEWORK
+- How to assess overall progress
+- How to identify patterns
+- How to reset targets for the next block
+
+6. PSYCHOLOGY OF TRACKING
+- How to use data to stay motivated without becoming obsessive
+- How to interpret slow progress
+- Warning signs you are over-tracking
+- How to stay consistent when numbers do not move
+
+Format this as a professional tracking system document. Use clear templates someone can print and fill in. Include example entries where helpful.
+
+Start with: # KYROO PROGRESS TRACKING SYSTEM
+
+Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    res.json({ program: message.content[0].text });
+  } catch (err) {
+    console.error('Tracker generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate tracking system' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent

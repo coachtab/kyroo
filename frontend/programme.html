@@ -24,7 +24,7 @@
     .hub__title{font-family:var(--serif);font-size:2.25rem;line-height:1.1;margin-bottom:8px}
     .hub__desc{font-size:0.8125rem;color:var(--text-3)}
 
-    .hub__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+    .hub__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
     .hub__card{background:var(--bg);padding:32px 28px;cursor:pointer;transition:all 0.3s var(--ease)}
     .hub__card:hover{background:var(--surface)}
     .hub__card-icon{font-size:1.75rem;margin-bottom:16px;opacity:0.4}
@@ -145,6 +145,12 @@
             <p class="hub__card-desc">Stuck on your lifts? Get a diagnostic and an 8-week plan to break through.</p>
             <span class="hub__card-badge">8 weeks</span>
           </div>
+          <div class="hub__card" onclick="showWizard('tracker')">
+            <div class="hub__card-icon">&#9638;</div>
+            <h3 class="hub__card-title">Progress Tracker</h3>
+            <p class="hub__card-desc">Professional tracking system for bodyweight, lifts, photos, measurements, and decisions.</p>
+            <span class="hub__card-badge">Monitoring</span>
+          </div>
           <div class="hub__card" onclick="showWizard('weakpoint')">
             <div class="hub__card-icon">&#9881;</div>
             <h3 class="hub__card-title">Weak Point Fixer</h3>
@@ -185,6 +191,69 @@
           <div class="card card--active" data-step="1"><p class="card__title">Where are you stuck?</p><p class="card__desc">Your current numbers and how long you have been stalled.</p><div class="input-group"><label class="input-label">Weeks stuck</label><input type="number" class="input" id="wp_weeks" placeholder="6"></div><div class="input-row"><div class="input-group"><label class="input-label">Squat (kg)</label><input type="number" class="input" id="wp_squat" placeholder="120"></div><div class="input-group"><label class="input-label">Bench (kg)</label><input type="number" class="input" id="wp_bench" placeholder="80"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift (kg)</label><input type="number" class="input" id="wp_deadlift" placeholder="140"></div><div class="input-group"><label class="input-label">OHP (kg)</label><input type="number" class="input" id="wp_ohp" placeholder="50"></div></div><div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
           <div class="card" data-step="2"><p class="card__title">Your current training.</p><p class="card__desc">What does your program look like right now?</p><div class="input-group"><label class="input-label">Current program</label><textarea class="textarea" id="wp_program" placeholder="e.g. Upper/Lower split, 4 days, been running it for 3 months..."></textarea></div><div class="input-group"><label class="input-label">Typical training week</label><textarea class="textarea" id="wp_week" placeholder="e.g. Monday: Squat 5x5, Bench 4x8... Tuesday: Rest..."></textarea></div><div class="input-group"><label class="input-label">Years lifting</label><input type="number" class="input" id="wp_years" placeholder="3"></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
           <div class="card" data-step="3"><p class="card__title">Your recovery.</p><p class="card__desc">Sleep, stress, nutrition - the stuff outside the gym.</p><div class="input-row"><div class="input-group"><label class="input-label">Sleep (hours/night)</label><input type="number" class="input" id="wp_sleep" placeholder="7"></div><div class="input-group"><label class="input-label">Stress level</label><div class="selector" id="wp_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Moderate</button><button type="button" class="selector__btn" data-value="high">High</button></div></div></div><div class="input-group"><label class="input-label">Main stress source</label><input type="text" class="input" id="wp_stressReason" placeholder="e.g. work, family, finances"></div><div class="input-group"><label class="input-label">Nutrition overview</label><textarea class="textarea" id="wp_nutrition" placeholder="e.g. ~2500 cal, 150g protein, 3 meals a day, no tracking..."></textarea></div><p class="error" id="errP" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" id="genPBtn" onclick="generateP()">Diagnose and fix</button></div></div>
+        </div>
+      </div>
+
+      <!-- Tracker Wizard -->
+      <div class="wizard" id="wizardTracker">
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
+        <div class="hero">
+          <p class="hero__tag">PROGRESS TRACKER</p>
+          <h1 class="hero__title">Track like a pro.</h1>
+          <p class="hero__desc">Get a complete monitoring system for your training.</p>
+        </div>
+        <div class="steps" id="stepsTracker"></div>
+        <div id="cardsTracker">
+          <div class="card card--active" data-step="1">
+            <p class="card__title">Your setup.</p>
+            <p class="card__desc">What are you tracking for?</p>
+            <div class="input-group">
+              <label class="input-label">Program type</label>
+              <div class="selector" id="wt_type">
+                <button type="button" class="selector__btn selector__btn--selected" data-value="12-week muscle-building program">Muscle building</button>
+                <button type="button" class="selector__btn" data-value="strength program">Strength</button>
+                <button type="button" class="selector__btn" data-value="fat loss program">Fat loss</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Duration (weeks)</label>
+              <div class="selector" id="wt_duration">
+                <button type="button" class="selector__btn" data-value="8">8</button>
+                <button type="button" class="selector__btn selector__btn--selected" data-value="12">12</button>
+                <button type="button" class="selector__btn" data-value="16">16</button>
+              </div>
+            </div>
+            <div class="card__actions">
+              <button type="button" class="btn btn--primary" onclick="nextT()">Continue</button>
+            </div>
+          </div>
+          <div class="card" data-step="2">
+            <p class="card__title">Your details.</p>
+            <p class="card__desc">Quick context for your tracking system.</p>
+            <div class="input-group">
+              <label class="input-label">Tracking experience</label>
+              <div class="selector" id="wt_exp">
+                <button type="button" class="selector__btn selector__btn--selected" data-value="beginner - never tracked before">Never tracked</button>
+                <button type="button" class="selector__btn" data-value="some experience with tracking">Some experience</button>
+                <button type="button" class="selector__btn" data-value="experienced tracker">Experienced</button>
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label">Current bodyweight (kg)</label>
+                <input type="number" class="input" id="wt_weight" placeholder="80">
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Key lifts to track</label>
+              <input type="text" class="input" id="wt_lifts" placeholder="e.g. squat, bench, deadlift, OHP">
+            </div>
+            <p class="error" id="errT" hidden></p>
+            <div class="card__actions">
+              <button type="button" class="btn btn--ghost" onclick="prevT()">Back</button>
+              <button type="button" class="btn btn--primary" onclick="generateT()">Build tracking system</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -286,18 +355,19 @@
     function showWizard(type) {
       document.getElementById('hubView').style.display = 'none';
       document.getElementById('resultView').style.display = 'none';
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', weakpoint: 'wizardWeakpoint' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', weakpoint: 'wizardWeakpoint' };
       const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
       initSteps(type);
     }
 
     // Steps
-    let step12 = 1, stepP = 1, stepW = 1;
+    let step12 = 1, stepP = 1, stepW = 1, stepT = 1;
 
     const wizardConfig = {
       '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
       plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
+      tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
       weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
     };
 
@@ -305,7 +375,7 @@
       const cfg = wizardConfig[type];
       const container = document.getElementById(cfg.steps);
       container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else stepW = 1;
+      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else stepW = 1;
       showCard(type, 1);
     }
 
@@ -327,6 +397,8 @@
     function prev12() { if (step12 > 1) { step12--; showCard('12week', step12); } }
     function nextP() { if (stepP < 3) { stepP++; showCard('plateau', stepP); } }
     function prevP() { if (stepP > 1) { stepP--; showCard('plateau', stepP); } }
+    function nextT() { if (stepT < 2) { stepT++; showCard('tracker', stepT); } }
+    function prevT() { if (stepT > 1) { stepT--; showCard('tracker', stepT); } }
     function nextW() { if (stepW < 3) { stepW++; showCard('weakpoint', stepW); } }
     function prevW() { if (stepW > 1) { stepW--; showCard('weakpoint', stepW); } }
 
@@ -388,6 +460,35 @@
       } catch (ex) { showError('plateau', ex.message); }
     }
 
+    // Generate tracker
+    async function generateT() {
+      const err = document.getElementById('errT');
+      err.hidden = true;
+      document.getElementById('wizardTracker').classList.remove('wizard--active');
+      document.getElementById('generatingView').hidden = false;
+      document.getElementById('genText').textContent = 'Building your tracking system...';
+
+      try {
+        const freshToken = localStorage.getItem('kyroo_token');
+        if (!freshToken) throw new Error('Please log in first.');
+        const res = await fetch(`${API}/api/program/tracker`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            program_type: sel('wt_type') || '12-week muscle-building program',
+            duration_weeks: sel('wt_duration') || '12',
+            tracking_experience: sel('wt_exp') || 'beginner',
+            current_bodyweight: val('wt_weight'),
+            key_lifts: val('wt_lifts') || 'squat, bench, deadlift, OHP',
+          }),
+        });
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        showResult(data.program);
+      } catch (ex) { showError('tracker', ex.message); }
+    }
+
     // Generate weak point fix
     async function generateW() {
       const err = document.getElementById('errW');
@@ -427,8 +528,8 @@
 
     function showError(type, msg) {
       document.getElementById('generatingView').hidden = true;
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', weakpoint: 'wizardWeakpoint' };
-      const errIds = { '12week': 'err12', plateau: 'errP', weakpoint: 'errW' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', weakpoint: 'wizardWeakpoint' };
+      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', weakpoint: 'errW' };
       document.getElementById(ids[type]).classList.add('wizard--active');
       const err = document.getElementById(errIds[type]);
       err.textContent = msg; err.hidden = false;
