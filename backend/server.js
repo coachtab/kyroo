@@ -689,7 +689,7 @@ STEP 1: CALORIE DEFICIT
 - Calculate their specific maintenance calories based on their bodyweight
 - Set their specific deficit number (300-500 below maintenance)
 - Give them their exact daily calorie target
-- Tell them exactly how to track using MyFitnessPal
+- Tell them exactly how to track using KyrooFitnessPal
 - Include the weekly weight loss target (0.5-1% bodyweight)
 - Include adjustment rules: what to do if weight stalls, what to do if losing too fast
 
