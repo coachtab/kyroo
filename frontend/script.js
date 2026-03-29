@@ -539,12 +539,7 @@ async function showAccountModal() {
     document.getElementById('activatePremiumBtn').addEventListener('click', async () => {
       hideModal('authModal');
       await new Promise(r => setTimeout(r, 300));
-      const methods = await fetch(`${API_BASE}/api/payment-methods`, { headers: authHeaders() }).then(r => r.json());
-      selectedPlan = 'yearly';
-      selectedPaymentMethodId = methods.find(m => m.is_default)?.id || null;
-      renderCheckout(methods);
-      document.getElementById('checkoutModal').hidden = false;
-      document.body.style.overflow = 'hidden';
+      showCheckoutModal();
     });
   }
 
@@ -600,9 +595,6 @@ async function showAccountModal() {
 
   <p class="section-title">Newsletter</p>
   ${nl ? '<table><tr><td>Email</td><td>' + esc(nl.email) + '</td></tr><tr><td>Subscribed</td><td>' + fmtDate(nl.subscribed_at) + '</td></tr><tr><td>Consent</td><td><span class="badge badge--yes">Given ' + fmtDate(nl.consent_date) + '</span></td></tr></table>' : '<p class="empty">No newsletter subscription.</p>'}
-
-  <p class="section-title">Payment Methods</p>
-  ${d.payment_methods.length ? '<table>' + d.payment_methods.map(pm => '<tr><td>' + esc(pm.type) + '</td><td>' + esc(pm.label) + (pm.is_default ? ' (Default)' : '') + '</td></tr>').join('') + '</table>' : '<p class="empty">No payment methods saved.</p>'}
 
   <p class="section-title">Payment History</p>
   ${d.payment_history.length ? '<table><tr style="border-bottom:1px solid #eee"><td style="font-weight:700;color:#1a1a1a">Date</td><td style="font-weight:700;color:#1a1a1a">Description</td></tr>' + d.payment_history.map(p => '<tr><td>' + fmtDate(p.created_at) + '</td><td>' + esc(p.description) + ' - ' + p.amount + ' ' + p.currency + '</td></tr>').join('') + '</table>' : '<p class="empty">No payments.</p>'}

@@ -318,71 +318,6 @@ app.get('/api/auth/me', authRequired, async (req, res) => {
 // Premium Subscription Routes
 // ========================================
 
-// ---- Payment Methods ----
-
-// GET /api/payment-methods
-app.get('/api/payment-methods', authRequired, async (req, res) => {
-  const { rows } = await pool.query(
-    'SELECT id, type, label, last_four, is_default, created_at FROM payment_methods WHERE user_id = $1 ORDER BY is_default DESC, created_at DESC',
-    [req.user.id]
-  );
-  res.json(rows);
-});
-
-// POST /api/payment-methods
-app.post('/api/payment-methods', authRequired, async (req, res) => {
-  const { type, card_number, card_expiry, card_cvc, paypal_email } = req.body;
-
-  if (!type) return res.status(400).json({ error: 'Payment type required' });
-
-  let label, lastFour;
-  if (type === 'card') {
-    if (!card_number || !card_expiry || !card_cvc) {
-      return res.status(400).json({ error: 'Card details required' });
-    }
-    const digits = card_number.replace(/\s/g, '');
-    if (digits.length < 13 || digits.length > 19) {
-      return res.status(400).json({ error: 'Invalid card number' });
-    }
-    lastFour = digits.slice(-4);
-    // Detect card brand
-    const brand = digits.startsWith('4') ? 'Visa' : digits.startsWith('5') ? 'Mastercard' : digits.startsWith('3') ? 'Amex' : 'Card';
-    label = `${brand} ending in ${lastFour}`;
-  } else if (type === 'paypal') {
-    if (!paypal_email) return res.status(400).json({ error: 'PayPal email required' });
-    label = `PayPal (${paypal_email})`;
-    lastFour = null;
-  } else if (type === 'sepa') {
-    const { iban } = req.body;
-    if (!iban) return res.status(400).json({ error: 'IBAN required' });
-    lastFour = iban.replace(/\s/g, '').slice(-4);
-    label = `SEPA ending in ${lastFour}`;
-  } else {
-    return res.status(400).json({ error: 'Invalid payment type' });
-  }
-
-  try {
-    // If first payment method, make it default
-    const existing = await pool.query('SELECT COUNT(*) as count FROM payment_methods WHERE user_id = $1', [req.user.id]);
-    const isDefault = parseInt(existing.rows[0].count) === 0;
-
-    const { rows } = await pool.query(
-      'INSERT INTO payment_methods (user_id, type, label, last_four, is_default) VALUES ($1, $2, $3, $4, $5) RETURNING id, type, label, last_four, is_default',
-      [req.user.id, type, label, lastFour, isDefault]
-    );
-    res.status(201).json(rows[0]);
-  } catch (err) {
-    console.error('Add payment method error:', err);
-    res.status(500).json({ error: 'Failed to add payment method' });
-  }
-});
-
-// DELETE /api/payment-methods/:id
-app.delete('/api/payment-methods/:id', authRequired, async (req, res) => {
-  await pool.query('DELETE FROM payment_methods WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
-  res.json({ success: true });
-});
-
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
@@ -488,7 +423,7 @@ app.post('/api/premium/cancel', authRequired, async (req, res) => {
 // GET /api/payments
 app.get('/api/payments', authRequired, async (req, res) => {
   const { rows } = await pool.query(
-    'SELECT p.id, p.amount, p.currency, p.description, p.status, p.created_at, pm.label as payment_method FROM payments p LEFT JOIN payment_methods pm ON p.payment_method_id = pm.id WHERE p.user_id = $1 ORDER BY p.created_at DESC',
+    'SELECT id, amount, currency, description, status, created_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC',
     [req.user.id]
   );
   res.json(rows);
@@ -501,10 +436,9 @@ app.get('/api/payments', authRequired, async (req, res) => {
 // GET /api/account/data-export - Art. 15 & 20 DSGVO (Auskunftsrecht & Datenportabilitaet)
 app.get('/api/account/data-export', authRequired, async (req, res) => {
   try {
-    const [user, payments, paymentMethods, subscriber] = await Promise.all([
+    const [user, payments, subscriber] = await Promise.all([
       pool.query('SELECT id, email, name, is_premium, email_verified, premium_started_at, premium_expires_at, created_at FROM users WHERE id = $1', [req.user.id]),
       pool.query('SELECT amount, currency, description, status, created_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]),
-      pool.query('SELECT type, label, last_four, is_default, created_at FROM payment_methods WHERE user_id = $1', [req.user.id]),
       pool.query('SELECT email, subscribed_at, consent_given, consent_date FROM subscribers WHERE email = $1', [req.user.email]),
     ]);
 
@@ -514,7 +448,6 @@ app.get('/api/account/data-export', authRequired, async (req, res) => {
       contact: 'info@kyroo.de',
       user_data: user.rows[0] || null,
       payment_history: payments.rows,
-      payment_methods: paymentMethods.rows,
       newsletter_subscription: subscriber.rows[0] || null,
     });
   } catch (err) {
@@ -530,7 +463,6 @@ app.delete('/api/account', authRequired, async (req, res) => {
 
     // Delete in order (foreign key constraints)
     await pool.query('DELETE FROM payments WHERE user_id = $1', [userId]);
-    await pool.query('DELETE FROM payment_methods WHERE user_id = $1', [userId]);
     await pool.query('DELETE FROM subscribers WHERE email = $1', [email]);
     await pool.query('DELETE FROM users WHERE id = $1', [userId]);
 
