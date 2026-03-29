@@ -459,6 +459,65 @@ Make this a document someone can print, bring to the gym, and follow from day on
   }
 });
 
+// ---- Plateau Breaker Generator ----
+app.post('/api/programme/plateau', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { weeks_stuck, squat, bench, deadlift, ohp, current_programme, training_week, sleep_hours, stress_level, stress_reason, nutrition, years_lifting } = req.body;
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const prompt = `You are a strength coach who specialises in diagnosing and fixing training plateaus in intermediate lifters. Write for someone who may not know advanced terminology - explain everything clearly.
+
+Client situation:
+- Stuck on lifts for ${weeks_stuck || 'several'} weeks despite consistent training
+- Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
+- Current programme: ${current_programme || 'Not specified'}
+- Typical training week: ${training_week || 'Not specified'}
+- Sleep: ${sleep_hours || 'unknown'} hours per night
+- Stress: ${stress_level || 'moderate'} due to ${stress_reason || 'general life'}
+- Nutrition: ${nutrition || 'Not specified'}
+- Lifting experience: ${years_lifting || 'unknown'} years
+
+Conduct a thorough analysis of every possible reason they may have plateaued across:
+1. Programming (volume, intensity, frequency, exercise selection, progression model)
+2. Recovery (sleep, stress, deload frequency)
+3. Nutrition (calories, protein, timing)
+4. Training psychology (staleness, motivation, effort)
+
+Then build a detailed 8-week plan specifically designed to break through each stall, with:
+- Weekly targets
+- Programming adjustments
+- Technique focus points
+- Lifestyle changes
+- Clear explanation of WHY each change is being made
+
+Prioritise the most likely causes based on the information given.
+
+Start with: # KYROO PLATEAU BREAKER - 8-WEEK PLAN
+
+Write this so a beginner can understand every instruction. No unexplained jargon.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    res.json({ programme: message.content[0].text });
+  } catch (err) {
+    console.error('Plateau generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate plan' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
