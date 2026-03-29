@@ -59,7 +59,13 @@
       "Bash(bash smoke-test.sh)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''''Explore section:'''', d[''''sections''''].get\\(''''explore'''',{}\\).get\\(''''title''''\\)\\); print\\(''''Categories:'''', len\\(d.get\\(''''categories'''',[]\\)\\)\\)\")",
       "Bash(curl -s http://localhost:3000/script.js)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"verify-test@test.com\"\",\"\"password\"\":\"\"test123\"\",\"\"name\"\":\"\"Test\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"link-test@test.com\"\",\"\"password\"\":\"\"test123\"\",\"\"name\"\":\"\"Link Test\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\",\"\"password\"\":\"\"Apache2008//!!\"\",\"\"name\"\":\"\"Email Test\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/forgot-password -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"kamaro.business@gmail.com\"\"}')",
+      "Bash(curl -s \"http://localhost:3000/api/articles?category=Trends\")",
+      "Bash(python -c \":*)"
     ]
   }
 }

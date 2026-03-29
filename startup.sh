@@ -11,7 +11,10 @@ echo ""
 
 # -- Load .env --
 if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+    while IFS='=' read -r key value; do
+        [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+        export "$key=$value"
+    done < .env
 fi
 
 # -- Check Docker --

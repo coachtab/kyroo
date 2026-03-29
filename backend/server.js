@@ -30,12 +30,27 @@ const mailTransport = nodemailer.createTransport({
   },
 });
 
+let smtpVerified = false;
+let smtpWorks = false;
+
 async function sendEmail(to, subject, html) {
-  // If SMTP not configured, log to console instead
+  // Extract any verification/reset links for console output
+  const linkMatch = html.match(/href="(http[^"]+(?:verify|reset)[^"]*)"/);
+  const link = linkMatch ? linkMatch[1] : null;
+
   if (!process.env.SMTP_USER) {
     console.log(`[EMAIL] To: ${to} | Subject: ${subject}`);
+    if (link) console.log(`[EMAIL] Link: ${link}`);
     return;
   }
+
+  // Only try SMTP if it has not already failed
+  if (smtpVerified && !smtpWorks) {
+    console.log(`[EMAIL] SMTP unavailable. To: ${to} | Subject: ${subject}`);
+    if (link) console.log(`[EMAIL] Link: ${link}`);
+    return;
+  }
+
   try {
     await mailTransport.sendMail({
       from: `"KYROO" <${process.env.SMTP_USER}>`,
@@ -43,9 +58,14 @@ async function sendEmail(to, subject, html) {
       subject,
       html,
     });
+    smtpVerified = true;
+    smtpWorks = true;
     console.log(`[EMAIL] Sent to ${to}`);
   } catch (err) {
-    console.log(`[EMAIL] Failed to send to ${to}: ${err.code || err.message}`);
+    smtpVerified = true;
+    smtpWorks = false;
+    console.log(`[EMAIL] SMTP failed (${err.code}). To: ${to} | Subject: ${subject}`);
+    if (link) console.log(`[EMAIL] Link: ${link}`);
   }
 }
 

@@ -215,6 +215,18 @@ input { font-family: inherit; }
   font-style: italic;
 }
 
+.hero__cursor {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 200;
+  animation: blink 0.8s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 .hero__subtitle {
   font-size: 0.9375rem;
   color: var(--text-2);

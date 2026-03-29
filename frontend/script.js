@@ -52,9 +52,51 @@ function renderSectionHeader(container, section) {
 function renderHero(data) {
   const hero = data.sections.hero;
   const titleEl = document.getElementById('heroTitle');
-  titleEl.innerHTML = `<span class="hero__title--accent">${esc(hero.title)}</span>`;
+
+  // Typewriter phrases from DB
+  const phrases = (data.settings && data.settings.hero_typewriter)
+    ? data.settings.hero_typewriter.split('|')
+    : [hero.title];
+
+  titleEl.innerHTML = `<span class="hero__title--accent" id="heroTypewriter"></span><span class="hero__cursor">|</span>`;
+  startTypewriter(document.getElementById('heroTypewriter'), phrases);
+
   document.getElementById('heroSubtitle').textContent = hero.description;
   updateHeroCTAs();
+}
+
+function startTypewriter(el, phrases) {
+  let phraseIdx = 0;
+  let charIdx = 0;
+  let deleting = false;
+  let pauseTimer = null;
+
+  function tick() {
+    const current = phrases[phraseIdx];
+
+    if (!deleting) {
+      charIdx++;
+      el.textContent = current.slice(0, charIdx);
+      if (charIdx === current.length) {
+        // Pause at full phrase
+        pauseTimer = setTimeout(() => { deleting = true; tick(); }, 2500);
+        return;
+      }
+      setTimeout(tick, 70 + Math.random() * 40);
+    } else {
+      charIdx--;
+      el.textContent = current.slice(0, charIdx);
+      if (charIdx === 0) {
+        deleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        setTimeout(tick, 400);
+        return;
+      }
+      setTimeout(tick, 35);
+    }
+  }
+
+  tick();
 }
 
 function renderAbout(data) {
@@ -247,6 +289,9 @@ function renderFooterLinks(data) {
         if (l.url && l.url.startsWith('category:')) {
           return `<a href="javascript:void(0)" class="footer__link footer__category-link" data-category="${esc(l.url.slice(9))}">${esc(l.label)}</a>`;
         }
+        if (l.url && l.url.startsWith('#')) {
+          return `<a href="javascript:void(0)" class="footer__link footer__scroll-link" data-target="${esc(l.url.slice(1))}">${esc(l.label)}</a>`;
+        }
         return `<a href="${esc(l.url)}" class="footer__link">${esc(l.label)}</a>`;
       }).join('')}
     </div>
@@ -262,9 +307,19 @@ function renderFooterLinks(data) {
     });
   });
 
-  // Wire category links
+  // Wire platform scroll links
+  container.querySelectorAll('.footer__scroll-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      scrollToSection(link.dataset.target);
+    });
+  });
+
+  // Wire category links - filter and scroll to articles
   container.querySelectorAll('.footer__category-link').forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       filterArticles(link.dataset.category);
     });
   });
@@ -591,7 +646,21 @@ async function doSignup(name, email, password) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Signup failed');
   setAuth(data.user, data.token);
-  hideModal('authModal');
+
+  // Show verification prompt
+  document.getElementById('authModalContent').innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <h2 class="modal__title">Welcome${name ? ', ' + esc(name) : ''}.</h2>
+      <p style="color:var(--text-2);font-size:0.875rem;margin-bottom:24px">Your account is ready. We sent a verification link to <strong>${esc(email)}</strong>.</p>
+      <p style="color:var(--text-3);font-size:0.8125rem;margin-bottom:32px">Check your inbox and click the link to verify your email. You can use KYROO in the meantime.</p>
+      <button type="button" class="btn btn--primary" id="signupDoneBtn">Start exploring</button>
+    </div>
+  `;
+  document.getElementById('signupDoneBtn').addEventListener('click', () => {
+    hideModal('authModal');
+    location.reload();
+  });
+
   loadArticles();
 }
 
@@ -1000,7 +1069,7 @@ function updateHeroCTAs() {
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (!el) return;
-  const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 72;
+  const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 60;
   window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
 }
 
@@ -1009,13 +1078,20 @@ let activeFilter = null;
 
 async function filterArticles(category) {
   activeFilter = category;
+
+  // Scroll to articles FIRST
+  const el = document.getElementById('articles');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Then fetch and render
   try {
     const url = category ? `${API_BASE}/api/articles?category=${encodeURIComponent(category)}` : `${API_BASE}/api/articles`;
     const res = await fetch(url, { headers: authHeaders() });
     const articles = await res.json();
     renderArticles(articles);
     updateFilterBar();
-    scrollToSection('articles');
   } catch (err) {
     console.error('Failed to filter articles:', err);
   }
@@ -1095,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
-        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 72;
+        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 60;
         window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
       }
     });
