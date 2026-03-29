@@ -1059,7 +1059,7 @@ function renderTrainTogether(locations, checkins) {
   const grid = document.getElementById('trainGrid');
   if (!grid) return;
 
-  const activities = ['Calisthenics', 'Running', 'Yoga', 'Just hanging'];
+  const activities = ['Workout', 'Running', 'Mobility'];
 
   grid.innerHTML = locations.map(loc => {
     const locCheckins = checkins.filter(c => c.location === loc.slug);

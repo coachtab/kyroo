@@ -79,7 +79,11 @@
       "Bash(curl -s http://93.90.201.90:3001/api/articles)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de)",
       "Bash(curl -s -X POST https://kyroo.de/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"okamara@gmail.com\"\",\"\"password\"\":\"\"Apache2008//!!\"\"}')",
-      "Bash(curl -s -X POST https://kyroo.de/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"okamara@gmail.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"KyrooAdmin2026\"\"\"\"}')"
+      "Bash(curl -s -X POST https://kyroo.de/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"okamara@gmail.com\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"KyrooAdmin2026\"\"\"\"}')",
+      "Bash(curl -s https://kyroo.de/api/locations)",
+      "Bash(python -c \"import sys,json; locs=json.load\\(sys.stdin\\); [print\\(f''''  {l[\"\"short_name\"\"]}''''\\) for l in locs]\")",
+      "Bash(python -c \"import sys,json; print\\(len\\(json.load\\(sys.stdin\\)\\), ''''locations''''\\)\")",
+      "Bash(curl -s https://kyroo.de/api/checkins)"
     ]
   }
 }
