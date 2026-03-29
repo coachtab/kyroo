@@ -515,9 +515,12 @@ async function showAccountModal() {
     document.getElementById('cancelPremiumBtn').onclick = cancelPremium;
   } else {
     actions.innerHTML = `
-      <button type="button" class="btn btn--primary btn--full" id="activatePremiumBtn">Go Premium - starting at 6 EUR/month</button>
+      <button type="button" class="btn btn--primary btn--full" id="activatePremiumBtn">Upgrade to Premium</button>
     `;
-    document.getElementById('activatePremiumBtn').onclick = () => { hideModal('authModal'); activatePremium(); };
+    document.getElementById('activatePremiumBtn').addEventListener('click', () => {
+      hideModal('authModal');
+      setTimeout(() => showCheckoutModal(), 200);
+    });
   }
 
   // Logout + DSGVO
