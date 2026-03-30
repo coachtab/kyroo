@@ -4,189 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KYROO Admin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
-    :root {
-      --bg: #0a0a0a; --surface: #111; --surface-2: #181818; --surface-3: #1f1f1f;
-      --border: rgba(255,255,255,0.07); --text: #ede8e0; --text-2: #a09a90; --text-3: #6b665e;
-      --accent: #d4816b; --accent-light: #e09880; --accent-subtle: rgba(212,129,107,0.08);
-      --accent-2: #a3b18a; --red: #e57373;
-      --font: 'Space Grotesk', sans-serif; --font-d: 'DM Serif Display', serif;
-      --radius: 10px;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
-    a { color: var(--accent); text-decoration: none; }
+    :root { --bg:#060606; --surface:#0d0d0d; --border:rgba(255,255,255,0.06); --text:#eae5de; --text-2:#7a756e; --text-3:#3d3a37; --accent:#c27a56; --sage:#7d8c68; --sans:'Space Grotesk',sans-serif; --serif:'DM Serif Display',serif; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:var(--sans); background:var(--bg); color:var(--text); line-height:1.6; }
+    a { color:inherit; text-decoration:none; }
 
-    .admin { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
-    .admin__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .admin__logo { font-family: var(--font-d); font-size: 1.5rem; color: var(--text); }
-    .admin__logo span { color: var(--accent); font-size: 0.75rem; font-family: var(--font); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-left: 10px; vertical-align: middle; }
-    .admin__user { font-size: 0.875rem; color: var(--text-2); }
-    .admin__nav { display: flex; align-items: center; gap: 14px; }
-    .admin__back { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; color: var(--text-3); border: 1px solid var(--border); transition: all 0.15s; }
-    .admin__back:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+    .page { max-width:800px; margin:0 auto; padding:40px 24px 80px; }
+
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:48px; }
+    .header__left { display:flex; align-items:center; gap:14px; }
+    .header__back { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:8px; color:var(--text-3); transition:all 0.15s; }
+    .header__back:hover { color:var(--text); border-color:rgba(255,255,255,0.12); }
+    .header__logo { font-family:var(--serif); font-size:1.125rem; letter-spacing:0.1em; }
+    .header__logo span { font-family:var(--sans); font-size:0.625rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent); margin-left:8px; }
+    .header__user { font-size:0.75rem; color:var(--text-3); }
 
     /* Stats */
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-    .stat__value { font-family: var(--font-d); font-size: 2rem; }
-    .stat__label { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:48px; }
+    .stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; text-align:center; }
+    .stat__value { font-family:var(--serif); font-size:2.5rem; line-height:1; margin-bottom:6px; }
+    .stat__label { font-size:0.625rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-3); }
 
-    /* Toolbar */
-    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .toolbar__title { font-family: var(--font-d); font-size: 1.25rem; }
+    /* Section */
+    .section-title { font-size:0.5625rem; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
 
-    .admin__links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
-    .admin__link { display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; transition: all 0.2s; color: inherit; text-decoration: none; }
-    .admin__link:hover { border-color: rgba(255,255,255,0.12); }
-    .admin__link-icon { font-size: 1.25rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(194,122,86,0.06); border-radius: 10px; flex-shrink: 0; }
-    .admin__link strong { font-size: 0.875rem; display: block; }
-    .admin__link p { font-size: 0.75rem; color: var(--text-3); margin: 0; }
-    .toolbar__actions { display: flex; gap: 8px; align-items: center; }
-    .toolbar__search { padding: 8px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.8125rem; outline: none; width: 220px; }
-    .toolbar__search:focus { border-color: var(--accent); }
-    .toolbar__search::placeholder { color: var(--text-3); }
-
-    /* Table */
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-    .table td { padding: 14px 12px; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: top; }
-    .table tr:hover td { background: var(--surface); }
-
-    .badge { display: inline-block; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; }
-    .badge--free { color: var(--accent-2); background: rgba(163,177,138,0.12); }
-    .badge--premium { color: var(--accent); background: var(--accent-subtle); }
-
-    .table__actions { display: flex; gap: 8px; }
-    .table__btn { font-family: var(--font); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-2); cursor: pointer; }
-    .table__btn:hover { border-color: var(--accent); color: var(--accent); }
-    .table__btn--del:hover { border-color: var(--red); color: var(--red); }
-
-    /* Buttons */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font); font-size: 0.875rem; font-weight: 600; padding: 10px 20px; border-radius: 999px; border: none; cursor: pointer; transition: all 0.2s; }
-    .btn--primary { background: var(--accent); color: #fff; }
-    .btn--primary:hover { background: var(--accent-light); }
-    .btn--outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn--outline:hover { border-color: var(--accent); }
-    .btn--full { width: 100%; }
-    .btn--small { font-size: 0.8125rem; padding: 8px 14px; }
-    .btn--ai { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
-    .btn--ai:hover { opacity: 0.9; }
-
-    /* Form */
-    .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .form-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; max-width: 600px; width: 100%; max-height: calc(100vh - 48px); overflow-y: auto; position: relative; }
-    .form-panel[hidden] { display: none; }
-    .form__title { font-family: var(--font-d); font-size: 1.375rem; margin-bottom: 20px; }
-    .form__close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--text-3); background: var(--surface-3); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
-    .form__group { margin-bottom: 14px; }
-    .form__label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px; }
-    .form__input, .form__select, .form__textarea { width: 100%; padding: 12px 14px; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.9375rem; outline: none; }
-    .form__input:focus, .form__select:focus, .form__textarea:focus { border-color: var(--accent); }
-    .form__textarea { min-height: 200px; resize: vertical; line-height: 1.6; }
-    .form__select { appearance: none; cursor: pointer; }
-    .form__row { display: flex; gap: 12px; }
-    .form__row > .form__group { flex: 1; }
-    .form__toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.875rem; }
-    .form__toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
-    .form__error { font-size: 0.8125rem; color: var(--red); padding: 8px 12px; background: rgba(229,115,115,0.08); border-radius: 6px; margin-bottom: 14px; }
-    .form__actions { display: flex; gap: 10px; margin-top: 20px; }
-
-    /* AI Generator */
-    .ai-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
-    .ai-section__header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-    .ai-section__title { font-family: var(--font-d); font-size: 1.125rem; }
-    .ai-section__badge { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 999px; background: linear-gradient(135deg, var(--accent-subtle), rgba(163,177,138,0.1)); color: var(--accent); }
-    .ai-section__form { display: flex; flex-direction: column; gap: 12px; }
-    .ai-section__row { display: flex; gap: 12px; }
-    .ai-section__row > * { flex: 1; }
-    .ai-section__prompt { width: 100%; padding: 14px; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.9375rem; outline: none; resize: vertical; min-height: 80px; }
-    .ai-section__prompt:focus { border-color: var(--accent); }
-    .ai-section__prompt::placeholder { color: var(--text-3); }
-    .ai-section__status { font-size: 0.8125rem; color: var(--text-3); }
-    .ai-section__status--error { color: var(--red); }
-    .ai-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 640px) { .ai-section__row { flex-direction: column; } }
-
-    /* Image upload */
-    .image-upload__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-bottom: 8px; }
-    .image-upload__item { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
-    .image-upload__item img { width: 100%; height: 100%; object-fit: cover; }
-    .image-upload__item-remove { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: #fff; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; }
-    .image-upload__item:hover .image-upload__item-remove { opacity: 1; }
-    .image-upload__item-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 4px 6px; background: rgba(0,0,0,0.6); }
-    .image-upload__item-caption input { width: 100%; border: none; background: transparent; color: #fff; font-size: 10px; font-family: var(--font); outline: none; }
-    .image-upload__item-caption input::placeholder { color: rgba(255,255,255,0.5); }
-    .image-upload__add { display: flex; align-items: center; justify-content: center; padding: 10px; border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; transition: border-color 0.15s; }
-    .image-upload__add:hover { border-color: var(--accent); }
-    .image-upload__add span { font-size: 0.75rem; color: var(--text-3); }
-    .image-upload__add:hover span { color: var(--accent); }
-
-    /* Video source tabs */
-    .video-source-tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--surface-3); border-radius: var(--radius); padding: 3px; }
-    .video-src-btn { flex: 1; padding: 7px 10px; font-family: var(--font); font-size: 0.75rem; font-weight: 600; border: none; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; transition: all 0.15s; }
-    .video-src-btn--active { background: var(--surface); color: var(--text); }
-
-    /* Camera */
-    .camera-container { text-align: center; }
-    .camera-container video { width: 100%; max-height: 220px; border-radius: var(--radius); background: #000; margin-bottom: 10px; }
-    .camera-controls { display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .camera-timer { font-size: 0.875rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-2); min-width: 80px; }
-    .camera-recording .camera-timer { color: var(--red); }
-
-    /* URL input */
-    .video-url-input { display: flex; gap: 8px; padding: 12px 0; }
-    .video-url-input .form__input { flex: 1; }
-
-    /* Video upload */
-    .video-upload { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
-    .video-upload:hover { border-color: var(--accent); }
-    .video-upload__input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .video-upload__label { font-size: 0.875rem; color: var(--text-3); }
-    .video-upload__label strong { color: var(--accent); }
-    .video-upload--has-video { border-style: solid; border-color: var(--accent-subtle); }
-    .video-preview { margin-top: 12px; }
-    .video-preview video { width: 100%; max-height: 240px; border-radius: var(--radius); background: #000; }
-    .video-preview__info { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 0.75rem; color: var(--text-3); }
-    .video-preview__remove { font-family: var(--font); font-size: 0.75rem; font-weight: 600; color: var(--red); background: none; border: none; cursor: pointer; }
-    .video-upload__error { font-size: 0.8125rem; color: var(--red); margin-top: 8px; }
-    .video-upload__progress { margin-top: 8px; }
-    .video-upload__progress-bar { height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
-    .video-upload__progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+    /* Links grid */
+    .links { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:48px; }
+    .link-card { display:flex; align-items:center; gap:16px; padding:22px 20px; background:var(--surface); border:1px solid var(--border); border-radius:14px; transition:all 0.2s; }
+    .link-card:hover { border-color:rgba(255,255,255,0.1); transform:translateY(-1px); }
+    .link-card__icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:12px; font-size:1.25rem; flex-shrink:0; }
+    .link-card__icon--accent { background:rgba(194,122,86,0.08); }
+    .link-card__icon--sage { background:rgba(125,140,104,0.08); }
+    .link-card__icon--neutral { background:rgba(255,255,255,0.03); }
+    .link-card__title { font-size:0.875rem; font-weight:600; margin-bottom:2px; }
+    .link-card__desc { font-size:0.6875rem; color:var(--text-3); }
 
     /* Login */
-    .login { max-width: 380px; margin: 80px auto; padding: 24px; }
-    .login__title { font-family: var(--font-d); font-size: 1.75rem; margin-bottom: 6px; text-align: center; }
-    .login__sub { font-size: 0.875rem; color: var(--text-2); text-align: center; margin-bottom: 24px; }
+    .login { max-width:340px; margin:80px auto; text-align:center; }
+    .login__title { font-family:var(--serif); font-size:1.5rem; margin-bottom:6px; }
+    .login__sub { font-size:0.8125rem; color:var(--text-2); margin-bottom:28px; }
+    .login form { display:flex; flex-direction:column; gap:10px; }
+    .input { padding:13px 16px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--sans); font-size:0.875rem; outline:none; }
+    .input:focus { border-color:var(--accent); }
+    .input::placeholder { color:var(--text-3); }
+    .btn { padding:13px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-family:var(--sans); font-size:0.8125rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
+    .btn:hover { background:#d4906c; }
+    .error { font-size:0.8125rem; color:#d46b6b; padding:8px 12px; background:rgba(212,107,107,0.06); border-radius:8px; }
+    .back-link { display:inline-block; margin-top:20px; font-size:0.75rem; color:var(--text-3); }
+    .back-link:hover { color:var(--text); }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .table { font-size: 0.8125rem; }
-      .form__row { flex-direction: column; }
-    }
+    @media(max-width:640px) { .stats{grid-template-columns:1fr} .links{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+  <div class="page" id="app"></div>
   <script>
     const API = window.location.origin;
     let token = localStorage.getItem('kyroo_token');
     let user = null;
 
-    function headers() {
-      return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-    }
-
+    function headers() { return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }; }
     function esc(s) { const el = document.createElement('span'); el.textContent = s || ''; return el.innerHTML; }
 
-    // ---- Check auth ----
     async function init() {
       if (!token) return renderLogin();
       try {
@@ -194,28 +76,25 @@
         if (!res.ok) throw new Error();
         user = await res.json();
         if (!user.is_admin) {
-          document.getElementById('app').innerHTML = '<div class="login"><h2 class="login__title">Access Denied</h2><p class="login__sub">Admin privileges required.</p><a href="/">Back to KYROO</a></div>';
+          document.getElementById('app').innerHTML = '<div class="login"><p class="login__title">Access Denied</p><p class="login__sub">Admin privileges required.</p><a href="/" class="back-link">Back to KYROO</a></div>';
           return;
         }
         renderDashboard();
-      } catch (e) {
-        renderLogin();
-      }
+      } catch (e) { renderLogin(); }
     }
 
-    // ---- Login ----
     function renderLogin() {
       document.getElementById('app').innerHTML = `
         <div class="login">
-          <h2 class="login__title">KYROO Admin</h2>
+          <p class="login__title">KYROO Admin</p>
           <p class="login__sub">Log in with your admin account</p>
-          <form id="loginForm" style="display:flex;flex-direction:column;gap:12px">
-            <input type="email" class="form__input" placeholder="Email" required id="email">
-            <input type="password" class="form__input" placeholder="Password" required id="password">
-            <div class="form__error" id="loginErr" hidden></div>
-            <button type="submit" class="btn btn--primary btn--full">Log in</button>
+          <form id="loginForm">
+            <input type="email" class="input" placeholder="Email" required id="email">
+            <input type="password" class="input" placeholder="Password" required id="password">
+            <div class="error" id="loginErr" hidden></div>
+            <button type="submit" class="btn">Log in</button>
           </form>
-          <p style="text-align:center;margin-top:16px"><a href="/">Back to KYROO</a></p>
+          <a href="/" class="back-link">Back to KYROO</a>
         </div>
       `;
       document.getElementById('loginForm').onsubmit = async (e) => {
@@ -230,665 +109,101 @@
           const data = await res.json();
           if (!res.ok) throw new Error(data.error);
           if (!data.user.is_admin) throw new Error('Admin privileges required');
-          token = data.token;
-          user = data.user;
+          token = data.token; user = data.user;
           localStorage.setItem('kyroo_token', token);
           renderDashboard();
-        } catch (ex) {
-          err.textContent = ex.message;
-          err.hidden = false;
-        }
+        } catch (ex) { err.textContent = ex.message; err.hidden = false; }
       };
     }
 
-    // ---- Dashboard ----
     async function renderDashboard() {
       const stats = await fetch(`${API}/api/admin/stats`, { headers: headers() }).then(r => r.json());
 
       document.getElementById('app').innerHTML = `
-        <div class="admin">
-          <div class="admin__header">
-            <div class="admin__nav">
-              <a href="/" class="admin__back" title="Back to site"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></a>
-              <a href="/admin.html" class="admin__logo">KYROO <span>Admin</span></a>
-            </div>
-            <div class="admin__user">${esc(user.name || user.email)}</div>
+        <div class="header">
+          <div class="header__left">
+            <a href="/" class="header__back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></a>
+            <span class="header__logo">KYROO <span>Admin</span></span>
           </div>
+          <span class="header__user">${esc(user.name || user.email)}</span>
+        </div>
 
-          <div class="stats">
-            <div class="stat"><div class="stat__value">${stats.total_users}</div><div class="stat__label">Users</div></div>
-            <div class="stat"><div class="stat__value">${stats.premium_users}</div><div class="stat__label">Premium</div></div>
-            <div class="stat"><div class="stat__value">${stats.total_subscribers}</div><div class="stat__label">Subscribers</div></div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat__value">${stats.total_users}</div>
+            <div class="stat__label">Users</div>
           </div>
-
-          <div class="toolbar">
-            <div class="toolbar__title">Quick Links</div>
+          <div class="stat">
+            <div class="stat__value">${stats.premium_users}</div>
+            <div class="stat__label">Premium</div>
           </div>
-
-          <div class="admin__links">
-            <a href="/program.html" class="admin__link">
-              <span class="admin__link-icon">&#9776;</span>
-              <div>
-                <strong>Programs</strong>
-                <p>7 AI training tools</p>
-              </div>
-            </a>
-            <a href="/" class="admin__link">
-              <span class="admin__link-icon">&#9728;</span>
-              <div>
-                <strong>Main Site</strong>
-                <p>kyroo.de</p>
-              </div>
-            </a>
-            <a href="/api-docs/" class="admin__link">
-              <span class="admin__link-icon">&#9638;</span>
-              <div>
-                <strong>API Docs</strong>
-                <p>Swagger UI</p>
-              </div>
-            </a>
-            <a href="https://dashboard.stripe.com" target="_blank" class="admin__link">
-              <span class="admin__link-icon">&#9733;</span>
-              <div>
-                <strong>Stripe</strong>
-                <p>Payments dashboard</p>
-              </div>
-            </a>
+          <div class="stat">
+            <div class="stat__value">${stats.total_subscribers}</div>
+            <div class="stat__label">Subscribers</div>
           </div>
         </div>
-        <div id="formContainer"></div>
-      `;
 
-    }
+        <p class="section-title">Manage</p>
+        <div class="links">
+          <a href="/program.html" class="link-card">
+            <div class="link-card__icon link-card__icon--accent">&#9776;</div>
+            <div>
+              <p class="link-card__title">Programs</p>
+              <p class="link-card__desc">7 AI training tools for premium users</p>
+            </div>
+          </a>
+          <a href="/" class="link-card">
+            <div class="link-card__icon link-card__icon--sage">&#9728;</div>
+            <div>
+              <p class="link-card__title">Main Site</p>
+              <p class="link-card__desc">kyroo.de</p>
+            </div>
+          </a>
+        </div>
 
-    // ---- AI Article Modal ----
-    function showAIModal() {
-      document.getElementById('formContainer').innerHTML = `
-        <div class="form-overlay" id="aiOverlay">
-          <div class="form-panel">
-            <button type="button" class="form__close" id="aiClose">&times;</button>
-            <h3 class="form__title">Generate with AI</h3>
-            <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:20px">Describe what you want to write about. Claude will generate a full article you can review before publishing.</p>
-            <div class="form__group">
-              <label class="form__label">Prompt</label>
-              <textarea class="form__textarea" id="aiPrompt" placeholder="e.g. Top 5 AI tools for freelancers in Berlin..." style="min-height:100px"></textarea>
+        <p class="section-title">Tools</p>
+        <div class="links">
+          <a href="https://dashboard.stripe.com/test/payments" target="_blank" class="link-card">
+            <div class="link-card__icon link-card__icon--accent">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
-            <div class="form__row">
-              <div class="form__group">
-                <label class="form__label">Category</label>
-                <select class="form__select" id="aiCategory">
-                  <option value="">Auto-detect</option>
-                  <option value="AI">AI</option>
-                  <option value="Fitness">Fitness</option>
-                  <option value="Trends">Trends</option>
-                  <option value="Recommendations">Recommendations</option>
-                  <option value="Lifestyle">Lifestyle</option>
-                  <option value="Future Tools">Future Tools</option>
-                </select>
-              </div>
-              <div class="form__group">
-                <label class="form__label">Access</label>
-                <label class="form__toggle" style="margin-top:8px">
-                  <input type="checkbox" id="aiPremium">
-                  <span>Premium only</span>
-                </label>
-              </div>
+            <div>
+              <p class="link-card__title">Stripe Payments</p>
+              <p class="link-card__desc">View transactions, refunds, customers</p>
             </div>
-            <div class="form__error" id="aiError" hidden></div>
-            <div class="ai-section__status" id="aiStatus" hidden></div>
-            <div class="form__actions">
-              <button type="button" class="btn btn--ai" id="aiGenerateBtn">Generate article</button>
-              <button type="button" class="btn btn--outline" id="aiCancelBtn">Cancel</button>
+          </a>
+          <a href="https://dashboard.stripe.com/test/customers" target="_blank" class="link-card">
+            <div class="link-card__icon link-card__icon--neutral">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
-          </div>
+            <div>
+              <p class="link-card__title">Stripe Customers</p>
+              <p class="link-card__desc">Manage subscribers and billing</p>
+            </div>
+          </a>
+          <a href="/api-docs/" class="link-card">
+            <div class="link-card__icon link-card__icon--neutral">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div>
+              <p class="link-card__title">API Docs</p>
+              <p class="link-card__desc">Swagger documentation</p>
+            </div>
+          </a>
+          <a href="https://dashboard.stripe.com/test/revenue" target="_blank" class="link-card">
+            <div class="link-card__icon link-card__icon--sage">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            </div>
+            <div>
+              <p class="link-card__title">Revenue</p>
+              <p class="link-card__desc">MRR, growth, analytics</p>
+            </div>
+          </a>
         </div>
       `;
-
-      document.getElementById('aiClose').onclick = closeForm;
-      document.getElementById('aiCancelBtn').onclick = closeForm;
-      document.getElementById('aiOverlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeForm();
-      });
-      document.getElementById('aiGenerateBtn').onclick = generateWithAI;
-    }
-
-    async function generateWithAI() {
-      const prompt = document.getElementById('aiPrompt').value.trim();
-      if (!prompt) return;
-
-      const btn = document.getElementById('aiGenerateBtn');
-      const status = document.getElementById('aiStatus');
-      const errEl = document.getElementById('aiError');
-      errEl.hidden = true;
-      btn.disabled = true;
-      btn.textContent = 'Generating...';
-      status.hidden = false;
-      status.innerHTML = '<span class="ai-spinner"></span>AI is writing your article...';
-
-      try {
-        const res = await fetch(`${API}/api/admin/generate`, {
-          method: 'POST',
-          headers: headers(),
-          body: JSON.stringify({
-            prompt,
-            category: document.getElementById('aiCategory').value || null,
-            is_premium: document.getElementById('aiPremium').checked,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
-        status.innerHTML = 'Done. Opening editor...';
-        setTimeout(() => {
-          closeForm();
-          showArticleForm({
-            title: data.title,
-            slug: data.slug,
-            category: data.category,
-            excerpt: data.excerpt,
-            body: data.body,
-            is_premium: data.is_premium,
-            _isAI: true,
-          });
-        }, 400);
-      } catch (err) {
-        errEl.textContent = err.message;
-        errEl.hidden = false;
-        status.hidden = true;
-        btn.disabled = false;
-        btn.textContent = 'Generate article';
-      }
-    }
-
-    // ---- Article form ----
-    function showArticleForm(article) {
-      const isAI = article && article._isAI;
-      const isEdit = !!article && !isAI;
-      const categories = ['AI', 'Fitness', 'Trends', 'Recommendations', 'Lifestyle', 'Future Tools'];
-
-      document.getElementById('formContainer').innerHTML = `
-        <div class="form-overlay" id="formOverlay">
-          <div class="form-panel">
-            <button type="button" class="form__close" id="formClose">&times;</button>
-            <h3 class="form__title">${isEdit ? 'Edit Article' : isAI ? 'Review AI Article' : 'New Article'}</h3>
-            <form id="articleForm">
-              <div class="form__group">
-                <label class="form__label">Title</label>
-                <input type="text" class="form__input" id="f_title" required value="${article ? esc(article.title) : ''}">
-              </div>
-              <div class="form__row">
-                <div class="form__group">
-                  <label class="form__label">Slug (URL)</label>
-                  <input type="text" class="form__input" id="f_slug" required value="${article ? esc(article.slug) : ''}" placeholder="my-article-title">
-                </div>
-                <div class="form__group">
-                  <label class="form__label">Category</label>
-                  <select class="form__select" id="f_category">
-                    ${categories.map(c => `<option value="${c}" ${article && article.category === c ? 'selected' : ''}>${c}</option>`).join('')}
-                  </select>
-                </div>
-              </div>
-              <div class="form__group">
-                <label class="form__label">Excerpt</label>
-                <input type="text" class="form__input" id="f_excerpt" required value="${article ? esc(article.excerpt) : ''}" placeholder="Short summary shown on cards">
-              </div>
-              <div class="form__group">
-                <label class="form__label">Body</label>
-                <textarea class="form__textarea" id="f_body" required placeholder="Full article content...">${article ? esc(article.body) : ''}</textarea>
-              </div>
-              <div class="form__group">
-                <label class="form__label">Video Clip (max 30 seconds)</label>
-                <div class="video-source-tabs" id="videoSourceTabs">
-                  <button type="button" class="video-src-btn video-src-btn--active" data-src="upload">Upload file</button>
-                  <button type="button" class="video-src-btn" data-src="camera">Record from camera</button>
-                  <button type="button" class="video-src-btn" data-src="url">From URL</button>
-                </div>
-                <div class="video-upload ${article && article.video_url ? 'video-upload--has-video' : ''}" id="videoUpload">
-                  <div id="videoDropzone">
-                    <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" class="video-upload__input" id="f_video_file">
-                    <p class="video-upload__label"><strong>Click to upload</strong> or drag a video here<br>MP4, WebM, MOV - max 50MB, 30 seconds</p>
-                  </div>
-                  <div id="videoCameraZone" hidden>
-                    <div class="camera-container">
-                      <video id="cameraFeed" autoplay playsinline muted></video>
-                      <div class="camera-controls">
-                        <div class="camera-timer" id="cameraTimer">0:00 / 0:30</div>
-                        <button type="button" class="btn btn--primary btn--small" id="cameraStartBtn">Start recording</button>
-                        <button type="button" class="btn btn--outline btn--small" id="cameraStopBtn" hidden>Stop</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="videoUrlZone" hidden>
-                    <div class="video-url-input">
-                      <input type="text" class="form__input" id="f_video_ext_url" placeholder="Paste video URL (mp4, webm)">
-                      <button type="button" class="btn btn--primary btn--small" id="videoUrlLoadBtn">Load</button>
-                    </div>
-                  </div>
-                  <div class="video-preview" id="videoPreview" ${article && article.video_url ? '' : 'hidden'}>
-                    <video src="${article && article.video_url ? esc(article.video_url) : ''}" controls playsinline></video>
-                    <div class="video-preview__info">
-                      <span id="videoDurationText">${article && article.video_duration ? Math.round(article.video_duration) + 's' : ''}</span>
-                      <button type="button" class="video-preview__remove" id="videoRemoveBtn">Remove video</button>
-                    </div>
-                  </div>
-                  <div class="video-upload__error" id="videoError" hidden></div>
-                  <div class="video-upload__progress" id="videoProgress" hidden>
-                    <div class="video-upload__progress-bar"><div class="video-upload__progress-fill" id="videoProgressFill" style="width:0%"></div></div>
-                  </div>
-                </div>
-                <input type="hidden" id="f_video_url" value="${article && article.video_url ? esc(article.video_url) : ''}">
-                <input type="hidden" id="f_video_duration" value="${article && article.video_duration ? article.video_duration : ''}">
-              </div>
-              <div class="form__group">
-                <label class="form__label">Images</label>
-                <div class="image-upload" id="imageUploadArea">
-                  <div class="image-upload__grid" id="imageGrid"></div>
-                  <label class="image-upload__add" id="imageAddBtn">
-                    <input type="file" accept="image/*" multiple hidden id="f_image_files">
-                    <span>+ Add images</span>
-                  </label>
-                </div>
-              </div>
-              <div class="form__group">
-                <label class="form__toggle">
-                  <input type="checkbox" id="f_premium" ${article && article.is_premium ? 'checked' : ''}>
-                  <span>Premium content (visible only to premium subscribers)</span>
-                </label>
-              </div>
-              <div class="form__error" id="formErr" hidden></div>
-              <div class="form__actions">
-                <button type="submit" class="btn btn--primary">${isEdit ? 'Save Changes' : isAI ? 'Publish AI Article' : 'Publish Article'}</button>
-                <button type="button" class="btn btn--outline" id="formCancel">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `;
-
-      // Auto-generate slug from title
-      if (!isEdit) {
-        document.getElementById('f_title').addEventListener('input', () => {
-          const slug = document.getElementById('f_title').value
-            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-          document.getElementById('f_slug').value = slug;
-        });
-      }
-
-      document.getElementById('formClose').onclick = closeForm;
-      document.getElementById('formCancel').onclick = closeForm;
-      document.getElementById('formOverlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeForm();
-      });
-
-      // ---- Image upload ----
-      let articleImages = (article && article._images) ? [...article._images] : [];
-
-      // Load existing images if editing
-      if (isEdit && article.id) {
-        fetch(`${API}/api/articles/${article.slug}`, { headers: headers() })
-          .then(r => r.json())
-          .then(data => { if (data.images) { articleImages = data.images; renderImageGrid(); } });
-      }
-
-      function renderImageGrid() {
-        const grid = document.getElementById('imageGrid');
-        grid.innerHTML = articleImages.map((img, i) => `
-          <div class="image-upload__item" data-idx="${i}">
-            <img src="${esc(img.url)}" alt="">
-            <button type="button" class="image-upload__item-remove" data-idx="${i}">&times;</button>
-            <div class="image-upload__item-caption">
-              <input type="text" placeholder="Caption" value="${esc(img.caption || '')}" data-idx="${i}" class="image-caption-input">
-            </div>
-          </div>
-        `).join('');
-
-        grid.querySelectorAll('.image-upload__item-remove').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            articleImages.splice(parseInt(btn.dataset.idx), 1);
-            renderImageGrid();
-          });
-        });
-
-        grid.querySelectorAll('.image-caption-input').forEach(input => {
-          input.addEventListener('change', () => {
-            articleImages[parseInt(input.dataset.idx)].caption = input.value;
-          });
-        });
-      }
-
-      renderImageGrid();
-
-      document.getElementById('f_image_files').addEventListener('change', async (e) => {
-        const files = Array.from(e.target.files);
-        for (const file of files) {
-          const formData = new FormData();
-          formData.append('image', file);
-          try {
-            const res = await fetch(`${API}/api/admin/upload-image`, {
-              method: 'POST',
-              headers: { 'Authorization': 'Bearer ' + token },
-              body: formData,
-            });
-            const data = await res.json();
-            if (res.ok) {
-              articleImages.push({ url: data.url, caption: '' });
-              renderImageGrid();
-            }
-          } catch (ex) {}
-        }
-        e.target.value = '';
-      });
-
-      // ---- Video source tabs ----
-      let cameraStream = null;
-      let mediaRecorder = null;
-      let recordedChunks = [];
-      let recordingTimer = null;
-      let recordingSeconds = 0;
-
-      document.getElementById('videoSourceTabs').querySelectorAll('.video-src-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.getElementById('videoSourceTabs').querySelectorAll('.video-src-btn').forEach(b => b.classList.remove('video-src-btn--active'));
-          btn.classList.add('video-src-btn--active');
-          const src = btn.dataset.src;
-          document.getElementById('videoDropzone').hidden = src !== 'upload';
-          document.getElementById('videoCameraZone').hidden = src !== 'camera';
-          document.getElementById('videoUrlZone').hidden = src !== 'url';
-          // Stop camera if switching away
-          if (src !== 'camera' && cameraStream) {
-            cameraStream.getTracks().forEach(t => t.stop());
-            cameraStream = null;
-          }
-          // Start camera if switching to it
-          if (src === 'camera') startCamera();
-        });
-      });
-
-      async function startCamera() {
-        try {
-          cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          document.getElementById('cameraFeed').srcObject = cameraStream;
-          document.getElementById('cameraStartBtn').hidden = false;
-          document.getElementById('cameraStopBtn').hidden = true;
-        } catch (err) {
-          document.getElementById('videoError').textContent = 'Camera access denied. Please allow camera access and try again.';
-          document.getElementById('videoError').hidden = false;
-        }
-      }
-
-      document.getElementById('cameraStartBtn').addEventListener('click', () => {
-        if (!cameraStream) return;
-        recordedChunks = [];
-        recordingSeconds = 0;
-        const timerEl = document.getElementById('cameraTimer');
-        timerEl.textContent = '0:00 / 0:30';
-        document.querySelector('.camera-container').classList.add('camera-recording');
-
-        mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' });
-        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-        mediaRecorder.onstop = () => handleRecordedVideo();
-        mediaRecorder.start();
-
-        document.getElementById('cameraStartBtn').hidden = true;
-        document.getElementById('cameraStopBtn').hidden = false;
-
-        recordingTimer = setInterval(() => {
-          recordingSeconds++;
-          const m = Math.floor(recordingSeconds / 60);
-          const s = String(recordingSeconds % 60).padStart(2, '0');
-          timerEl.textContent = m + ':' + s + ' / 0:30';
-          if (recordingSeconds >= 30) {
-            clearInterval(recordingTimer);
-            mediaRecorder.stop();
-            cameraStream.getTracks().forEach(t => t.stop());
-            cameraStream = null;
-          }
-        }, 1000);
-      });
-
-      document.getElementById('cameraStopBtn').addEventListener('click', () => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-          clearInterval(recordingTimer);
-          mediaRecorder.stop();
-          cameraStream.getTracks().forEach(t => t.stop());
-          cameraStream = null;
-        }
-      });
-
-      async function handleRecordedVideo() {
-        document.querySelector('.camera-container').classList.remove('camera-recording');
-        document.getElementById('cameraStartBtn').hidden = false;
-        document.getElementById('cameraStopBtn').hidden = true;
-
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        const file = new File([blob], 'recording-' + Date.now() + '.webm', { type: 'video/webm' });
-        await uploadVideoFile(file, recordingSeconds);
-      }
-
-      // ---- URL video ----
-      document.getElementById('videoUrlLoadBtn').addEventListener('click', () => {
-        const url = document.getElementById('f_video_ext_url').value.trim();
-        if (!url) return;
-        const videoError = document.getElementById('videoError');
-        videoError.hidden = true;
-
-        // Validate it looks like a video URL
-        if (!url.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i) && !url.includes('video')) {
-          videoError.textContent = 'URL does not appear to be a video file. Use a direct link to an mp4 or webm file.';
-          videoError.hidden = false;
-          return;
-        }
-
-        // Set directly as video URL (no upload needed - external source)
-        document.getElementById('f_video_url').value = url;
-        document.getElementById('f_video_duration').value = '';
-        const preview = document.getElementById('videoPreview');
-        const vid = preview.querySelector('video');
-        vid.src = url;
-        vid.onloadedmetadata = () => {
-          const dur = Math.round(vid.duration);
-          if (dur > 30) {
-            videoError.textContent = 'Video is ' + dur + 's long. Maximum is 30 seconds.';
-            videoError.hidden = false;
-            document.getElementById('f_video_url').value = '';
-            preview.hidden = true;
-            document.getElementById('videoUrlZone').hidden = false;
-            return;
-          }
-          document.getElementById('f_video_duration').value = dur;
-          document.getElementById('videoDurationText').textContent = dur + 's';
-        };
-        preview.hidden = false;
-        document.getElementById('videoDropzone').hidden = true;
-        document.getElementById('videoCameraZone').hidden = true;
-        document.getElementById('videoUrlZone').hidden = true;
-        document.getElementById('videoUpload').classList.add('video-upload--has-video');
-      });
-
-      // ---- Video file upload ----
-      async function uploadVideoFile(file, knownDuration) {
-        const videoError = document.getElementById('videoError');
-        const videoProgress = document.getElementById('videoProgress');
-        const videoUrlInput = document.getElementById('f_video_url');
-        const videoDurInput = document.getElementById('f_video_duration');
-        videoError.hidden = true;
-
-        const duration = knownDuration || await getVideoDuration(file);
-        if (duration > 30) {
-          videoError.textContent = 'Video is ' + Math.round(duration) + 's long. Maximum is 30 seconds.';
-          videoError.hidden = false;
-          return;
-        }
-
-        videoProgress.hidden = false;
-        const fill = document.getElementById('videoProgressFill');
-        fill.style.width = '30%';
-
-        const formData = new FormData();
-        formData.append('video', file);
-
-        try {
-          fill.style.width = '60%';
-          const res = await fetch(API + '/api/admin/upload-video', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token },
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-
-          fill.style.width = '100%';
-          videoUrlInput.value = data.url;
-          videoDurInput.value = Math.round(duration);
-
-          const preview = document.getElementById('videoPreview');
-          preview.querySelector('video').src = data.url;
-          document.getElementById('videoDurationText').textContent = Math.round(duration) + 's';
-          preview.hidden = false;
-          document.getElementById('videoDropzone').hidden = true;
-          document.getElementById('videoCameraZone').hidden = true;
-          document.getElementById('videoUrlZone').hidden = true;
-          document.getElementById('videoUpload').classList.add('video-upload--has-video');
-
-          setTimeout(() => { videoProgress.hidden = true; }, 500);
-        } catch (ex) {
-          videoError.textContent = ex.message;
-          videoError.hidden = false;
-          videoProgress.hidden = true;
-        }
-      }
-
-      const videoFileInput = document.getElementById('f_video_file');
-      const videoPreview = document.getElementById('videoPreview');
-      const videoError = document.getElementById('videoError');
-      const videoProgress = document.getElementById('videoProgress');
-      const videoUrlInput = document.getElementById('f_video_url');
-      const videoDurInput = document.getElementById('f_video_duration');
-
-      videoFileInput.addEventListener('change', async () => {
-        const file = videoFileInput.files[0];
-        if (!file) return;
-        await uploadVideoFile(file);
-      });
-
-      document.getElementById('videoRemoveBtn').addEventListener('click', () => {
-        document.getElementById('f_video_url').value = '';
-        document.getElementById('f_video_duration').value = '';
-        document.getElementById('videoPreview').hidden = true;
-        // Show active source tab zone
-        const activeTab = document.querySelector('.video-src-btn--active');
-        const src = activeTab ? activeTab.dataset.src : 'upload';
-        document.getElementById('videoDropzone').hidden = src !== 'upload';
-        document.getElementById('videoCameraZone').hidden = src !== 'camera';
-        document.getElementById('videoUrlZone').hidden = src !== 'url';
-        document.getElementById('videoUpload').classList.remove('video-upload--has-video');
-        videoFileInput.value = '';
-        if (src === 'camera') startCamera();
-      });
-
-      // If editing with existing video, hide all source zones
-      if (article && article.video_url) {
-        document.getElementById('videoDropzone').hidden = true;
-        document.getElementById('videoCameraZone').hidden = true;
-        document.getElementById('videoUrlZone').hidden = true;
-      }
-
-      document.getElementById('articleForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const err = document.getElementById('formErr');
-        err.hidden = true;
-
-        const payload = {
-          title: document.getElementById('f_title').value,
-          slug: document.getElementById('f_slug').value,
-          category: document.getElementById('f_category').value,
-          excerpt: document.getElementById('f_excerpt').value,
-          body: document.getElementById('f_body').value,
-          is_premium: document.getElementById('f_premium').checked,
-          video_url: videoUrlInput.value || null,
-          video_duration: videoDurInput.value ? parseFloat(videoDurInput.value) : null,
-        };
-
-        try {
-          const url = isEdit ? `${API}/api/admin/articles/${article.id}` : `${API}/api/admin/articles`;
-          const method = isEdit ? 'PUT' : 'POST';
-          const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(payload) });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-
-          // Save images
-          if (articleImages.length > 0 || isEdit) {
-            const articleId = data.id || article.id;
-            await fetch(`${API}/api/admin/articles/${articleId}/images`, {
-              method: 'POST',
-              headers: headers(),
-              body: JSON.stringify({ images: articleImages }),
-            });
-          }
-
-          closeForm();
-          renderDashboard();
-        } catch (ex) {
-          err.textContent = ex.message;
-          err.hidden = false;
-        }
-      };
-    }
-
-    function getVideoDuration(file) {
-      return new Promise((resolve) => {
-        const video = document.createElement('video');
-        video.preload = 'metadata';
-        video.onloadedmetadata = () => {
-          URL.revokeObjectURL(video.src);
-          resolve(video.duration);
-        };
-        video.onerror = () => resolve(0);
-        video.src = URL.createObjectURL(file);
-      });
-    }
-
-    function closeForm() {
-      document.getElementById('formContainer').innerHTML = '';
-    }
-
-    async function editArticle(id) {
-      const article = window._articles.find(a => a.id === id);
-      if (article) showArticleForm(article);
-    }
-
-    async function deleteArticle(id, title) {
-      if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-      await fetch(`${API}/api/admin/articles/${id}`, { method: 'DELETE', headers: headers() });
-      renderDashboard();
     }
 
     init();
-
-    // ---- WebSocket live updates ----
-    (function connectWS() {
-      const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws`;
-      let ws, delay = 1000;
-      function connect() {
-        ws = new WebSocket(wsUrl);
-        ws.onopen = () => { delay = 1000; };
-        ws.onmessage = (e) => {
-          try {
-            const msg = JSON.parse(e.data);
-            if (msg.type && msg.type.startsWith('article-')) {
-              // Only refresh if we're on the dashboard (not in a form)
-              if (!document.getElementById('formOverlay') && !document.getElementById('aiOverlay')) {
-                renderDashboard();
-              }
-            }
-          } catch(ex) {}
-        };
-        ws.onclose = () => { setTimeout(connect, delay); delay = Math.min(delay * 2, 15000); };
-        ws.onerror = () => ws.close();
-      }
-      connect();
-    })();
   </script>
 </body>
 </html>
