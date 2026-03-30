@@ -439,20 +439,7 @@ function updateAuthUI() {
     adminLink.remove();
   }
 
-  // Programme link for premium/admin
-  let progLink = document.getElementById('navProgLink');
-  if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
-    if (!progLink) {
-      progLink = document.createElement('a');
-      progLink.id = 'navProgLink';
-      progLink.href = '/program.html';
-      progLink.className = 'nav__link';
-      progLink.textContent = 'Program';
-      btn.parentNode.insertBefore(progLink, btn);
-    }
-  } else if (progLink) {
-    progLink.remove();
-  }
+  // Program link already in static nav - no duplicate needed
 
   if (currentUser) {
     btn.textContent = currentUser.name || currentUser.email.split('@')[0];
