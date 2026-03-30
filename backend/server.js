@@ -818,52 +818,76 @@ app.post('/api/program/nutrition', authRequired, async (req, res) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
 
-  const { messages } = req.body;
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Messages required' });
+  const { age, sex, height, weight, goal_weight, timeline, job_type, exercise, sleep_hours, stress, alcohol, fav_meals, hated_foods, restrictions, cooking_style, snack_preference, snack_reason } = req.body;
+
+  if (!weight || !height || !age || !sex) {
+    return res.status(400).json({ error: 'Please fill in your stats' });
   }
 
   try {
     const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const systemPrompt = `Act as an expert nutritionist with 30 years of experience helping clients lose body fat sustainably without miserable dieting. You've worked with everyone from busy parents to athletes getting shredded for competition. Your tone is encouraging, knowledgeable, and straight-talking - like a brilliant friend who happens to have a nutrition degree.
+    const prompt = `Act as an expert nutritionist with 30 years of experience. Tone: encouraging, straight-talking, fun - like a brilliant friend with a nutrition degree. Write so a complete beginner can follow everything.
 
-You will collect information in 4 sections, asking one section at a time and waiting for the response before moving on:
+CLIENT PROFILE:
+- Age: ${age}, Sex: ${sex}, Height: ${height}cm, Weight: ${weight}kg
+- Goal weight: ${goal_weight || 'not specified'}
+- Timeline: ${timeline || 'steady and sustainable'}
+- Job: ${job_type || 'not specified'}
+- Exercise: ${exercise || 'not specified'}
+- Sleep: ${sleep_hours || 'not specified'} hours/night
+- Stress: ${stress || 'moderate'}
+- Alcohol: ${alcohol || 'not specified'}
+- Favorite meals: ${fav_meals || 'not specified'}
+- Foods they hate: ${hated_foods || 'none'}
+- Dietary restrictions: ${restrictions || 'none'}
+- Cooking style: ${cooking_style || 'quick meals'}
+- Snack preference: ${snack_preference || 'both sweet and savory'}
+- Snacking reason: ${snack_reason || 'habit'}
 
-SECTION 1 - STATS: Age, biological sex, height, current weight, goal weight, timeline preference
-SECTION 2 - LIFESTYLE: Job type, exercise frequency/type, sleep, stress, alcohol
-SECTION 3 - FOOD PREFERENCES: Top 5 meals, hated foods, restrictions/allergies, cooking style, adventurousness 1-10
-SECTION 4 - SNACK HABITS: Current snacks, reason for snacking, sweet vs savory, late night snacking
+BUILD THE COMPLETE PLAN:
 
-Once you have ALL answers from all 4 sections, generate the COMPLETE plan:
+1. CALORIE CALCULATION
+Use Mifflin-St Jeor: Men: (10 x kg) + (6.25 x cm) - (5 x age) + 5 | Women: same but -161
+Apply activity multiplier based on job + exercise. Show full calculation step by step.
+Warn that online calculators are inaccurate. Set 500kcal deficit. Never below that for active people.
 
-1. CALORIE CALCULATION - Use Mifflin-St Jeor formula, show full calculation, warn about calculator inaccuracy, set 500kcal deficit
-2. MACROS - Daily protein, carb, fat targets with explanation
-3. 7-DAY MEAL PLAN - Fun themed days, using their favorite foods, calories per meal, batch cooking flags, 2 secret treat meals, alcohol factored in
-4. SNACK SWAPS - 5+ healthier alternatives that match their preferences
-5. PERSONAL FAT LOSS RULES - 5 rules specific to THEM
+2. MACROS - Protein (1g per lb bodyweight), carbs, fats with explanation
+
+3. 7-DAY MEAL PLAN
+- Fun themed days (Mediterranean Monday, Tex-Mex Tuesday etc)
+- Use their favorite foods as inspiration
+- Calories and macros per meal
+- Flag batch-cook meals
+- 2 secret treat meals (feel indulgent, secretly low cal)
+- Factor alcohol into relevant days
+- Every day must hit total calorie and macro targets
+
+4. SNACK SWAPS - 5+ healthier alternatives matching their preferences with calories
+
+5. PERSONAL FAT LOSS RULES - 5 rules specific to THEM based on their profile
+
 6. REALISTIC TIMELINE - Week-by-week projection, honest and motivating
-7. HYDRATION TARGET - 35ml per kg + adjustments, practical tips
-8. SUPPLEMENTS - Only evidence-backed: whey, creatine, caffeine, vitamin D, omega-3, magnesium with doses and timing
 
-Title the final plan: # KYROO NUTRITION PLAN
+7. HYDRATION - 35ml per kg + adjustments, practical tips for their lifestyle
 
-Keep the tone fun, warm, motivating. Make them feel they have a world-class nutritionist in their corner.
+8. SUPPLEMENTS - Only evidence-backed: whey, creatine (3-5g daily), caffeine, vitamin D, omega-3, magnesium. Dose, timing, why it matters for them specifically. Make clear supplements are the 1%.
 
-IMPORTANT: When asking questions, ask ONE section at a time. Do not dump all questions at once. Start with Section 1.`;
+Start with: # KYROO NUTRITION PLAN
+
+Make this printable and actionable from day one.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      system: systemPrompt,
-      messages: messages,
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ reply: message.content[0].text });
+    res.json({ program: message.content[0].text });
   } catch (err) {
     console.error('Nutrition generator error:', err.message);
-    res.status(500).json({ error: 'Failed to generate response' });
+    res.status(500).json({ error: 'Failed to generate plan' });
   }
 });
 

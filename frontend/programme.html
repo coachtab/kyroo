@@ -490,19 +490,61 @@
         </div>
       </div>
 
-      <!-- Nutrition Chat Wizard -->
+      <!-- Nutrition Wizard -->
       <div class="wizard" id="wizardNutrition">
         <span class="wizard__back" onclick="showHub()">Back to programs</span>
         <div class="hero">
           <p class="hero__tag">NUTRITION SHREDDER</p>
           <h1 class="hero__title">Your meal plan.</h1>
-          <p class="hero__desc">Chat with your AI nutritionist. Answer 4 sections. Get a complete plan.</p>
+          <p class="hero__desc">Four steps. One complete nutrition plan.</p>
         </div>
-        <div class="chat" id="nutritionChat">
-          <div class="chat__messages" id="chatMessages"></div>
-          <div class="chat__input-wrap">
-            <textarea class="chat__input" id="chatInput" placeholder="Type your answer..." rows="2"></textarea>
-            <button type="button" class="chat__send" id="chatSend" onclick="sendChat()">Send</button>
+        <div class="steps" id="stepsNutrition"></div>
+        <div id="cardsNutrition">
+          <div class="card card--active" data-step="1">
+            <p class="card__title">Your body.</p>
+            <p class="card__desc">The basics for calculating your calories.</p>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="wn_age" placeholder="28"></div>
+              <div class="input-group"><label class="input-label">Sex</label><div class="selector" id="wn_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button><button type="button" class="selector__btn" data-value="diverse">Diverse</button></div></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="wn_weight" placeholder="85"></div>
+              <div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="wn_height" placeholder="180"></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Goal weight (kg)</label><input type="number" class="input" id="wn_goal" placeholder="75"></div>
+              <div class="input-group"><label class="input-label">Timeline</label><div class="selector" id="wn_timeline"><button type="button" class="selector__btn selector__btn--selected" data-value="steady and sustainable">Steady</button><button type="button" class="selector__btn" data-value="as fast as safely possible">Fast</button></div></div>
+            </div>
+            <div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
+          </div>
+          <div class="card" data-step="2">
+            <p class="card__title">Your lifestyle.</p>
+            <p class="card__desc">Activity, sleep, stress, alcohol.</p>
+            <div class="input-group"><label class="input-label">Job type</label><div class="selector" id="wn_job"><button type="button" class="selector__btn selector__btn--selected" data-value="desk job">Desk job</button><button type="button" class="selector__btn" data-value="on my feet most of the day">On feet</button><button type="button" class="selector__btn" data-value="manual labour">Manual</button></div></div>
+            <div class="input-group"><label class="input-label">Exercise</label><div class="selector" id="wn_exercise"><button type="button" class="selector__btn" data-value="1-2 times per week">1-2x</button><button type="button" class="selector__btn selector__btn--selected" data-value="3-4 times per week, weights and cardio">3-4x</button><button type="button" class="selector__btn" data-value="5-6 times per week">5-6x</button></div></div>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Sleep (hrs)</label><input type="number" class="input" id="wn_sleep" placeholder="7"></div>
+              <div class="input-group"><label class="input-label">Stress</label><div class="selector" id="wn_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Med</button><button type="button" class="selector__btn" data-value="high">High</button></div></div>
+            </div>
+            <div class="input-group"><label class="input-label">Alcohol</label><div class="selector" id="wn_alcohol"><button type="button" class="selector__btn" data-value="none">None</button><button type="button" class="selector__btn selector__btn--selected" data-value="1-3 drinks per week">Light</button><button type="button" class="selector__btn" data-value="4-8 drinks per week">Moderate</button><button type="button" class="selector__btn" data-value="10+ drinks per week">Heavy</button></div></div>
+            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
+          </div>
+          <div class="card" data-step="3">
+            <p class="card__title">Your food.</p>
+            <p class="card__desc">What you love, what you hate, how you cook.</p>
+            <div class="input-group"><label class="input-label">Top 5 favorite meals</label><input type="text" class="input" id="wn_fav" placeholder="e.g. pasta, stir fry, tacos, curry, burgers"></div>
+            <div class="input-group"><label class="input-label">Foods you hate</label><input type="text" class="input" id="wn_hate" placeholder="e.g. fish, mushrooms... or 'none'"></div>
+            <div class="input-group"><label class="input-label">Restrictions</label><div class="selector" id="wn_restrict"><button type="button" class="selector__btn selector__btn--selected" data-value="none">None</button><button type="button" class="selector__btn" data-value="vegetarian">Vegetarian</button><button type="button" class="selector__btn" data-value="vegan">Vegan</button><button type="button" class="selector__btn" data-value="dairy-free">Dairy-free</button><button type="button" class="selector__btn" data-value="gluten-free">Gluten-free</button></div></div>
+            <div class="input-group"><label class="input-label">Cooking style</label><div class="selector" id="wn_cook"><button type="button" class="selector__btn" data-value="cooking from scratch">From scratch</button><button type="button" class="selector__btn selector__btn--selected" data-value="quick meals under 15 minutes">Quick meals</button><button type="button" class="selector__btn" data-value="batch cooking and meal prep">Meal prep</button></div></div>
+            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
+          </div>
+          <div class="card" data-step="4">
+            <p class="card__title">Your snacks.</p>
+            <p class="card__desc">What you reach for and why.</p>
+            <div class="input-group"><label class="input-label">Snack preference</label><div class="selector" id="wn_snacktype"><button type="button" class="selector__btn" data-value="sweet">Sweet</button><button type="button" class="selector__btn" data-value="savory">Savory</button><button type="button" class="selector__btn selector__btn--selected" data-value="both sweet and savory">Both</button></div></div>
+            <div class="input-group"><label class="input-label">Why do you snack?</label><div class="selector" id="wn_snackwhy"><button type="button" class="selector__btn" data-value="genuine hunger">Hunger</button><button type="button" class="selector__btn selector__btn--selected" data-value="boredom or habit">Boredom</button><button type="button" class="selector__btn" data-value="stress or emotions">Stress</button></div></div>
+            <p class="error" id="errN" hidden></p>
+            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="generateN()">Build my nutrition plan</button></div>
           </div>
         </div>
       </div>
@@ -551,9 +593,6 @@
       document.getElementById('hubView').style.display = 'block';
       document.getElementById('resultView').style.display = 'none';
       document.getElementById('generatingView').hidden = true;
-      // Reset chat
-      const chatWrap = document.querySelector('.chat__input-wrap');
-      if (chatWrap) chatWrap.style.display = 'flex';
     }
 
     function showWizard(type) {
@@ -562,21 +601,17 @@
       const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', nutrition: 'wizardNutrition', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
       const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
-      if (type === 'nutrition') {
-        startNutritionChat();
-      } else {
-        initSteps(type);
-      }
+      initSteps(type);
     }
 
     // Steps
-    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1, stepI = 1;
+    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1, stepN = 1, stepI = 1;
 
     const wizardConfig = {
       '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
       plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
       tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
-      nutrition: { cards: null, steps: null, count: 0 },
+      nutrition: { cards: 'cardsNutrition', steps: 'stepsNutrition', count: 4 },
       summer: { cards: 'cardsSummer', steps: 'stepsSummer', count: 3 },
       injury: { cards: 'cardsInjury', steps: 'stepsInjury', count: 2 },
       weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
@@ -586,7 +621,7 @@
       const cfg = wizardConfig[type];
       const container = document.getElementById(cfg.steps);
       container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'summer') stepS = 1; else if (type === 'injury') stepI = 1; else stepW = 1;
+      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'nutrition') stepN = 1; else if (type === 'summer') stepS = 1; else if (type === 'injury') stepI = 1; else stepW = 1;
       showCard(type, 1);
     }
 
@@ -610,6 +645,8 @@
     function prevP() { if (stepP > 1) { stepP--; showCard('plateau', stepP); } }
     function nextT() { if (stepT < 2) { stepT++; showCard('tracker', stepT); } }
     function prevT() { if (stepT > 1) { stepT--; showCard('tracker', stepT); } }
+    function nextN() { if (stepN < 4) { stepN++; showCard('nutrition', stepN); } }
+    function prevN() { if (stepN > 1) { stepN--; showCard('nutrition', stepN); } }
     function nextS() { if (stepS < 3) { stepS++; showCard('summer', stepS); } }
     function prevS() { if (stepS > 1) { stepS--; showCard('summer', stepS); } }
     function nextI() { if (stepI < 2) { stepI++; showCard('injury', stepI); } }
@@ -794,128 +831,39 @@
       } catch (ex) { showError('weakpoint', ex.message); }
     }
 
-    // ---- Nutrition Chat ----
-    let chatHistory = [];
-
-    async function startNutritionChat() {
-      chatHistory = [];
-      document.getElementById('chatMessages').innerHTML = '';
-      document.getElementById('chatInput').value = '';
-      // Send initial message to get the AI to ask Section 1
-      await sendToNutrition([{ role: 'user', content: 'Hi, I want to build a nutrition plan to lose fat. Start the process.' }]);
-    }
-
-    async function sendChat() {
-      const input = document.getElementById('chatInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      // Add user message to UI
-      addChatMsg(msg, 'user');
-      input.value = '';
-
-      // Add to history
-      chatHistory.push({ role: 'user', content: msg });
-      await sendToNutrition(chatHistory);
-    }
-
-    async function sendToNutrition(messages) {
-      const sendBtn = document.getElementById('chatSend');
-      sendBtn.disabled = true;
-      sendBtn.textContent = '...';
-
-      // Show typing indicator
-      const typing = document.createElement('div');
-      typing.className = 'chat__typing';
-      typing.textContent = 'Your nutritionist is thinking...';
-      document.getElementById('chatMessages').appendChild(typing);
-      scrollChat();
+    // ---- Nutrition Generate ----
+    async function generateN() {
+      const err = document.getElementById('errN');
+      err.hidden = true;
+      if (!val('wn_weight') || !val('wn_height') || !val('wn_age') || !sel('wn_sex')) {
+        err.textContent = 'Please fill in your stats (step 1).'; err.hidden = false; return;
+      }
+      document.getElementById('wizardNutrition').classList.remove('wizard--active');
+      document.getElementById('generatingView').hidden = false;
+      document.getElementById('genText').textContent = 'Building your nutrition plan...';
 
       try {
         const freshToken = localStorage.getItem('kyroo_token');
         if (!freshToken) throw new Error('Please log in first.');
-
         const res = await fetch(`${API}/api/program/nutrition`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages }),
+          body: JSON.stringify({
+            age: val('wn_age'), sex: sel('wn_sex'), height: val('wn_height'), weight: val('wn_weight'),
+            goal_weight: val('wn_goal'), timeline: sel('wn_timeline') || 'steady and sustainable',
+            job_type: sel('wn_job') || 'desk job', exercise: sel('wn_exercise') || '3-4 times per week',
+            sleep_hours: val('wn_sleep'), stress: sel('wn_stress') || 'moderate', alcohol: sel('wn_alcohol') || 'light',
+            fav_meals: val('wn_fav'), hated_foods: val('wn_hate'), restrictions: sel('wn_restrict') || 'none',
+            cooking_style: sel('wn_cook') || 'quick meals', snack_preference: sel('wn_snacktype') || 'both',
+            snack_reason: sel('wn_snackwhy') || 'habit',
+          }),
         });
         const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
+        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
         if (!res.ok) throw new Error(data.error || 'Failed');
-
-        typing.remove();
-
-        const reply = data.reply;
-        chatHistory.push({ role: 'assistant', content: reply });
-
-        // Check if this is the final plan (contains the full plan markers)
-        const isFinal = reply.includes('KYROO NUTRITION PLAN') || reply.includes('7-DAY MEAL PLAN') || reply.includes('CALORIE CALCULATION');
-
-        if (isFinal) {
-          // Render as formatted result
-          let html = reply
-            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n\n/g, '</p><p>')
-            .replace(/\n/g, '<br>');
-
-          const msgEl = document.createElement('div');
-          msgEl.className = 'chat__msg chat__msg--final';
-          msgEl.innerHTML = '<p>' + html + '</p>';
-          document.getElementById('chatMessages').appendChild(msgEl);
-
-          // Add print button
-          const actions = document.createElement('div');
-          actions.className = 'chat__actions';
-          actions.innerHTML = '<button type="button" class="result__btn" onclick="printNutrition()">Print / PDF</button><button type="button" class="result__btn" onclick="showHub()">Done</button>';
-          document.getElementById('chatMessages').appendChild(actions);
-
-          // Hide input
-          document.querySelector('.chat__input-wrap').style.display = 'none';
-        } else {
-          addChatMsg(reply, 'ai');
-        }
-
-        scrollChat();
-      } catch (ex) {
-        typing.remove();
-        addChatMsg('Error: ' + ex.message, 'ai');
-      }
-
-      sendBtn.disabled = false;
-      sendBtn.textContent = 'Send';
+        showResult(data.program);
+      } catch (ex) { showError('nutrition', ex.message); }
     }
-
-    function addChatMsg(text, type) {
-      const el = document.createElement('div');
-      el.className = 'chat__msg chat__msg--' + type;
-      el.textContent = text;
-      document.getElementById('chatMessages').appendChild(el);
-      scrollChat();
-    }
-
-    function scrollChat() {
-      const c = document.getElementById('chatMessages');
-      c.scrollTop = c.scrollHeight;
-    }
-
-    function printNutrition() {
-      const final = document.querySelector('.chat__msg--final');
-      if (!final) return;
-      const w = window.open('', '_blank');
-      w.document.write('<html><head><title>KYROO Nutrition Plan</title><style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.8;color:#111}h1,h2,h3{font-family:Georgia,serif;font-weight:400}h2{border-top:1px solid #ddd;padding-top:16px;margin-top:28px}strong{font-weight:600}</style></head><body>' + final.innerHTML + '</body></html>');
-      w.document.close();
-      w.print();
-    }
-
-    // Enter key sends
-    document.getElementById('chatInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-    });
 
     function showResult(text) {
       let html = text.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
@@ -926,8 +874,8 @@
 
     function showError(type, msg) {
       document.getElementById('generatingView').hidden = true;
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
-      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', summer: 'errS', injury: 'errI', weakpoint: 'errW' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', nutrition: 'wizardNutrition', summer: 'wizardSummer', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
+      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', nutrition: 'errN', summer: 'errS', injury: 'errI', weakpoint: 'errW' };
       document.getElementById(ids[type]).classList.add('wizard--active');
       const err = document.getElementById(errIds[type]);
       err.textContent = msg; err.hidden = false;
