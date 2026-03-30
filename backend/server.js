@@ -135,10 +135,54 @@ function authRequired(req, res, next) {
 
 function generateToken(user) {
   return jwt.sign(
-    { id: user.id, email: user.email, is_premium: user.is_premium, is_admin: user.is_admin || false },
+    { id: user.id, email: user.email, is_premium: user.is_premium, is_admin: user.is_admin || false, plan: user.plan || 'free' },
     JWT_SECRET,
     { expiresIn: '30d' }
   );
+}
+
+// Plan limits
+const PLAN_LIMITS = { free: 0, basic: 5, pro: Infinity };
+
+async function getUserUsageThisMonth(userId) {
+  const { rows } = await pool.query(
+    "SELECT COUNT(*) as count FROM ai_usage WHERE user_id = $1 AND created_at >= date_trunc('month', NOW())",
+    [userId]
+  );
+  return parseInt(rows[0].count);
+}
+
+async function canGenerateProgram(userId, plan) {
+  if (plan === 'pro' || plan === 'admin') return { allowed: true, used: 0, limit: Infinity };
+  const used = await getUserUsageThisMonth(userId);
+  const limit = PLAN_LIMITS[plan] || 0;
+  return { allowed: used < limit, used, limit };
+}
+
+async function recordUsage(userId, programType, tokensUsed) {
+  await pool.query(
+    'INSERT INTO ai_usage (user_id, program_type, tokens_used) VALUES ($1, $2, $3)',
+    [userId, programType, tokensUsed || 0]
+  );
+}
+
+async function checkProgramAccess(req, res) {
+  // Get fresh user data with plan
+  const { rows } = await pool.query('SELECT plan, is_admin FROM users WHERE id = $1', [req.user.id]);
+  if (rows.length === 0) { res.status(401).json({ error: 'User not found' }); return false; }
+  const user = rows[0];
+
+  if (user.is_admin) return true;
+
+  const plan = user.plan || 'free';
+  if (plan === 'free') { res.status(403).json({ error: 'Upgrade to Basic or Pro to generate programs', plan: 'free' }); return false; }
+
+  const { allowed, used, limit } = await canGenerateProgram(req.user.id, plan);
+  if (!allowed) {
+    res.status(429).json({ error: `You have used all ${limit} programs this month. Upgrade to Pro for unlimited.`, used, limit, plan });
+    return false;
+  }
+  return true;
 }
 
 function adminRequired(req, res, next) {
@@ -177,8 +221,8 @@ app.post('/api/auth/signup', async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const verifyToken = crypto.randomBytes(32).toString('hex');
     const { rows } = await pool.query(
-      'INSERT INTO users (email, password_hash, name, verify_token) VALUES ($1, $2, $3, $4) RETURNING id, email, name, is_premium, is_admin, email_verified, created_at',
-      [email, hash, name || null, verifyToken]
+      'INSERT INTO users (email, password_hash, name, verify_token, plan) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, name, is_premium, is_admin, plan, email_verified, created_at',
+      [email, hash, name || null, verifyToken, 'free']
     );
     const user = rows[0];
     const token = generateToken(user);
@@ -291,7 +335,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
     const token = generateToken(user);
     res.json({
-      user: { id: user.id, email: user.email, name: user.name, is_premium: user.is_premium, is_admin: user.is_admin },
+      user: { id: user.id, email: user.email, name: user.name, is_premium: user.is_premium, is_admin: user.is_admin, plan: user.plan || 'free' },
       token,
     });
   } catch (err) {
@@ -304,11 +348,14 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/auth/me', authRequired, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, email, name, is_premium, is_admin, premium_started_at, premium_expires_at, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, is_premium, is_admin, plan, premium_started_at, premium_expires_at, created_at FROM users WHERE id = $1',
       [req.user.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-    res.json(rows[0]);
+    const user = rows[0];
+    const used = await getUserUsageThisMonth(user.id);
+    const limit = user.is_admin ? Infinity : (PLAN_LIMITS[user.plan] || 0);
+    res.json({ ...user, usage: { used, limit, remaining: Math.max(0, limit - used) } });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
@@ -389,9 +436,7 @@ app.delete('/api/checkins', authRequired, async (req, res) => {
 
 // ---- 12-Week Program Generator ----
 app.post('/api/program/generate', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -461,9 +506,7 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English - no fanc
 
 // ---- Plateau Breaker Generator ----
 app.post('/api/program/plateau', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -511,7 +554,9 @@ Write this so a beginner can understand every instruction. No unexplained jargon
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Plateau generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
@@ -520,9 +565,7 @@ Write this so a beginner can understand every instruction. No unexplained jargon
 
 // ---- Weak Point Fixer ----
 app.post('/api/program/weakpoints', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -568,7 +611,9 @@ Write so someone can print this, bring it to the gym, and follow it without conf
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Weak point generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
@@ -577,9 +622,7 @@ Write so someone can print this, bring it to the gym, and follow it without conf
 
 // ---- Progress Tracker Generator ----
 app.post('/api/program/tracker', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -654,7 +697,9 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Tracker generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate tracking system' });
@@ -663,9 +708,7 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
 
 // ---- 90-Day Summer Shred ----
 app.post('/api/program/summer', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -740,7 +783,9 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Summer shred generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
@@ -749,9 +794,7 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
 
 // ---- Injury Prevention Generator ----
 app.post('/api/program/injury', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -810,7 +853,9 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Injury prevention generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
@@ -819,9 +864,7 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
 
 // ---- Nutrition Shredder ----
 app.post('/api/program/nutrition', authRequired, async (req, res) => {
-  if (!req.user.is_premium && !req.user.is_admin) {
-    return res.status(403).json({ error: 'Premium required' });
-  }
+  if (!(await checkProgramAccess(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -892,11 +935,22 @@ LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain 
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ program: message.content[0].text });
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
   } catch (err) {
     console.error('Nutrition generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
   }
+});
+
+// GET /api/usage - get current user's usage
+app.get('/api/usage', authRequired, async (req, res) => {
+  const { rows } = await pool.query('SELECT plan FROM users WHERE id = $1', [req.user.id]);
+  const plan = rows[0]?.plan || 'free';
+  const used = await getUserUsageThisMonth(req.user.id);
+  const limit = req.user.is_admin ? Infinity : (PLAN_LIMITS[plan] || 0);
+  res.json({ plan, used, limit, remaining: limit === Infinity ? 'unlimited' : Math.max(0, limit - used) });
 });
 
 // ---- Stripe Checkout ----

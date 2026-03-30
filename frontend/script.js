@@ -519,15 +519,23 @@ async function showAccountModal() {
         <span class="account-info__value">
           ${currentUser.is_admin
             ? '<span class="account-badge account-badge--premium">Admin</span>'
-            : currentUser.is_premium
-              ? '<span class="account-badge account-badge--premium">Premium</span>'
-              : '<span class="account-badge account-badge--free">Free</span>'}
+            : currentUser.plan === 'pro'
+              ? '<span class="account-badge account-badge--premium">Pro</span>'
+              : currentUser.plan === 'basic'
+                ? '<span class="account-badge account-badge--premium">Basic</span>'
+                : '<span class="account-badge account-badge--free">Free</span>'}
         </span>
       </div>
       ${expiresDate ? `
       <div class="account-info__row">
         <span class="account-info__label">Renews</span>
         <span class="account-info__value">${expiresDate}</span>
+      </div>
+      ` : ''}
+      ${currentUser.usage ? `
+      <div class="account-info__row">
+        <span class="account-info__label">Programs used</span>
+        <span class="account-info__value">${currentUser.usage.used} / ${currentUser.usage.limit === Infinity || currentUser.usage.remaining === 'unlimited' ? 'unlimited' : currentUser.usage.limit}</span>
       </div>
       ` : ''}
     </div>

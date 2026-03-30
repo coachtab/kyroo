@@ -902,7 +902,9 @@
         const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) { showLocked(); return; }
         const user = await res.json();
-        if (!user.is_premium && !user.is_admin) showLocked();
+        if (!user.plan || user.plan === 'free') {
+          if (!user.is_admin) showLocked();
+        }
       } catch (e) { showLocked(); }
     }
     function showLocked() { document.getElementById('hubView').style.display = 'none'; document.getElementById('lockedView').hidden = false; }
