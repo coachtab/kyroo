@@ -440,10 +440,10 @@ Include:
 
 Start with:
 
-# KYROO 12-WEEK TRAINING PROGRAMME
+# KYROO 12-WEEK TRAINING PROGRAM
 Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}
 
-Make this a document someone can print, bring to the gym, and follow from day one without Googling anything.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English - no fancy words. Explain every term the first time. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -556,6 +556,8 @@ For EACH weak point listed, provide:
 
 Format this as a prioritized action plan that can be started this week.
 
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+
 Start with: # KYROO WEAK POINT ACTION PLAN
 
 Write so someone can print this, bring it to the gym, and follow it without confusion. Explain all terminology.`;
@@ -642,7 +644,9 @@ Format this as a professional tracking system document. Use clear templates some
 
 Start with: # KYROO PROGRESS TRACKING SYSTEM
 
-Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.`;
+Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.
+
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -726,7 +730,9 @@ Then add:
 
 Start with: # KYROO 90-DAY SUMMER SHRED
 
-Write this so someone can start tomorrow morning. No fluff. Every instruction is actionable.`;
+Write this so someone can start tomorrow morning. No fluff. Every instruction is actionable.
+
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -794,7 +800,9 @@ For each main lift, give 2-3 technique tweaks that reduce joint stress without h
 
 Start with: # KYROO INJURY PREVENTION PLAN
 
-Format this as a practical document someone can print and reference. Make it feel like a thorough physiotherapy consultation, but written in plain English.`;
+Format this as a practical document someone can print and reference.
+
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -876,7 +884,7 @@ Warn that online calculators are inaccurate. Set 500kcal deficit. Never below th
 
 Start with: # KYROO NUTRITION PLAN
 
-Make this printable and actionable from day one.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',

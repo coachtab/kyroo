@@ -147,57 +147,61 @@ function renderFreeContent(data) {
 function renderPremium(data) {
   renderSectionHeader(document.getElementById('premiumHeader'), data.sections.premium);
 
-  const plan = data.premiumPlan;
-  const featuresHtml = data.premiumFeatures.map(f => `
-    <div class="premium__feature">
-      <div class="premium__feature-check">${ICONS.check}</div>
-      <div>
-        <h4 class="premium__feature-title">${esc(f.title)}</h4>
-        <p class="premium__feature-text">${esc(f.text)}</p>
+  const grid = document.getElementById('premiumGrid');
+  grid.innerHTML = `
+    <div class="premium__cards">
+      <div class="premium__card" data-animate="fade-up">
+        <div class="premium__card-badge">Starter</div>
+        <h3 class="premium__card-title">Basic</h3>
+        <div class="premium__card-price">
+          <span class="premium__card-amount">6 EUR</span>
+          <span class="premium__card-period">/month</span>
+        </div>
+        <p class="premium__card-note">5 program PDFs per month</p>
+        <ul class="premium__card-list">
+          <li>5 AI-generated programs per month</li>
+          <li>All 7 training tools</li>
+          <li>Train Together access</li>
+          <li>Print-ready PDF output</li>
+        </ul>
+        <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="monthly">Get Basic</button>
+      </div>
+      <div class="premium__card premium__card--pro" data-animate="fade-up" data-delay="100">
+        <div class="premium__card-badge premium__card-badge--pro">Best Value</div>
+        <h3 class="premium__card-title">Pro</h3>
+        <div class="premium__card-price">
+          <span class="premium__card-amount">14 EUR</span>
+          <span class="premium__card-period">/month</span>
+        </div>
+        <p class="premium__card-note">Unlimited program PDFs</p>
+        <ul class="premium__card-list">
+          <li>Unlimited AI-generated programs</li>
+          <li>All 7 training tools</li>
+          <li>Train Together access</li>
+          <li>Print-ready PDF output</li>
+          <li>Priority AI generation</li>
+        </ul>
+        <button type="button" class="btn btn--primary btn--full premiumCTA" data-plan="yearly">Get Pro</button>
+        <p class="premium__card-guarantee">14-day free trial. Cancel anytime.</p>
       </div>
     </div>
-  `).join('');
-
-  const planItemsHtml = plan ? plan.items.map(item => `<li>${esc(item)}</li>`).join('') : '';
-
-  document.getElementById('premiumGrid').innerHTML = `
-    <div class="premium__features" data-animate="fade-up">
-      ${featuresHtml}
-    </div>
-    ${plan ? `
-    <div class="premium__card" data-animate="fade-up" data-delay="200">
-      <div class="premium__card-badge">${esc(plan.badge)}</div>
-      <h3 class="premium__card-title">${esc(plan.name)}</h3>
-      <div class="premium__card-price">
-        <span class="premium__card-amount">${parseInt(plan.price)} EUR</span>
-        <span class="premium__card-period">${esc(plan.period)}</span>
-      </div>
-      <p class="premium__card-note">${esc(plan.note)}</p>
-      <ul class="premium__card-list">${planItemsHtml}</ul>
-      <button type="button" class="btn btn--primary btn--full" id="premiumCTA"></button>
-      <p class="premium__card-guarantee">${esc(plan.guarantee)}</p>
-    </div>
-    ` : ''}
   `;
 
   updatePremiumCTA();
 }
 
 function updatePremiumCTA() {
-  const btn = document.getElementById('premiumCTA');
-  if (!btn) return;
-
-  if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
-    btn.textContent = 'You have Premium';
-    btn.className = 'btn btn--outline btn--full';
-    btn.onclick = () => showAccountModal();
-  } else if (currentUser) {
-    btn.textContent = 'Go Premium';
-    btn.onclick = () => activatePremium();
-  } else {
-    btn.textContent = 'Get started';
-    btn.onclick = () => showAuthModal('signup');
-  }
+  document.querySelectorAll('.premiumCTA').forEach(btn => {
+    if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
+      btn.textContent = 'Active';
+      btn.className = 'btn btn--outline btn--full premiumCTA';
+      btn.onclick = () => showAccountModal();
+    } else if (currentUser) {
+      btn.onclick = () => showCheckoutModal();
+    } else {
+      btn.onclick = () => showAuthModal('signup');
+    }
+  });
 }
 
 const ARROW_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';

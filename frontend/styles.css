@@ -496,13 +496,9 @@ input { font-family: inherit; }
    Premium - glass card
    ======================================== */
 
-.premium__content { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.premium__content { max-width: 720px; margin: 0 auto; }
 
-.premium__features { display: flex; flex-direction: column; gap: 22px; padding-top: 8px; }
-.premium__feature { display: flex; gap: 14px; align-items: flex-start; }
-.premium__feature-check { flex-shrink: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: var(--sage); }
-.premium__feature-title { font-family: var(--heading); font-size: 0.9375rem; font-weight: 800; margin-bottom: 2px; }
-.premium__feature-text { font-size: 0.8125rem; color: var(--text-2); line-height: 1.55; }
+.premium__cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
 .premium__card {
   background: linear-gradient(160deg, var(--surface), var(--surface-2));
@@ -536,7 +532,21 @@ input { font-family: inherit; }
 .premium__card-list li { font-size: 0.8125rem; color: var(--text-2); padding-left: 20px; position: relative; }
 .premium__card-list li::before { content: ''; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; background: linear-gradient(135deg, var(--accent), var(--warm)); border-radius: 50%; }
 
+.premium__card--pro {
+  border-color: rgba(240,132,90,0.1);
+  box-shadow: 0 16px 56px rgba(0,0,0,0.3), 0 0 80px rgba(240,132,90,0.04);
+}
+.premium__card--pro::before {
+  background: linear-gradient(90deg, var(--accent), var(--warm));
+  height: 4px;
+}
+.premium__card-badge--pro { color: var(--warm); background: rgba(252,201,110,0.08); }
+
 .premium__card-guarantee { font-size: 0.6875rem; color: var(--text-3); margin-top: 14px; }
+
+@media (max-width: 640px) {
+  .premium__cards { grid-template-columns: 1fr; }
+}
 
 /* ========================================
    Newsletter - warm, inviting
