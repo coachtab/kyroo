@@ -111,7 +111,7 @@ input { font-family: inherit; }
   border-bottom: 1px solid var(--border);
 }
 
-.nav__container { display: flex; align-items: center; justify-content: space-between; }
+.nav__container { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 
 .nav__logo {
   font-family: var(--heading);
