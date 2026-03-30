@@ -288,9 +288,7 @@ function renderFooterLinks(data) {
 
   // Add categories column from DB data
   const cols = { ...data.footerLinks };
-  if (data.categories && !cols['Categories']) {
-    cols['Categories'] = data.categories.map(c => ({ label: c.title, url: 'category:' + c.title, column_title: 'Categories' }));
-  }
+  // Categories disabled - programs-only site
 
   const modalLinks = { imprint: 'Imprint', privacy: 'Privacy', terms: 'Terms' };
 
