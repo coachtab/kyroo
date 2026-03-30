@@ -313,6 +313,179 @@ input { font-family: inherit; }
   max-width: 400px;
 }
 
+.section__label--center { text-align: center; }
+.section__desc--center { margin-left: auto; margin-right: auto; }
+
+/* Hero badge */
+.hero__badge {
+  display: inline-block;
+  font-family: var(--heading);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-deep);
+  padding: 8px 18px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.hero__trust {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: 20px;
+  position: relative;
+}
+
+/* How It Works */
+.how__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.how__step {
+  background: linear-gradient(160deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+  transition: all 0.4s var(--ease-out);
+}
+
+.how__step:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+}
+
+.how__step-num {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), #e86f3a);
+  color: #fff;
+  font-family: var(--heading);
+  font-size: 1.125rem;
+  font-weight: 900;
+  border-radius: 14px;
+  margin: 0 auto 18px;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.how__step-title {
+  font-family: var(--heading);
+  font-size: 1.0625rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.how__step-desc {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+/* Benefits */
+.benefits__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.benefit {
+  background: linear-gradient(160deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  transition: all 0.4s var(--ease-out);
+}
+
+.benefit:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+}
+
+.benefit__title {
+  font-family: var(--heading);
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.benefit__desc {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
+/* FAQ */
+.faq__list {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.faq__item {
+  background: linear-gradient(160deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.faq__item[open] { border-color: var(--border-hover); }
+
+.faq__question {
+  font-family: var(--heading);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  padding: 18px 24px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faq__question::-webkit-details-marker { display: none; }
+
+.faq__question::after {
+  content: '+';
+  font-size: 1.25rem;
+  color: var(--text-3);
+  transition: transform 0.3s var(--ease);
+}
+
+.faq__item[open] .faq__question::after {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+
+.faq__answer {
+  font-size: 0.8125rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  padding: 0 24px 20px;
+}
+
+/* Programs CTA */
+.programs__cta {
+  text-align: center;
+  margin-top: 32px;
+}
+
+/* Footer tagline */
+.footer__tagline {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  margin-bottom: 16px;
+}
+
 /* ========================================
    Programs - cards with personality
    ======================================== */
@@ -779,7 +952,9 @@ input { font-family: inherit; }
   .section { padding: 100px 0; }
   .premium__cards { grid-template-columns: 1fr 1fr; }
   .premium__card--pro { grid-column: span 2; max-width: 400px; margin: 0 auto; }
+  .how__grid { grid-template-columns: 1fr; }
   .programs__grid { grid-template-columns: repeat(2, 1fr); }
+  .benefits__grid { grid-template-columns: 1fr; }
   .train__grid { grid-template-columns: repeat(2, 1fr); }
   .footer__inner { flex-direction: column; gap: 32px; }
 }

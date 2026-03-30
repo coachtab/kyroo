@@ -145,7 +145,7 @@ function renderFreeContent(data) {
 }
 
 function renderPremium(data) {
-  renderSectionHeader(document.getElementById('premiumHeader'), data.sections.premium);
+  // Premium header is now static HTML - skip dynamic render
 
   const grid = document.getElementById('premiumGrid');
   grid.innerHTML = `
@@ -166,8 +166,8 @@ function renderPremium(data) {
         </ul>
         <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="free">Get started</button>
       </div>
-      <div class="premium__card" data-animate="fade-up" data-delay="100">
-        <div class="premium__card-badge">Starter</div>
+      <div class="premium__card premium__card--popular" data-animate="fade-up" data-delay="100">
+        <div class="premium__card-badge premium__card-badge--popular">Most Popular</div>
         <h3 class="premium__card-title">Basic</h3>
         <div class="premium__card-price">
           <span class="premium__card-amount">6 EUR</span>

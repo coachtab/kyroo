@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYROO</title>
-  <meta name="description" content="KYROO - personalized training programs and community workouts. Built in Prenzlauer Berg.">
+  <title>KYROO - Your AI Fitness Coach</title>
+  <meta name="description" content="KYROO - personalized AI fitness programs. Answer a few questions, get a complete training plan as a downloadable PDF. Built in Prenzlauer Berg.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
 </head>
 <body>
 
+  <!-- Nav -->
   <nav class="nav" id="nav">
     <div class="nav__container container">
       <a href="/" class="nav__logo">KYROO</a>
@@ -21,30 +22,61 @@
       </button>
       <div class="nav__menu" id="navMenu">
         <a href="/program.html" class="nav__link">Programs</a>
-        <a href="#train" class="nav__link" onclick="event.preventDefault();document.getElementById('train').scrollIntoView({behavior:'smooth'})">Train</a>
-        <a href="#premium" class="nav__link" onclick="event.preventDefault();document.getElementById('premium').scrollIntoView({behavior:'smooth'})">Premium</a>
+        <a href="#how" class="nav__link" onclick="event.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</a>
+        <a href="#premium" class="nav__link" onclick="event.preventDefault();document.getElementById('premium').scrollIntoView({behavior:'smooth'})">Pricing</a>
         <a href="javascript:void(0)" class="nav__link nav__auth" id="navAuthBtn">Log in</a>
       </div>
     </div>
   </nav>
 
+  <!-- Hero -->
   <section class="hero" id="hero">
     <div class="hero__container container">
-      <h1 class="hero__title" data-animate="fade-up" id="heroTitle"></h1>
-      <p class="hero__subtitle" data-animate="fade-up" data-delay="150" id="heroSubtitle"></p>
+      <div class="hero__badge" data-animate="fade-up">Your AI Fitness Coach</div>
+      <h1 class="hero__title" data-animate="fade-up" data-delay="100" id="heroTitle"></h1>
+      <p class="hero__subtitle" data-animate="fade-up" data-delay="200" id="heroSubtitle"></p>
       <div class="hero__actions" data-animate="fade-up" data-delay="300" id="heroActions">
-        <a href="#programs" class="btn btn--primary" id="heroCTA1">See programs</a>
-        <a href="#premium" class="btn btn--ghost" id="heroCTA2">Subscribe</a>
+        <a href="/program.html" class="btn btn--primary" id="heroCTA1">Start free</a>
+        <a href="#how" class="btn btn--ghost" id="heroCTA2" onclick="event.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</a>
+      </div>
+      <p class="hero__trust" data-animate="fade-up" data-delay="400">Free calculators included. No credit card needed.</p>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how section" id="how">
+    <div class="container">
+      <div class="section__label section__label--center" data-animate="fade-up">
+        <span class="section__tag">HOW IT WORKS</span>
+        <h2 class="section__title">Three steps to your plan.</h2>
+      </div>
+      <div class="how__grid" data-animate="fade-up" data-delay="100">
+        <div class="how__step">
+          <div class="how__step-num">1</div>
+          <h3 class="how__step-title">Pick a program</h3>
+          <p class="how__step-desc">Choose from 12-week plans, nutrition guides, summer shreds, and more.</p>
+        </div>
+        <div class="how__step">
+          <div class="how__step-num">2</div>
+          <h3 class="how__step-title">Answer a few questions</h3>
+          <p class="how__step-desc">Your body, goals, schedule, and preferences. Takes about 2 minutes.</p>
+        </div>
+        <div class="how__step">
+          <div class="how__step-num">3</div>
+          <h3 class="how__step-title">Get your PDF</h3>
+          <p class="how__step-desc">KYROO builds a personalized plan you can print and follow from day one.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Programs Preview -->
+  <!-- Programs -->
   <section class="programs section" id="programs">
     <div class="container">
-      <div class="section__label" data-animate="fade-up">
-        <span class="section__tag">PREMIUM</span>
+      <div class="section__label section__label--center" data-animate="fade-up">
+        <span class="section__tag">PROGRAMS</span>
         <h2 class="section__title">Your KYROO coach.</h2>
+        <p class="section__desc section__desc--center">Every program generates a personalized PDF you can print and follow.</p>
       </div>
       <div class="programs__grid" data-animate="fade-up" data-delay="100">
         <a href="/program.html#calc" class="program-card program-card--free">
@@ -89,6 +121,37 @@
           <p class="program-card__desc">Fix lagging muscles and lifts</p>
         </a>
       </div>
+      <div class="programs__cta" data-animate="fade-up" data-delay="200">
+        <a href="/program.html" class="btn btn--primary">Open ProgramHub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="benefits section" id="benefits">
+    <div class="container">
+      <div class="section__label section__label--center" data-animate="fade-up">
+        <span class="section__tag">WHY KYROO</span>
+        <h2 class="section__title">Not another fitness app.</h2>
+      </div>
+      <div class="benefits__grid" data-animate="fade-up" data-delay="100">
+        <div class="benefit">
+          <h3 class="benefit__title">Truly personal</h3>
+          <p class="benefit__desc">Not a template. Every plan is built from your body, your goals, your schedule.</p>
+        </div>
+        <div class="benefit">
+          <h3 class="benefit__title">Print and go</h3>
+          <p class="benefit__desc">Download a clean PDF. Bring it to the gym. No app needed during your workout.</p>
+        </div>
+        <div class="benefit">
+          <h3 class="benefit__title">Written for humans</h3>
+          <p class="benefit__desc">Simple language. Every exercise explained. A 14-year-old could follow it.</p>
+        </div>
+        <div class="benefit">
+          <h3 class="benefit__title">Built by coaches</h3>
+          <p class="benefit__desc">Prompts designed by real strength coaches and nutritionists. AI executes.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -103,11 +166,51 @@
     </div>
   </section>
 
-  <!-- Premium -->
+  <!-- Premium / Pricing -->
   <section class="premium section" id="premium">
     <div class="container">
-      <div class="section__label" data-animate="fade-up" id="premiumHeader"></div>
+      <div class="section__label section__label--center" data-animate="fade-up" id="premiumHeader">
+        <span class="section__tag">PRICING</span>
+        <h2 class="section__title">Simple pricing.</h2>
+        <p class="section__desc section__desc--center">Start free. Upgrade when you need more.</p>
+      </div>
       <div class="premium__content" id="premiumGrid"></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq section" id="faq">
+    <div class="container">
+      <div class="section__label section__label--center" data-animate="fade-up">
+        <span class="section__tag">FAQ</span>
+        <h2 class="section__title">Questions.</h2>
+      </div>
+      <div class="faq__list" data-animate="fade-up" data-delay="100">
+        <details class="faq__item">
+          <summary class="faq__question">What is KYROO?</summary>
+          <p class="faq__answer">KYROO is an AI fitness coach. You pick a program, answer a few questions about your body and goals, and KYROO generates a complete personalized training or nutrition plan as a downloadable PDF.</p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__question">Is it really personalized?</summary>
+          <p class="faq__answer">Yes. Every plan is generated from scratch based on your weight, height, age, goals, schedule, equipment, and preferences. No two plans are the same.</p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__question">What can I use for free?</summary>
+          <p class="faq__answer">The calculators are completely free - BMR, 1RM, macros, and body fat estimates. No account needed. The AI-powered programs require a Basic or Pro subscription.</p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__question">How does the PDF work?</summary>
+          <p class="faq__answer">After answering the questions, KYROO generates your plan in about 30 seconds. You can read it on screen, print it, or save it as a PDF to bring to the gym.</p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__question">Can I cancel anytime?</summary>
+          <p class="faq__answer">Yes. Cancel from your account settings at any time. No contracts, no commitments.</p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__question">Where is KYROO based?</summary>
+          <p class="faq__answer">KYROO is built in Prenzlauer Berg, Berlin. The Train Together feature connects you with people working out in local parks.</p>
+        </details>
+      </div>
     </div>
   </section>
 
@@ -129,11 +232,13 @@
     </div>
   </section>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer__inner">
         <div class="footer__brand">
           <a href="/" class="footer__logo">KYROO</a>
+          <p class="footer__tagline">Your AI fitness coach.</p>
           <div class="footer__socials" id="footerSocials"></div>
         </div>
         <div class="footer__links" id="footerLinks"></div>
@@ -209,7 +314,6 @@
     <div class="modal"><button type="button" class="modal__close" id="imprintModalClose">&times;</button><div id="imprintContent"></div></div>
   </div>
 
-  <!-- GDPR Cookie Consent -->
   <div class="cookie-banner" id="cookieBanner" hidden>
     <div class="cookie-banner__inner container">
       <p class="cookie-banner__text">We only use essential cookies. No tracking, no ads. <a href="javascript:void(0)" id="cookiePrivacyLink">Privacy Policy</a></p>
