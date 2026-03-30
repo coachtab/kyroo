@@ -94,7 +94,8 @@
       "Bash(done)",
       "Bash(node social-media/convert.js social-media/ig-nutrition-shredder.svg)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de/programme.html)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de/program.html)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de/program.html)",
+      "Bash(curl -s https://kyroo.de)"
     ],
     "additionalDirectories": [
       "C:\\buf\\github\\ct\\kyroo"

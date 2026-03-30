@@ -40,6 +40,12 @@
     .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .toolbar__title { font-family: var(--font-d); font-size: 1.25rem; }
 
+    .admin__links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+    .admin__link { display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; transition: all 0.2s; color: inherit; text-decoration: none; }
+    .admin__link:hover { border-color: rgba(255,255,255,0.12); }
+    .admin__link-icon { font-size: 1.25rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(194,122,86,0.06); border-radius: 10px; flex-shrink: 0; }
+    .admin__link strong { font-size: 0.875rem; display: block; }
+    .admin__link p { font-size: 0.75rem; color: var(--text-3); margin: 0; }
     .toolbar__actions { display: flex; gap: 8px; align-items: center; }
     .toolbar__search { padding: 8px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 0.8125rem; outline: none; width: 220px; }
     .toolbar__search:focus { border-color: var(--accent); }
@@ -237,10 +243,7 @@
 
     // ---- Dashboard ----
     async function renderDashboard() {
-      const [stats, articles] = await Promise.all([
-        fetch(`${API}/api/admin/stats`, { headers: headers() }).then(r => r.json()),
-        fetch(`${API}/api/admin/articles`, { headers: headers() }).then(r => r.json()),
-      ]);
+      const stats = await fetch(`${API}/api/admin/stats`, { headers: headers() }).then(r => r.json());
 
       document.getElementById('app').innerHTML = `
         <div class="admin">
@@ -255,58 +258,47 @@
           <div class="stats">
             <div class="stat"><div class="stat__value">${stats.total_users}</div><div class="stat__label">Users</div></div>
             <div class="stat"><div class="stat__value">${stats.premium_users}</div><div class="stat__label">Premium</div></div>
-            <div class="stat"><div class="stat__value">${stats.total_articles}</div><div class="stat__label">Articles</div></div>
             <div class="stat"><div class="stat__value">${stats.total_subscribers}</div><div class="stat__label">Subscribers</div></div>
           </div>
 
           <div class="toolbar">
-            <div class="toolbar__title">Articles</div>
-            <div class="toolbar__actions">
-              <input type="text" class="toolbar__search" id="articleSearch" placeholder="Search articles...">
-              <button class="btn btn--primary btn--small" id="newArticleBtn">+ New Article</button>
-              <button class="btn btn--ai btn--small" id="aiArticleBtn">+ AI Article</button>
-            </div>
+            <div class="toolbar__title">Quick Links</div>
           </div>
 
-          <table class="table">
-            <thead>
-              <tr><th>Title</th><th>Category</th><th>Access</th><th>Media</th><th>Published</th><th></th></tr>
-            </thead>
-            <tbody id="articlesBody">
-              ${articles.map(a => `
-                <tr>
-                  <td><strong>${esc(a.title)}</strong><br><span style="color:var(--text-3);font-size:0.75rem">/${esc(a.slug)}</span></td>
-                  <td>${esc(a.category)}</td>
-                  <td><span class="badge ${a.is_premium ? 'badge--premium' : 'badge--free'}">${a.is_premium ? 'Premium' : 'Free'}</span></td>
-                  <td style="font-size:0.8125rem">${[a.video_url ? '&#9654; ' + (a.video_duration ? Math.round(a.video_duration) + 's' : 'Video') : '', a.image_count ? '&#9638; ' + a.image_count + ' img' : ''].filter(Boolean).join(', ') || '<span style="color:var(--text-3)">-</span>'}</td>
-                  <td style="color:var(--text-3);font-size:0.8125rem">${new Date(a.published_at).toLocaleDateString('de-DE')}</td>
-                  <td>
-                    <div class="table__actions">
-                      <button class="table__btn" onclick="editArticle(${a.id})">Edit</button>
-                      <button class="table__btn table__btn--del" onclick="deleteArticle(${a.id}, '${esc(a.title).replace(/'/g, "\\'")}')">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+          <div class="admin__links">
+            <a href="/program.html" class="admin__link">
+              <span class="admin__link-icon">&#9776;</span>
+              <div>
+                <strong>Programs</strong>
+                <p>7 AI training tools</p>
+              </div>
+            </a>
+            <a href="/" class="admin__link">
+              <span class="admin__link-icon">&#9728;</span>
+              <div>
+                <strong>Main Site</strong>
+                <p>kyroo.de</p>
+              </div>
+            </a>
+            <a href="/api-docs/" class="admin__link">
+              <span class="admin__link-icon">&#9638;</span>
+              <div>
+                <strong>API Docs</strong>
+                <p>Swagger UI</p>
+              </div>
+            </a>
+            <a href="https://dashboard.stripe.com" target="_blank" class="admin__link">
+              <span class="admin__link-icon">&#9733;</span>
+              <div>
+                <strong>Stripe</strong>
+                <p>Payments dashboard</p>
+              </div>
+            </a>
+          </div>
         </div>
         <div id="formContainer"></div>
       `;
 
-      document.getElementById('newArticleBtn').onclick = () => showArticleForm(null);
-      document.getElementById('aiArticleBtn').onclick = () => showAIModal();
-      window._articles = articles;
-
-      // Search
-      document.getElementById('articleSearch').addEventListener('input', (e) => {
-        const q = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#articlesBody tr');
-        rows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          row.style.display = text.includes(q) ? '' : 'none';
-        });
-      });
     }
 
     // ---- AI Article Modal ----
