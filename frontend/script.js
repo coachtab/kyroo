@@ -151,35 +151,50 @@ function renderPremium(data) {
   grid.innerHTML = `
     <div class="premium__cards">
       <div class="premium__card" data-animate="fade-up">
+        <div class="premium__card-badge">Free</div>
+        <h3 class="premium__card-title">Free</h3>
+        <div class="premium__card-price">
+          <span class="premium__card-amount">0 EUR</span>
+          <span class="premium__card-period">forever</span>
+        </div>
+        <p class="premium__card-note">No credit card needed</p>
+        <ul class="premium__card-list">
+          <li>BMR Calculator</li>
+          <li>1RM Calculator</li>
+          <li>Macro Calculator</li>
+          <li>Body fat estimator</li>
+        </ul>
+        <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="free">Get started</button>
+      </div>
+      <div class="premium__card" data-animate="fade-up" data-delay="100">
         <div class="premium__card-badge">Starter</div>
         <h3 class="premium__card-title">Basic</h3>
         <div class="premium__card-price">
           <span class="premium__card-amount">6 EUR</span>
           <span class="premium__card-period">/month</span>
         </div>
-        <p class="premium__card-note">5 program PDFs per month</p>
+        <p class="premium__card-note">5 KYROO coach programs per month</p>
         <ul class="premium__card-list">
-          <li>5 AI-generated programs per month</li>
+          <li>Everything in Free</li>
+          <li>5 KYROO coach programs/month</li>
           <li>All 7 training tools</li>
-          <li>Train Together access</li>
-          <li>Print-ready PDF output</li>
+          <li>Train Together</li>
         </ul>
         <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="monthly">Get Basic</button>
       </div>
-      <div class="premium__card premium__card--pro" data-animate="fade-up" data-delay="100">
+      <div class="premium__card premium__card--pro" data-animate="fade-up" data-delay="200">
         <div class="premium__card-badge premium__card-badge--pro">Best Value</div>
         <h3 class="premium__card-title">Pro</h3>
         <div class="premium__card-price">
           <span class="premium__card-amount">14 EUR</span>
           <span class="premium__card-period">/month</span>
         </div>
-        <p class="premium__card-note">Unlimited program PDFs</p>
+        <p class="premium__card-note">Unlimited KYROO coach programs</p>
         <ul class="premium__card-list">
-          <li>Unlimited AI-generated programs</li>
-          <li>All 7 training tools</li>
-          <li>Train Together access</li>
-          <li>Print-ready PDF output</li>
-          <li>Priority AI generation</li>
+          <li>Everything in Basic</li>
+          <li>Unlimited programs</li>
+          <li>Priority generation</li>
+          <li>Train Together</li>
         </ul>
         <button type="button" class="btn btn--primary btn--full premiumCTA" data-plan="yearly">Get Pro</button>
         <p class="premium__card-guarantee">14-day free trial. Cancel anytime.</p>
@@ -192,12 +207,31 @@ function renderPremium(data) {
 
 function updatePremiumCTA() {
   document.querySelectorAll('.premiumCTA').forEach(btn => {
-    if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
-      btn.textContent = 'Active';
-      btn.className = 'btn btn--outline btn--full premiumCTA';
-      btn.onclick = () => showAccountModal();
+    const plan = btn.dataset.plan;
+    if (currentUser && (currentUser.is_admin || (currentUser.plan === 'pro') || (currentUser.plan === 'basic' && plan !== 'yearly'))) {
+      if (plan === 'free') {
+        btn.textContent = 'Active';
+        btn.className = 'btn btn--outline btn--full premiumCTA';
+        btn.onclick = () => showAccountModal();
+      } else if (plan === 'monthly' && (currentUser.plan === 'basic' || currentUser.plan === 'pro' || currentUser.is_admin)) {
+        btn.textContent = 'Active';
+        btn.className = 'btn btn--outline btn--full premiumCTA';
+        btn.onclick = () => showAccountModal();
+      } else if (plan === 'yearly' && (currentUser.plan === 'pro' || currentUser.is_admin)) {
+        btn.textContent = 'Active';
+        btn.className = 'btn btn--outline btn--full premiumCTA';
+        btn.onclick = () => showAccountModal();
+      } else {
+        btn.onclick = () => showCheckoutModal();
+      }
     } else if (currentUser) {
-      btn.onclick = () => showCheckoutModal();
+      if (plan === 'free') {
+        btn.textContent = 'Active';
+        btn.className = 'btn btn--outline btn--full premiumCTA';
+        btn.onclick = () => {};
+      } else {
+        btn.onclick = () => showCheckoutModal();
+      }
     } else {
       btn.onclick = () => showAuthModal('signup');
     }

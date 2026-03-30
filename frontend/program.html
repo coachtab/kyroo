@@ -40,6 +40,13 @@
     .hub__card-desc{font-size:0.75rem;color:var(--text-3);line-height:1.65;position:relative;z-index:1}
     .hub__card-badge{display:inline-block;font-family:var(--heading);font-size:0.5625rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--sage);margin-top:14px;padding:5px 12px;background:var(--sage-glow);border-radius:8px;position:relative;z-index:1}
 
+    .hero__tag--free{background:var(--sage-glow);color:var(--sage)}
+    .input--flex{flex:1}
+    .input--half{flex:0.5}
+    .hub__card--free::before{background:linear-gradient(90deg,var(--sage),#a8d090)}
+    .hub__card-icon--sage{background:var(--sage-glow)!important}
+    .hub__card-badge--free{color:var(--sage)!important;background:var(--sage-glow)!important}
+
     @media(max-width:768px){.hub__grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:640px){.hub__grid{grid-template-columns:1fr}}
 
@@ -169,6 +176,12 @@
           <p class="hub__desc">Pick a program. Answer a few questions. Get a plan you can start today.</p>
         </div>
         <div class="hub__grid">
+          <div class="hub__card hub__card--free" onclick="showWizard('calculators')">
+            <div class="hub__card-icon hub__card-icon--sage">&#9874;</div>
+            <h3 class="hub__card-title">Calculators</h3>
+            <p class="hub__card-desc">BMR, 1RM, macros, body fat. Instant results, no AI needed.</p>
+            <span class="hub__card-badge hub__card-badge--free">Free</span>
+          </div>
           <div class="hub__card" onclick="showWizard('12week')">
             <div class="hub__card-icon">&#9776;</div>
             <h3 class="hub__card-title">12-Week Plan</h3>
@@ -210,6 +223,53 @@
             <h3 class="hub__card-title">Weak Point Fixer</h3>
             <p class="hub__card-desc">Identify underdeveloped muscles or lift breakdowns. Get a targeted fix plan.</p>
             <span class="hub__card-badge">Action plan</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calculators Wizard (Free - no API) -->
+      <div class="wizard" id="wizardCalculators">
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
+        <div class="hero">
+          <p class="hero__tag hero__tag--free">FREE TOOLS</p>
+          <h1 class="hero__title">Calculators.</h1>
+          <p class="hero__desc">Instant results. No account needed.</p>
+        </div>
+        <div class="steps" id="stepsCalc"></div>
+        <div id="cardsCalc">
+          <div class="card card--active" data-step="1">
+            <p class="card__title">Your stats.</p>
+            <p class="card__desc">We calculate everything from this.</p>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="wc_weight" placeholder="80"></div>
+              <div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="wc_height" placeholder="180"></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="wc_age" placeholder="28"></div>
+              <div class="input-group"><label class="input-label">Sex</label><div class="selector" id="wc_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button></div></div>
+            </div>
+            <div class="input-group"><label class="input-label">Activity level</label>
+              <div class="selector" id="wc_activity">
+                <button type="button" class="selector__btn" data-value="1.2">Sedentary</button>
+                <button type="button" class="selector__btn selector__btn--selected" data-value="1.55">Moderate</button>
+                <button type="button" class="selector__btn" data-value="1.725">Very active</button>
+              </div>
+            </div>
+            <div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextC()">Continue</button></div>
+          </div>
+          <div class="card" data-step="2">
+            <p class="card__title">Your lifts (optional).</p>
+            <p class="card__desc">For 1RM estimates. Leave blank to skip.</p>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Squat (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_sq_w" placeholder="100" class="input--flex"><input type="number" class="input" id="wc_sq_r" placeholder="5" class="input--half"></div></div>
+              <div class="input-group"><label class="input-label">Bench (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_bp_w" placeholder="70" class="input--flex"><input type="number" class="input" id="wc_bp_r" placeholder="5" class="input--half"></div></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label class="input-label">Deadlift (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_dl_w" placeholder="120" class="input--flex"><input type="number" class="input" id="wc_dl_r" placeholder="5" class="input--half"></div></div>
+              <div class="input-group"><label class="input-label">OHP (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_oh_w" placeholder="40" class="input--flex"><input type="number" class="input" id="wc_oh_r" placeholder="5" class="input--half"></div></div>
+            </div>
+            <p class="error" id="errC" hidden></p>
+            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevC()">Back</button><button type="button" class="btn btn--primary" onclick="calcResults()">Calculate</button></div>
           </div>
         </div>
       </div>
@@ -612,16 +672,17 @@
     function showWizard(type) {
       document.getElementById('hubView').style.display = 'none';
       document.getElementById('resultView').style.display = 'none';
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', nutrition: 'wizardNutrition', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
+      const ids = { calculators: 'wizardCalculators', '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', nutrition: 'wizardNutrition', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
       const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
       initSteps(type);
     }
 
     // Steps
-    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1, stepN = 1, stepI = 1;
+    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1, stepN = 1, stepI = 1, stepC = 1;
 
     const wizardConfig = {
+      calculators: { cards: 'cardsCalc', steps: 'stepsCalc', count: 2 },
       '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
       plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
       tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
@@ -635,7 +696,7 @@
       const cfg = wizardConfig[type];
       const container = document.getElementById(cfg.steps);
       container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'nutrition') stepN = 1; else if (type === 'summer') stepS = 1; else if (type === 'injury') stepI = 1; else stepW = 1;
+      if (type === 'calculators') stepC = 1; else if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'nutrition') stepN = 1; else if (type === 'summer') stepS = 1; else if (type === 'injury') stepI = 1; else stepW = 1;
       showCard(type, 1);
     }
 
@@ -651,6 +712,84 @@
         if (i + 1 < n) s.classList.add('step--done');
         if (i + 1 === n) s.classList.add('step--active');
       });
+    }
+
+    function nextC() { if (stepC < 2) { stepC++; showCard('calculators', stepC); } }
+    function prevC() { if (stepC > 1) { stepC--; showCard('calculators', stepC); } }
+
+    function calc1RM(weight, reps) {
+      if (!weight || !reps || reps < 1) return 0;
+      return Math.round(weight * (1 + reps / 30));
+    }
+
+    function calcResults() {
+      const w = parseFloat(val('wc_weight'));
+      const h = parseFloat(val('wc_height'));
+      const age = parseFloat(val('wc_age'));
+      const sex = sel('wc_sex');
+      const activity = parseFloat(sel('wc_activity')) || 1.55;
+
+      if (!w || !h || !age || !sex) {
+        document.getElementById('errC').textContent = 'Fill in your stats on step 1.';
+        document.getElementById('errC').hidden = false;
+        return;
+      }
+
+      // BMR (Mifflin-St Jeor)
+      let bmr;
+      if (sex === 'male') bmr = (10 * w) + (6.25 * h) - (5 * age) + 5;
+      else bmr = (10 * w) + (6.25 * h) - (5 * age) - 161;
+      const tdee = Math.round(bmr * activity);
+      const deficit = tdee - 500;
+
+      // Macros
+      const proteinG = Math.round(w * 2.2);
+      const fatG = Math.round(w * 0.9);
+      const carbG = Math.round((deficit - (proteinG * 4) - (fatG * 9)) / 4);
+
+      // Body fat estimate (Navy method simplified)
+      const bfEstimate = sex === 'male' ? Math.round(0.3 * w / (h / 100) - 5) : Math.round(0.4 * w / (h / 100) - 3);
+
+      // 1RMs
+      const sq = calc1RM(parseFloat(val('wc_sq_w')), parseFloat(val('wc_sq_r')));
+      const bp = calc1RM(parseFloat(val('wc_bp_w')), parseFloat(val('wc_bp_r')));
+      const dl = calc1RM(parseFloat(val('wc_dl_w')), parseFloat(val('wc_dl_r')));
+      const oh = calc1RM(parseFloat(val('wc_oh_w')), parseFloat(val('wc_oh_r')));
+
+      // Water intake
+      const water = ((w * 35) / 1000).toFixed(1);
+
+      let html = `<h1>KYROO Calculator Results</h1>`;
+      html += `<h2>Calories</h2><p><strong>BMR:</strong> ${Math.round(bmr)} kcal/day (what your body burns at rest)<br>`;
+      html += `<strong>TDEE:</strong> ${tdee} kcal/day (your total daily burn)<br>`;
+      html += `<strong>Fat loss target:</strong> ${deficit} kcal/day (500 below TDEE)</p>`;
+
+      html += `<h2>Macros (for fat loss)</h2>`;
+      html += `<p><strong>Protein:</strong> ${proteinG}g/day (protects muscle)<br>`;
+      html += `<strong>Fat:</strong> ${fatG}g/day (hormones and health)<br>`;
+      html += `<strong>Carbs:</strong> ${Math.max(carbG, 50)}g/day (energy for training)</p>`;
+
+      html += `<h2>Body Composition</h2>`;
+      html += `<p><strong>Estimated body fat:</strong> ~${bfEstimate}% (rough estimate)<br>`;
+      html += `<strong>BMI:</strong> ${(w / ((h/100) * (h/100))).toFixed(1)}</p>`;
+
+      if (sq || bp || dl || oh) {
+        html += `<h2>Estimated 1 Rep Max</h2><p>`;
+        if (sq) html += `<strong>Squat:</strong> ${sq}kg<br>`;
+        if (bp) html += `<strong>Bench:</strong> ${bp}kg<br>`;
+        if (dl) html += `<strong>Deadlift:</strong> ${dl}kg<br>`;
+        if (oh) html += `<strong>OHP:</strong> ${oh}kg<br>`;
+        html += `</p>`;
+      }
+
+      html += `<h2>Daily Water</h2><p><strong>Target:</strong> ${water} litres/day</p>`;
+
+      html += `<h2>What to do next</h2>`;
+      html += `<p>These numbers are your starting point. Track your weight for 2 weeks eating at ${deficit} kcal. If you lose 0.5-1kg per week, you are on track. If not, adjust by 100-200 kcal.</p>`;
+      html += `<p>For a full personalized training + nutrition plan, try the <strong>KYROO coach programs</strong>.</p>`;
+
+      showResult(html);
+      document.getElementById('wizardCalculators').classList.remove('wizard--active');
     }
 
     function next12() { if (step12 < 5) { step12++; showCard('12week', step12); } }
@@ -889,7 +1028,7 @@
     function showError(type, msg) {
       document.getElementById('generatingView').hidden = true;
       const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', nutrition: 'wizardNutrition', summer: 'wizardSummer', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
-      const errIds = { '12week': 'err12', plateau: 'errP', tracker: 'errT', nutrition: 'errN', summer: 'errS', injury: 'errI', weakpoint: 'errW' };
+      const errIds = { calculators: 'errC', '12week': 'err12', plateau: 'errP', tracker: 'errT', nutrition: 'errN', summer: 'errS', injury: 'errI', weakpoint: 'errW' };
       document.getElementById(ids[type]).classList.add('wizard--active');
       const err = document.getElementById(errIds[type]);
       err.textContent = msg; err.hidden = false;
@@ -897,15 +1036,12 @@
 
     // Auth check
     async function init() {
-      if (!token) { showLocked(); return; }
+      // Everyone can see the hub - calculators are free
+      if (!token) return;
       try {
         const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) { showLocked(); return; }
-        const user = await res.json();
-        if (!user.plan || user.plan === 'free') {
-          if (!user.is_admin) showLocked();
-        }
-      } catch (e) { showLocked(); }
+        if (res.ok) user = await res.json();
+      } catch (e) {}
     }
     function showLocked() { document.getElementById('hubView').style.display = 'none'; document.getElementById('lockedView').hidden = false; }
     init();

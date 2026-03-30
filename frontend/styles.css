@@ -395,6 +395,27 @@ input { font-family: inherit; }
   z-index: 1;
 }
 
+.program-card--free { border-color: rgba(130,169,111,0.1); }
+.program-card--free::before { background: linear-gradient(90deg, var(--sage), #a8d090); }
+.program-card--free .program-card__icon { background: var(--sage-glow); }
+.program-card--free:hover .program-card__icon { box-shadow: 0 8px 20px rgba(130,169,111,0.12); }
+
+.program-card__badge-free {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-family: var(--heading);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
+  background: var(--sage-glow);
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 1;
+}
+
 .program-card__desc {
   font-size: 0.75rem;
   color: var(--text-2);
@@ -546,9 +567,9 @@ input { font-family: inherit; }
    Premium - glass card
    ======================================== */
 
-.premium__content { max-width: 720px; margin: 0 auto; }
+.premium__content { max-width: 900px; margin: 0 auto; }
 
-.premium__cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.premium__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
 .premium__card {
   background: linear-gradient(160deg, var(--surface), var(--surface-2));
@@ -596,6 +617,7 @@ input { font-family: inherit; }
 
 @media (max-width: 640px) {
   .premium__cards { grid-template-columns: 1fr; }
+  .premium__card--pro { grid-column: span 1; }
 }
 
 /* ========================================
@@ -755,8 +777,8 @@ input { font-family: inherit; }
 
 @media (max-width: 1024px) {
   .section { padding: 100px 0; }
-  .premium__content { grid-template-columns: 1fr; gap: 40px; }
-  .premium__card { max-width: 440px; margin: 0 auto; }
+  .premium__cards { grid-template-columns: 1fr 1fr; }
+  .premium__card--pro { grid-column: span 2; max-width: 400px; margin: 0 auto; }
   .programs__grid { grid-template-columns: repeat(2, 1fr); }
   .train__grid { grid-template-columns: repeat(2, 1fr); }
   .footer__inner { flex-direction: column; gap: 32px; }
