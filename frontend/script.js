@@ -1105,9 +1105,7 @@ function renderTrainTogether(locations, checkins) {
         </div>
         <h3 class="train__card-name">${esc(loc.short_name)}</h3>
         ${count > 0 ? `
-          <div class="train__card-people">
-            ${locCheckins.map(c => `<span class="train__person">${esc(c.user_name.split(' ')[0])} <em>${timeAgo(c.created_at)}</em></span>`).join('')}
-          </div>
+          <div class="train__card-vibe">${count === 1 ? 'Someone is training here right now' : count + ' people working out right now'}</div>
         ` : ''}
         ${canCheckin ? (isHere ? `
           <button type="button" class="train__btn train__btn--here" data-action="checkout">Leave</button>

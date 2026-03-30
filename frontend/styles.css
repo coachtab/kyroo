@@ -1051,6 +1051,12 @@ input { font-family: inherit; }
   color: var(--sage);
 }
 
+.train__card-vibe {
+  font-size: 0.75rem;
+  color: var(--sage);
+  margin-bottom: 14px;
+}
+
 .train__card-name {
   font-family: var(--serif);
   font-size: 1.125rem;
