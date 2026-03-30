@@ -443,7 +443,7 @@ function updateAuthUI() {
     if (!progLink) {
       progLink = document.createElement('a');
       progLink.id = 'navProgLink';
-      progLink.href = '/programme.html';
+      progLink.href = '/program.html';
       progLink.className = 'nav__link';
       progLink.textContent = 'Program';
       btn.parentNode.insertBefore(progLink, btn);

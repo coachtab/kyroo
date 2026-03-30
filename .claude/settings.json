@@ -92,7 +92,8 @@
       "Bash(echo \"Converting $f...\")",
       "Bash(node social-media/convert.js \"$f\")",
       "Bash(done)",
-      "Bash(node social-media/convert.js social-media/ig-nutrition-shredder.svg)"
+      "Bash(node social-media/convert.js social-media/ig-nutrition-shredder.svg)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://kyroo.de/programme.html)"
     ],
     "additionalDirectories": [
       "C:\\buf\\github\\ct\\kyroo"
