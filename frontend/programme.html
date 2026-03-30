@@ -104,6 +104,28 @@
     .locked__desc{font-size:0.875rem;color:var(--text-3);margin-bottom:28px}
     .locked__btn{display:inline-flex;padding:14px 32px;background:var(--accent);color:#fff;font-family:var(--sans);font-size:0.8125rem;font-weight:600;border-radius:999px}
 
+    /* Chat */
+    .chat{max-height:60vh;display:flex;flex-direction:column}
+    .chat__messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding:8px 0 20px;min-height:200px}
+    .chat__msg{max-width:90%;font-size:0.875rem;line-height:1.7;padding:14px 18px;white-space:pre-wrap}
+    .chat__msg--ai{background:var(--surface);border:1px solid var(--border);color:var(--text-2);align-self:flex-start}
+    .chat__msg--user{background:rgba(194,122,86,0.08);border:1px solid rgba(194,122,86,0.15);color:var(--text);align-self:flex-end}
+    .chat__msg--final{background:var(--surface);border:1px solid var(--border);color:var(--text-2);align-self:flex-start;max-width:100%}
+    .chat__msg--final h1,.chat__msg--final h2,.chat__msg--final h3{font-family:var(--serif);font-weight:400;color:var(--text);margin:20px 0 8px}
+    .chat__msg--final h1{font-size:1.375rem;margin-top:0}
+    .chat__msg--final h2{font-size:1.125rem;padding-top:16px;border-top:1px solid var(--border)}
+    .chat__msg--final h3{font-size:1rem}
+    .chat__msg--final strong{color:var(--text)}
+    .chat__input-wrap{display:flex;gap:8px;border-top:1px solid var(--border);padding-top:16px}
+    .chat__input{flex:1;padding:12px 14px;background:transparent;border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:0.875rem;outline:none;resize:none;line-height:1.5}
+    .chat__input:focus{border-color:var(--accent)}
+    .chat__input::placeholder{color:var(--text-3)}
+    .chat__send{padding:12px 24px;background:var(--accent);color:#fff;font-family:var(--sans);font-size:0.8125rem;font-weight:600;border:none;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+    .chat__send:hover{background:var(--accent-h)}
+    .chat__send:disabled{opacity:0.3;cursor:not-allowed}
+    .chat__typing{font-size:0.75rem;color:var(--text-3);padding:8px 0}
+    .chat__actions{display:flex;gap:8px;margin-top:16px}
+
     @media print{body{background:#fff;color:#111}.nav,.steps,.card__actions,.result__actions,.locked,.hub,.wizard__back{display:none!important}.result{display:block!important}.result__body,.result__body *{color:#111!important}.result__body h2{border-top:1px solid #ddd}.page{max-width:100%;padding:0}}
     @media(max-width:640px){.input-row{flex-direction:column}.hub__grid{grid-template-columns:1fr}.selector__btn{min-width:0}}
   </style>
@@ -156,6 +178,12 @@
             <h3 class="hub__card-title">90-Day Summer Shred</h3>
             <p class="hub__card-desc">Deficit, diet, training, steps, sleep. Five steps, no BS. Start tomorrow.</p>
             <span class="hub__card-badge">90 days</span>
+          </div>
+          <div class="hub__card" onclick="showWizard('nutrition')">
+            <div class="hub__card-icon">&#9733;</div>
+            <h3 class="hub__card-title">Nutrition Shredder</h3>
+            <p class="hub__card-desc">AI nutritionist builds your meal plan, macros, snack swaps, and timeline. Chat-based.</p>
+            <span class="hub__card-badge">Meal plan</span>
           </div>
           <div class="hub__card" onclick="showWizard('injury')">
             <div class="hub__card-icon">&#9769;</div>
@@ -462,6 +490,23 @@
         </div>
       </div>
 
+      <!-- Nutrition Chat Wizard -->
+      <div class="wizard" id="wizardNutrition">
+        <span class="wizard__back" onclick="showHub()">Back to programs</span>
+        <div class="hero">
+          <p class="hero__tag">NUTRITION SHREDDER</p>
+          <h1 class="hero__title">Your meal plan.</h1>
+          <p class="hero__desc">Chat with your AI nutritionist. Answer 4 sections. Get a complete plan.</p>
+        </div>
+        <div class="chat" id="nutritionChat">
+          <div class="chat__messages" id="chatMessages"></div>
+          <div class="chat__input-wrap">
+            <textarea class="chat__input" id="chatInput" placeholder="Type your answer..." rows="2"></textarea>
+            <button type="button" class="chat__send" id="chatSend" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Generating -->
       <div id="generatingView" hidden>
         <div class="generating">
@@ -506,15 +551,22 @@
       document.getElementById('hubView').style.display = 'block';
       document.getElementById('resultView').style.display = 'none';
       document.getElementById('generatingView').hidden = true;
+      // Reset chat
+      const chatWrap = document.querySelector('.chat__input-wrap');
+      if (chatWrap) chatWrap.style.display = 'flex';
     }
 
     function showWizard(type) {
       document.getElementById('hubView').style.display = 'none';
       document.getElementById('resultView').style.display = 'none';
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
+      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', nutrition: 'wizardNutrition', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
       const w = document.getElementById(ids[type]);
       w.classList.add('wizard--active');
-      initSteps(type);
+      if (type === 'nutrition') {
+        startNutritionChat();
+      } else {
+        initSteps(type);
+      }
     }
 
     // Steps
@@ -524,6 +576,7 @@
       '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
       plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
       tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
+      nutrition: { cards: null, steps: null, count: 0 },
       summer: { cards: 'cardsSummer', steps: 'stepsSummer', count: 3 },
       injury: { cards: 'cardsInjury', steps: 'stepsInjury', count: 2 },
       weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
@@ -740,6 +793,129 @@
         showResult(data.program);
       } catch (ex) { showError('weakpoint', ex.message); }
     }
+
+    // ---- Nutrition Chat ----
+    let chatHistory = [];
+
+    async function startNutritionChat() {
+      chatHistory = [];
+      document.getElementById('chatMessages').innerHTML = '';
+      document.getElementById('chatInput').value = '';
+      // Send initial message to get the AI to ask Section 1
+      await sendToNutrition([{ role: 'user', content: 'Hi, I want to build a nutrition plan to lose fat. Start the process.' }]);
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      // Add user message to UI
+      addChatMsg(msg, 'user');
+      input.value = '';
+
+      // Add to history
+      chatHistory.push({ role: 'user', content: msg });
+      await sendToNutrition(chatHistory);
+    }
+
+    async function sendToNutrition(messages) {
+      const sendBtn = document.getElementById('chatSend');
+      sendBtn.disabled = true;
+      sendBtn.textContent = '...';
+
+      // Show typing indicator
+      const typing = document.createElement('div');
+      typing.className = 'chat__typing';
+      typing.textContent = 'Your nutritionist is thinking...';
+      document.getElementById('chatMessages').appendChild(typing);
+      scrollChat();
+
+      try {
+        const freshToken = localStorage.getItem('kyroo_token');
+        if (!freshToken) throw new Error('Please log in first.');
+
+        const res = await fetch(`${API}/api/program/nutrition`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages }),
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
+        if (!res.ok) throw new Error(data.error || 'Failed');
+
+        typing.remove();
+
+        const reply = data.reply;
+        chatHistory.push({ role: 'assistant', content: reply });
+
+        // Check if this is the final plan (contains the full plan markers)
+        const isFinal = reply.includes('KYROO NUTRITION PLAN') || reply.includes('7-DAY MEAL PLAN') || reply.includes('CALORIE CALCULATION');
+
+        if (isFinal) {
+          // Render as formatted result
+          let html = reply
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+
+          const msgEl = document.createElement('div');
+          msgEl.className = 'chat__msg chat__msg--final';
+          msgEl.innerHTML = '<p>' + html + '</p>';
+          document.getElementById('chatMessages').appendChild(msgEl);
+
+          // Add print button
+          const actions = document.createElement('div');
+          actions.className = 'chat__actions';
+          actions.innerHTML = '<button type="button" class="result__btn" onclick="printNutrition()">Print / PDF</button><button type="button" class="result__btn" onclick="showHub()">Done</button>';
+          document.getElementById('chatMessages').appendChild(actions);
+
+          // Hide input
+          document.querySelector('.chat__input-wrap').style.display = 'none';
+        } else {
+          addChatMsg(reply, 'ai');
+        }
+
+        scrollChat();
+      } catch (ex) {
+        typing.remove();
+        addChatMsg('Error: ' + ex.message, 'ai');
+      }
+
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send';
+    }
+
+    function addChatMsg(text, type) {
+      const el = document.createElement('div');
+      el.className = 'chat__msg chat__msg--' + type;
+      el.textContent = text;
+      document.getElementById('chatMessages').appendChild(el);
+      scrollChat();
+    }
+
+    function scrollChat() {
+      const c = document.getElementById('chatMessages');
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function printNutrition() {
+      const final = document.querySelector('.chat__msg--final');
+      if (!final) return;
+      const w = window.open('', '_blank');
+      w.document.write('<html><head><title>KYROO Nutrition Plan</title><style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 20px;line-height:1.8;color:#111}h1,h2,h3{font-family:Georgia,serif;font-weight:400}h2{border-top:1px solid #ddd;padding-top:16px;margin-top:28px}strong{font-weight:600}</style></head><body>' + final.innerHTML + '</body></html>');
+      w.document.close();
+      w.print();
+    }
+
+    // Enter key sends
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+    });
 
     function showResult(text) {
       let html = text.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');

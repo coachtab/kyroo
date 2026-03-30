@@ -84,7 +84,18 @@
       "Bash(python -c \"import sys,json; locs=json.load\\(sys.stdin\\); [print\\(f''''  {l[\"\"short_name\"\"]}''''\\) for l in locs]\")",
       "Bash(python -c \"import sys,json; print\\(len\\(json.load\\(sys.stdin\\)\\), ''''locations''''\\)\")",
       "Bash(curl -s https://kyroo.de/api/checkins)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST https://kyroo.de/api/programme/generate -H \"Content-Type: application/json\" -d '{\"\"level\"\":\"\"test\"\"}')"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST https://kyroo.de/api/programme/generate -H \"Content-Type: application/json\" -d '{\"\"level\"\":\"\"test\"\"}')",
+      "Bash(node social-media/convert.js social-media/instagram-launch-post.svg)",
+      "Read(//c/Users/KamaraO/AppData/Local/Temp/claude/c--buf-github-ct-kyroo/61683a01-281f-4e15-8975-8cc6314a7c1c/tasks/**)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(echo \"Converting $f...\")",
+      "Bash(node social-media/convert.js \"$f\")",
+      "Bash(done)",
+      "Bash(node social-media/convert.js social-media/ig-nutrition-shredder.svg)"
+    ],
+    "additionalDirectories": [
+      "C:\\buf\\github\\ct\\kyroo"
     ]
   }
 }

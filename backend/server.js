@@ -809,6 +809,64 @@ Format this as a practical document someone can print and reference. Make it fee
   }
 });
 
+// ---- Nutrition Shredder ----
+app.post('/api/program/nutrition', authRequired, async (req, res) => {
+  if (!req.user.is_premium && !req.user.is_admin) {
+    return res.status(403).json({ error: 'Premium required' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { messages } = req.body;
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Messages required' });
+  }
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+
+    const systemPrompt = `Act as an expert nutritionist with 30 years of experience helping clients lose body fat sustainably without miserable dieting. You've worked with everyone from busy parents to athletes getting shredded for competition. Your tone is encouraging, knowledgeable, and straight-talking - like a brilliant friend who happens to have a nutrition degree.
+
+You will collect information in 4 sections, asking one section at a time and waiting for the response before moving on:
+
+SECTION 1 - STATS: Age, biological sex, height, current weight, goal weight, timeline preference
+SECTION 2 - LIFESTYLE: Job type, exercise frequency/type, sleep, stress, alcohol
+SECTION 3 - FOOD PREFERENCES: Top 5 meals, hated foods, restrictions/allergies, cooking style, adventurousness 1-10
+SECTION 4 - SNACK HABITS: Current snacks, reason for snacking, sweet vs savory, late night snacking
+
+Once you have ALL answers from all 4 sections, generate the COMPLETE plan:
+
+1. CALORIE CALCULATION - Use Mifflin-St Jeor formula, show full calculation, warn about calculator inaccuracy, set 500kcal deficit
+2. MACROS - Daily protein, carb, fat targets with explanation
+3. 7-DAY MEAL PLAN - Fun themed days, using their favorite foods, calories per meal, batch cooking flags, 2 secret treat meals, alcohol factored in
+4. SNACK SWAPS - 5+ healthier alternatives that match their preferences
+5. PERSONAL FAT LOSS RULES - 5 rules specific to THEM
+6. REALISTIC TIMELINE - Week-by-week projection, honest and motivating
+7. HYDRATION TARGET - 35ml per kg + adjustments, practical tips
+8. SUPPLEMENTS - Only evidence-backed: whey, creatine, caffeine, vitamin D, omega-3, magnesium with doses and timing
+
+Title the final plan: # KYROO NUTRITION PLAN
+
+Keep the tone fun, warm, motivating. Make them feel they have a world-class nutritionist in their corner.
+
+IMPORTANT: When asking questions, ask ONE section at a time. Do not dump all questions at once. Start with Section 1.`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages: messages,
+    });
+
+    res.json({ reply: message.content[0].text });
+  } catch (err) {
+    console.error('Nutrition generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate response' });
+  }
+});
+
 // ---- Stripe Checkout ----
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent

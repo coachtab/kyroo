@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c27a56"/>
+      <stop offset="100%" stop-color="#7d8c68"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="#060606"/>
+
+  <!-- Subtle corner accent -->
+  <circle cx="1080" cy="0" r="300" fill="#c27a56" opacity="0.03"/>
+  <circle cx="0" cy="1080" r="250" fill="#7d8c68" opacity="0.03"/>
+
+  <!-- Top line -->
+  <line x1="80" y1="120" x2="1000" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+  <!-- Tag -->
+  <text x="540" y="300" font-family="sans-serif" font-size="14" font-weight="700" fill="#c27a56" text-anchor="middle" letter-spacing="8" text-transform="uppercase">NOW LIVE</text>
+
+  <!-- Logo -->
+  <text x="540" y="460" font-family="Georgia, serif" font-size="120" fill="#eae5de" text-anchor="middle" letter-spacing="12">KYROO</text>
+
+  <!-- Tagline -->
+  <text x="540" y="540" font-family="Georgia, serif" font-size="36" fill="#c27a56" text-anchor="middle" font-style="italic">Curated in Berlin.</text>
+
+  <!-- Description -->
+  <text x="540" y="640" font-family="sans-serif" font-size="22" fill="#7a756e" text-anchor="middle">Trends. Fitness. Lifestyle. One place.</text>
+
+  <!-- Divider -->
+  <line x1="440" y1="700" x2="640" y2="700" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+  <!-- CTA -->
+  <rect x="360" y="760" width="360" height="56" rx="28" fill="url(#accent)"/>
+  <text x="540" y="796" font-family="sans-serif" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="3">KYROO.DE</text>
+
+  <!-- Bottom text -->
+  <text x="540" y="920" font-family="sans-serif" font-size="14" fill="#3d3a37" text-anchor="middle" letter-spacing="4">BUILT IN PRENZLAUER BERG</text>
+
+  <!-- Bottom line -->
+  <line x1="80" y1="960" x2="1000" y2="960" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <rect width="1080" height="1080" fill="#060606"/>
+  <circle cx="0" cy="0" r="350" fill="#c27a56" opacity="0.03"/>
+  <line x1="80" y1="120" x2="1000" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="280" font-family="sans-serif" font-size="14" font-weight="700" fill="#c27a56" text-anchor="middle" letter-spacing="8">STUCK?</text>
+  <text x="540" y="420" font-family="Georgia, serif" font-size="68" fill="#eae5de" text-anchor="middle">Same weight.</text>
+  <text x="540" y="500" font-family="Georgia, serif" font-size="68" fill="#eae5de" text-anchor="middle">Same reps.</text>
+  <text x="540" y="580" font-family="Georgia, serif" font-size="68" fill="#c27a56" text-anchor="middle" font-style="italic">Every week.</text>
+  <line x1="440" y1="640" x2="640" y2="640" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="720" font-family="sans-serif" font-size="20" fill="#7a756e" text-anchor="middle">We diagnose why you stalled.</text>
+  <text x="540" y="760" font-family="sans-serif" font-size="20" fill="#7a756e" text-anchor="middle">Then build an 8-week plan to fix it.</text>
+  <rect x="360" y="840" width="360" height="56" rx="28" fill="#c27a56"/>
+  <text x="540" y="876" font-family="sans-serif" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="3">PLATEAU BREAKER</text>
+  <line x1="80" y1="960" x2="1000" y2="960" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="1000" font-family="sans-serif" font-size="13" fill="#3d3a37" text-anchor="middle" letter-spacing="4">KYROO.DE</text>
+</svg>

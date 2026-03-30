@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <rect width="1080" height="1080" fill="#060606"/>
+  <circle cx="540" cy="540" r="500" fill="#7d8c68" opacity="0.02"/>
+  <line x1="80" y1="120" x2="1000" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="260" font-family="sans-serif" font-size="14" font-weight="700" fill="#7d8c68" text-anchor="middle" letter-spacing="8">90 DAYS</text>
+  <text x="540" y="400" font-family="Georgia, serif" font-size="80" fill="#eae5de" text-anchor="middle">Get lean.</text>
+  <text x="540" y="490" font-family="Georgia, serif" font-size="80" fill="#c27a56" text-anchor="middle" font-style="italic">No BS.</text>
+  <text x="540" y="600" font-family="sans-serif" font-size="20" fill="#7a756e" text-anchor="middle">Deficit. Diet. Training. Steps. Sleep.</text>
+  <text x="540" y="640" font-family="sans-serif" font-size="20" fill="#7a756e" text-anchor="middle">Five steps. Personalized to you.</text>
+  <line x1="440" y1="700" x2="640" y2="700" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="770" font-family="sans-serif" font-size="16" fill="#3d3a37" text-anchor="middle" letter-spacing="2">EXACT CALORIES. EXACT MACROS.</text>
+  <text x="540" y="800" font-family="sans-serif" font-size="16" fill="#3d3a37" text-anchor="middle" letter-spacing="2">FULL TRAINING SPLIT. MEAL IDEAS.</text>
+  <rect x="360" y="860" width="360" height="56" rx="28" fill="#7d8c68"/>
+  <text x="540" y="896" font-family="sans-serif" font-size="16" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="3">SUMMER SHRED</text>
+  <line x1="80" y1="960" x2="1000" y2="960" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="540" y="1000" font-family="sans-serif" font-size="13" fill="#3d3a37" text-anchor="middle" letter-spacing="4">KYROO.DE</text>
+</svg>
