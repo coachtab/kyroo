@@ -318,17 +318,12 @@ input { font-family: inherit; }
    ======================================== */
 
 .programs__grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 16px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
-.programs__grid::-webkit-scrollbar { display: none; }
 
 .program-card {
-  flex: 0 0 175px;
   background: linear-gradient(160deg, var(--surface), var(--surface-2));
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -702,6 +697,7 @@ input { font-family: inherit; }
   .section { padding: 100px 0; }
   .premium__content { grid-template-columns: 1fr; gap: 40px; }
   .premium__card { max-width: 440px; margin: 0 auto; }
+  .programs__grid { grid-template-columns: repeat(2, 1fr); }
   .train__grid { grid-template-columns: repeat(2, 1fr); }
   .footer__inner { flex-direction: column; gap: 32px; }
 }
