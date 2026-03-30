@@ -1039,23 +1039,23 @@ function updateHeroCTAs() {
   if (!cta1 || !cta2) return;
 
   if (currentUser && (currentUser.is_premium || currentUser.is_admin)) {
-    cta1.textContent = 'Read';
-    cta1.href = '#articles';
-    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('articles'); };
+    cta1.textContent = 'Programs';
+    cta1.href = '/program.html';
+    cta1.onclick = null;
     cta2.textContent = 'Account';
     cta2.href = 'javascript:void(0)';
     cta2.onclick = (e) => { e.preventDefault(); showAccountModal(); };
   } else if (currentUser) {
-    cta1.textContent = 'Explore';
-    cta1.href = '#explore';
-    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('explore'); };
+    cta1.textContent = 'See programs';
+    cta1.href = '#programs';
+    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('programs'); };
     cta2.textContent = 'Go Premium';
     cta2.href = 'javascript:void(0)';
     cta2.onclick = (e) => { e.preventDefault(); scrollToSection('premium'); };
   } else {
-    cta1.textContent = 'Explore';
-    cta1.href = '#explore';
-    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('explore'); };
+    cta1.textContent = 'See programs';
+    cta1.href = '#programs';
+    cta1.onclick = (e) => { e.preventDefault(); scrollToSection('programs'); };
     cta2.textContent = 'Subscribe';
     cta2.href = '#premium';
     cta2.onclick = (e) => { e.preventDefault(); scrollToSection('premium'); };
@@ -1279,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---- Modal wiring (close via X button or Escape only) ----
   document.getElementById('authModalClose').onclick = () => hideModal('authModal');
-  document.getElementById('articleModalClose').onclick = () => hideModal('articleModal');
+
   document.getElementById('checkoutModalClose').onclick = () => hideModal('checkoutModal');
   document.getElementById('privacyModalClose').onclick = () => hideModal('privacyModal');
   document.getElementById('termsModalClose').onclick = () => hideModal('termsModal');
@@ -1408,8 +1408,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await res.json();
 
     renderHero(data);
-    renderExplore(data);
-    renderArticlesHeader(data);
     renderPremium(data);
     renderNewsletter(data);
     renderSocials(data);
@@ -1419,8 +1417,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to load site data:', err);
   }
 
-  // ---- Load articles ----
-  loadArticles();
+  // Articles disabled for launch
+  // loadArticles();
 
   // Train Together
   loadTrainTogether();

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KYROO</title>
-  <meta name="description" content="KYROO - curated trends, AI, fitness, and culture. From Berlin.">
+  <meta name="description" content="KYROO - AI training tools and community workouts. Built in Prenzlauer Berg.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@
         <span></span><span></span>
       </button>
       <div class="nav__menu" id="navMenu">
-        <a href="#explore" class="nav__link">Explore</a>
-        <a href="#articles" class="nav__link">Articles</a>
+        <a href="#programs" class="nav__link">Programs</a>
+        <a href="#train" class="nav__link">Train</a>
         <a href="#premium" class="nav__link">Premium</a>
         <a href="javascript:void(0)" class="nav__link nav__auth" id="navAuthBtn">Log in</a>
       </div>
@@ -33,36 +33,71 @@
       <h1 class="hero__title" data-animate="fade-up" id="heroTitle"></h1>
       <p class="hero__subtitle" data-animate="fade-up" data-delay="150" id="heroSubtitle"></p>
       <div class="hero__actions" data-animate="fade-up" data-delay="300" id="heroActions">
-        <a href="#explore" class="btn btn--primary" id="heroCTA1">Explore</a>
+        <a href="#programs" class="btn btn--primary" id="heroCTA1">See programs</a>
         <a href="#premium" class="btn btn--ghost" id="heroCTA2">Subscribe</a>
       </div>
     </div>
   </section>
 
-  <section class="explore section" id="explore">
-    <div class="container">
-      <div class="section__label" data-animate="fade-up" id="exploreHeader"></div>
-      <div class="explore__grid" id="exploreGrid"></div>
-    </div>
-  </section>
-
-  <section class="articles section" id="articles">
-    <div class="container">
-      <div class="section__label" data-animate="fade-up" id="articlesHeader"></div>
-      <div class="articles__grid" id="articlesGrid"></div>
-    </div>
-  </section>
-
-  <section class="train section" id="train">
+  <!-- Programs Preview -->
+  <section class="programs section" id="programs">
     <div class="container">
       <div class="section__label" data-animate="fade-up">
         <span class="section__tag">PREMIUM</span>
+        <h2 class="section__title">Your AI coach.</h2>
+      </div>
+      <div class="programs__grid" data-animate="fade-up" data-delay="100">
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9776;</span>
+          <h3 class="program-card__title">12-Week Plan</h3>
+          <p class="program-card__desc">Complete periodized training program</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9889;</span>
+          <h3 class="program-card__title">Plateau Breaker</h3>
+          <p class="program-card__desc">Diagnose stalls, 8-week fix</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9733;</span>
+          <h3 class="program-card__title">Nutrition Shredder</h3>
+          <p class="program-card__desc">Calories, macros, 7-day meal plan</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9728;</span>
+          <h3 class="program-card__title">90-Day Shred</h3>
+          <p class="program-card__desc">Deficit, diet, training, steps, sleep</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9638;</span>
+          <h3 class="program-card__title">Progress Tracker</h3>
+          <p class="program-card__desc">Professional monitoring system</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9769;</span>
+          <h3 class="program-card__title">Injury Prevention</h3>
+          <p class="program-card__desc">Prehab, warm-ups, technique fixes</p>
+        </a>
+        <a href="/program.html" class="program-card">
+          <span class="program-card__icon">&#9881;</span>
+          <h3 class="program-card__title">Weak Point Fixer</h3>
+          <p class="program-card__desc">Fix lagging muscles and lifts</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Train Together -->
+  <section class="train section" id="train">
+    <div class="container">
+      <div class="section__label" data-animate="fade-up">
+        <span class="section__tag">COMMUNITY</span>
         <h2 class="section__title">Train together.</h2>
       </div>
       <div class="train__grid" id="trainGrid"></div>
     </div>
   </section>
 
+  <!-- Premium -->
   <section class="premium section" id="premium">
     <div class="container">
       <div class="section__label" data-animate="fade-up" id="premiumHeader"></div>
@@ -70,6 +105,7 @@
     </div>
   </section>
 
+  <!-- Newsletter -->
   <section class="newsletter section" id="newsletter">
     <div class="container">
       <div class="newsletter__inner" data-animate="fade-up">
@@ -150,13 +186,6 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="articleModal" hidden>
-    <div class="modal modal--wide">
-      <button type="button" class="modal__close" id="articleModalClose">&times;</button>
-      <div id="articleContent"></div>
-    </div>
-  </div>
-
   <div class="modal-overlay" id="checkoutModal" hidden>
     <div class="modal modal--checkout">
       <button type="button" class="modal__close" id="checkoutModalClose">&times;</button>
@@ -174,7 +203,7 @@
     <div class="modal"><button type="button" class="modal__close" id="imprintModalClose">&times;</button><div id="imprintContent"></div></div>
   </div>
 
-  <!-- DSGVO Cookie Consent -->
+  <!-- GDPR Cookie Consent -->
   <div class="cookie-banner" id="cookieBanner" hidden>
     <div class="cookie-banner__inner container">
       <p class="cookie-banner__text">We only use essential cookies. No tracking, no ads. <a href="javascript:void(0)" id="cookiePrivacyLink">Privacy Policy</a></p>
