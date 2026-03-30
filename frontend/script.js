@@ -205,6 +205,7 @@ const ARROW_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 function renderExplore(data) {
   renderSectionHeader(document.getElementById('exploreHeader'), data.sections.explore);
   const grid = document.getElementById('exploreGrid');
+  if (!grid) return;
   grid.innerHTML = data.categories.map((cat, i) => `
     <div class="explore__card" data-category="${esc(cat.title)}" data-animate="fade-up" data-delay="${i * 100}">
       <div class="explore__card-top">
@@ -341,6 +342,7 @@ function renderFooterLinks(data) {
 
 function renderArticlesHeader(data) {
   const header = document.getElementById('articlesHeader');
+  if (!header) return;
   if (!header || !data.settings) return;
   header.innerHTML = `
     <span class="section__tag">${esc(data.settings.articles_tag || 'Read')}</span>
@@ -474,12 +476,16 @@ function updateAuthUI() {
 // Modal helpers
 // ========================================
 function showModal(id) {
-  document.getElementById(id).hidden = false;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = false;
   document.body.style.overflow = 'hidden';
 }
 
 function hideModal(id) {
-  document.getElementById(id).hidden = true;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = true;
   document.body.style.overflow = '';
 }
 
@@ -1288,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Escape key closes the topmost modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      const modals = ['checkoutModal', 'articleModal', 'authModal', 'privacyModal', 'termsModal', 'imprintModal'];
+      const modals = ['checkoutModal', 'authModal', 'privacyModal', 'termsModal', 'imprintModal'];
       for (const id of modals) {
         if (!document.getElementById(id).hidden) {
           hideModal(id);
@@ -1399,7 +1405,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await restoreSession();
   // Ensure modals stay closed on page load
   hideModal('authModal');
-  hideModal('articleModal');
 
   // ---- Fetch site data and render ----
   try {
