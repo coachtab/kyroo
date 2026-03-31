@@ -494,7 +494,8 @@ h1, h2, h3, h4, h5, h6 {
    6. HERO
    ============================================================ */
 .hero {
-  height:          100vh;
+  margin-top:      var(--nav-h);
+  height:          calc(100vh - var(--nav-h));
   display:         flex;
   align-items:     center;
   justify-content: center;
@@ -502,7 +503,6 @@ h1, h2, h3, h4, h5, h6 {
   position:        relative;
   overflow:        hidden;
   background:      var(--bg);
-  padding-top:     var(--nav-h);
 }
 
 /* Background glow blobs */
@@ -3356,7 +3356,8 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Hero */
   .hero {
-    height: 100vh;
+    margin-top: var(--nav-h);
+    height: calc(100vh - var(--nav-h));
   }
   .hero__title { font-size: clamp(2rem, 9vw, 3rem); }
   .hero__subtitle { font-size: 1rem; }
