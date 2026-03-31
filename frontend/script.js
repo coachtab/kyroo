@@ -540,7 +540,7 @@ async function showAccountModal() {
   // Fetch fresh user data
   try {
     const meRes = await fetch(`${API_BASE}/api/auth/me`, { headers: authHeaders() });
-    if (meRes.ok) currentUser = await meRes.json();
+    if (meRes.ok) { currentUser = await meRes.json(); window.currentUser = currentUser; }
   } catch (e) {}
 
   const expiresDate = currentUser.premium_expires_at
@@ -954,6 +954,7 @@ async function restoreSession() {
     if (!res.ok) { clearAuth(); return; }
     const user = await res.json();
     currentUser = user;
+    window.currentUser = user;   // expose for inline scripts
     updateAuthUI();
   } catch (e) {
     clearAuth();
