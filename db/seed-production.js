@@ -60,13 +60,9 @@ async function seed() {
   // Footer links — clean single set, no duplicates
   await pool.query("DELETE FROM footer_links");
   await pool.query(`INSERT INTO footer_links (column_title, label, url, col_order, sort_order) VALUES
-    ('Programs', '90-Day Challenge', '/program.html#challenge90', 1, 1),
-    ('Programs', 'Getting Fit for Summer', '/program.html#summer', 1, 2),
-    ('Programs', 'Weight Loss Plan', '/program.html#weightloss', 1, 3),
-    ('Programs', 'Muscle Gain Plan', '/program.html#muscle', 1, 4),
-    ('Legal', 'Privacy Policy', 'privacy', 2, 1),
-    ('Legal', 'Terms of Service', 'terms', 2, 2),
-    ('Legal', 'Imprint', 'imprint', 2, 3)`);
+    ('Legal', 'Privacy Policy', 'privacy', 1, 1),
+    ('Legal', 'Terms of Service', 'terms', 1, 2),
+    ('Legal', 'Imprint', 'imprint', 1, 3)`);
   console.log('Footer links updated');
 
   await pool.end();
