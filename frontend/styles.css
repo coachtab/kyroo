@@ -575,6 +575,7 @@ h1, h2, h3, h4, h5, h6 {
   color:       var(--text);
   margin-bottom: 24px;
   animation:   fadeUp 0.7s var(--ease-out) 0.1s both;
+  white-space: nowrap;
 }
 
 .hero__title--accent {
