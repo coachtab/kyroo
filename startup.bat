@@ -53,8 +53,8 @@ if not exist node_modules (
 )
 cd ..
 
-:: -- Kill any existing process on port 3000 --
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3000 " 2^>nul') do (
+:: -- Kill any existing process on port 3001 --
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3001 " 2^>nul') do (
     if not "%%a"=="0" taskkill /PID %%a /F >nul 2>nul
 )
 
@@ -62,16 +62,16 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3000 " 2^>nul') do (
 echo   [3/4] Starting server...
 echo   [4/4] Opening browser...
 timeout /t 2 /nobreak >nul
-start http://localhost:3000
+start http://localhost:3001
 
 echo.
 echo   +======================================+
-echo   ^|   KYROO running at localhost:3000    ^|
+echo   ^|   KYROO running at localhost:3001    ^|
 echo   ^|   Press Ctrl+C to stop              ^|
 echo   +======================================+
 echo.
 echo   Database: Docker (kyroo-db)
-echo   Server:   Node.js (localhost:3000)
+echo   Server:   Node.js (localhost:3001)
 echo.
 echo   To stop everything:
 echo     Ctrl+C (server)
