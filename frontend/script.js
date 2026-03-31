@@ -521,12 +521,14 @@ function showModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.hidden = false;
+  requestAnimationFrame(() => el.classList.add('modal-overlay--active'));
   document.body.style.overflow = 'hidden';
 }
 
 function hideModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
+  el.classList.remove('modal-overlay--active');
   el.hidden = true;
   document.body.style.overflow = '';
 }
