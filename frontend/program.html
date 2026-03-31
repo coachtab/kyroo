@@ -23,6 +23,12 @@
     .hub-hero__tag { margin-bottom: 20px; }
     .hub-hero__title { font-family: var(--heading); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; color: var(--text); }
     .hub-hero__desc { font-size: 1rem; color: var(--text-2); line-height: 1.7; max-width: 520px; margin: 0 auto; }
+    .hub-search { position: relative; max-width: 420px; margin: 28px auto 0; }
+    .hub-search__icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--text-3); pointer-events: none; }
+    .hub-search__input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-full); padding: 12px 20px 12px 44px; font-size: 0.9375rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+    .hub-search__input::placeholder { color: var(--text-3); }
+    .hub-search__input:focus { border-color: var(--accent); }
+    .hub-search__input::-webkit-search-cancel-button { cursor: pointer; }
 
     /* Hub sections */
     .hub-section { padding: 48px 0 80px; }
@@ -220,6 +226,10 @@
           <span class="hub-hero__tag section__tag">PROGRAMHUB</span>
           <h1 class="hub-hero__title">Choose your program.</h1>
           <p class="hub-hero__desc">Pick a program, answer a few guided questions, and get your personalized AI fitness guide — ready to download.</p>
+          <div class="hub-search">
+            <svg class="hub-search__icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.75"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
+            <input type="search" class="hub-search__input" id="hubSearch" placeholder="Search programs…" autocomplete="off">
+          </div>
         </div>
       </div>
     </section>
@@ -1391,6 +1401,16 @@
       renderHubGrid();
       // Re-wire groups after hub grid renders (calcSection groups already wired above)
       ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'tilesNutrition', 'tilesMotivation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
+
+      // Search filter
+      document.getElementById('hubSearch').addEventListener('input', e => {
+        const q = e.target.value.trim().toLowerCase();
+        document.querySelectorAll('.hub__grid .hub__card').forEach(card => {
+          if (!q) { card.hidden = false; return; }
+          const text = card.textContent.toLowerCase();
+          card.hidden = !text.includes(q);
+        });
+      });
 
       // Auto-open wizard if a program hash is present (e.g. /program.html#challenge90)
       const hash = window.location.hash.slice(1);
