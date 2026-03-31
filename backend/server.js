@@ -488,7 +488,8 @@ Start with:
 # KYROO 12-WEEK TRAINING PROGRAM
 Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English - no fancy words. Explain every term the first time. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English - no fancy words. Explain every term the first time. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -546,7 +547,8 @@ Prioritise the most likely causes based on the information given.
 
 Start with: # KYROO PLATEAU BREAKER - 8-WEEK PLAN
 
-Write this so a beginner can understand every instruction. No unexplained jargon.`;
+Write this so a beginner can understand every instruction. No unexplained jargon.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -600,6 +602,7 @@ For EACH weak point listed, provide:
 Format this as a prioritized action plan that can be started this week.
 
 LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".
 
 Start with: # KYROO WEAK POINT ACTION PLAN
 
@@ -689,7 +692,8 @@ Start with: # KYROO PROGRESS TRACKING SYSTEM
 
 Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -736,7 +740,7 @@ STEP 1: CALORIE DEFICIT
 - Calculate their specific maintenance calories based on their bodyweight
 - Set their specific deficit number (300-500 below maintenance)
 - Give them their exact daily calorie target
-- Tell them exactly how to track using KyrooFitnessPal
+- Tell them exactly how to track using Kyroo
 - Include the weekly weight loss target (0.5-1% bodyweight)
 - Include adjustment rules: what to do if weight stalls, what to do if losing too fast
 
@@ -775,7 +779,8 @@ Start with: # KYROO 90-DAY SUMMER SHRED
 
 Write this so someone can start tomorrow morning. No fluff. Every instruction is actionable.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -845,7 +850,8 @@ Start with: # KYROO INJURY PREVENTION PLAN
 
 Format this as a practical document someone can print and reference.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -927,7 +933,8 @@ Warn that online calculators are inaccurate. Set 500kcal deficit. Never below th
 
 Start with: # KYROO NUTRITION PLAN
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.`;
+LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
