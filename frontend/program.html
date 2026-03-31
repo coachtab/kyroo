@@ -29,6 +29,10 @@
     .hub-search__input::placeholder { color: var(--text-3); }
     .hub-search__input:focus { border-color: var(--accent); }
     .hub-search__input::-webkit-search-cancel-button { cursor: pointer; }
+    .hub-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+    .hub-filter { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-full); padding: 7px 18px; font-size: 0.8125rem; font-weight: 600; color: var(--text-2); cursor: pointer; transition: all 0.2s; }
+    .hub-filter:hover { border-color: var(--accent); color: var(--text); }
+    .hub-filter--active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     /* Hub sections */
     .hub-section { padding: 48px 0 80px; }
@@ -229,6 +233,14 @@
           <div class="hub-search">
             <svg class="hub-search__icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.75"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
             <input type="search" class="hub-search__input" id="hubSearch" placeholder="Search programs…" autocomplete="off">
+          </div>
+          <div class="hub-filters" id="hubFilters">
+            <button type="button" class="hub-filter hub-filter--active" data-filter="all">All</button>
+            <button type="button" class="hub-filter" data-filter="beginner">Beginner</button>
+            <button type="button" class="hub-filter" data-filter="weight-loss">Weight Loss</button>
+            <button type="button" class="hub-filter" data-filter="muscle">Muscle</button>
+            <button type="button" class="hub-filter" data-filter="transformation">Transformation</button>
+            <button type="button" class="hub-filter" data-filter="home">Home</button>
           </div>
         </div>
       </div>
@@ -794,12 +806,12 @@
     const API_BASE_HUB = window.location.origin;
 
     const PROGRAMS = [
-      { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation system combining smart training and nutrition to change your body from the inside out.',      duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',           outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'] },
-      { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',             duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                   outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'] },
-      { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',           duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',               outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'] },
-      { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',           duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                   outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'] },
-      { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',    duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',             outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'] },
-      { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',       duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment',  outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'] },
+      { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation system combining smart training and nutrition to change your body from the inside out.',      duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',           outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'], filters: ['transformation', 'strength'] },
+      { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',             duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                   outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'],  filters: ['beginner', 'transformation'] },
+      { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',           duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',               outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'],     filters: ['weight-loss'] },
+      { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',           duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                   outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'], filters: ['strength', 'muscle'] },
+      { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',    duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',             outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'], filters: ['beginner', 'transformation'] },
+      { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',       duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment',  outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'],   filters: ['home'] },
     ];
 
     let selectedProgram = null;
@@ -1402,13 +1414,31 @@
       // Re-wire groups after hub grid renders (calcSection groups already wired above)
       ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'tilesNutrition', 'tilesMotivation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
 
-      // Search filter
-      document.getElementById('hubSearch').addEventListener('input', e => {
-        const q = e.target.value.trim().toLowerCase();
+      // Unified search + filter
+      let activeFilter = 'all';
+
+      function applyFilters() {
+        const q = document.getElementById('hubSearch').value.trim().toLowerCase();
         document.querySelectorAll('.hub__grid .hub__card').forEach(card => {
-          if (!q) { card.hidden = false; return; }
           const text = card.textContent.toLowerCase();
-          card.hidden = !text.includes(q);
+          const programId = card.dataset.program;
+          const prog = PROGRAMS.find(p => p.id === programId);
+          const matchesSearch = !q || text.includes(q);
+          const matchesFilter = activeFilter === 'all' || (prog && prog.filters && prog.filters.includes(activeFilter));
+          // Calculators card always shows unless search filters it out
+          const isCalc = card.id === 'calcCard';
+          card.style.display = (matchesSearch && (isCalc || matchesFilter)) ? '' : 'none';
+        });
+      }
+
+      document.getElementById('hubSearch').addEventListener('input', applyFilters);
+
+      document.querySelectorAll('.hub-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.hub-filter').forEach(b => b.classList.remove('hub-filter--active'));
+          btn.classList.add('hub-filter--active');
+          activeFilter = btn.dataset.filter;
+          applyFilters();
         });
       });
 
