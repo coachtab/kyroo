@@ -857,6 +857,93 @@
     document.getElementById('wizCloseBtn').addEventListener('click', closeWizard);
     document.getElementById('calcBackBtn').addEventListener('click', closeWizard);
 
+    /* ---- Endpoint + payload map per program type ---- */
+    const ENDPOINTS = {
+      // 90-Day Challenge & Getting Fit for Summer → /api/program/summer
+      summer: (fd) => ({
+        url: '/api/program/summer',
+        body: {
+          bodyweight:          fd.weight    || 75,
+          body_fat_estimate:   '',
+          training_days:       fd.schedule  || 3,
+          current_steps:       '5000',
+          sleep_hours:         '7',
+          biggest_challenge:   fd.injuries  || 'staying consistent',
+          diet_preference:     fd.goals     || 'balanced nutrition',
+        },
+      }),
+      // Weight Loss Plan → /api/program/nutrition
+      nutrition: (fd) => ({
+        url: '/api/program/nutrition',
+        body: {
+          age:            fd.age    || 28,
+          sex:            fd.sex    || 'other',
+          height:         fd.height || 175,
+          weight:         fd.weight || 75,
+          goal_weight:    '',
+          timeline:       '12 weeks',
+          job_type:       'mixed',
+          exercise:       (fd.schedule || 3) + ' days per week, ' + (fd.session_mins || 45) + ' min sessions',
+          sleep_hours:    '7',
+          stress:         'moderate',
+          alcohol:        'occasionally',
+          fav_meals:      '',
+          hated_foods:    '',
+          restrictions:   fd.injuries || 'none',
+          cooking_style:  'quick meals',
+          snack_preference: 'both sweet and savory',
+          snack_reason:   'habit',
+        },
+      }),
+      // Muscle Gain, Beginner Transformation, Home Workout → /api/program/generate
+      generate: (fd, overrides = {}) => ({
+        url: '/api/program/generate',
+        body: {
+          level:            overrides.level    || fd.level    || 'intermediate',
+          experience_years: overrides.exp      || fd.experience_years || 2,
+          weight:           fd.weight   || 75,
+          height:           fd.height   || 175,
+          age:              fd.age      || 28,
+          sex:              fd.sex      || 'other',
+          days_per_week:    fd.schedule || 3,
+          session_minutes:  fd.session_mins || 45,
+          equipment:        overrides.equipment || fd.equipment || 'full commercial gym',
+          primary_goal:     overrides.primary  || fd.goals || 'general fitness',
+          secondary_goal:   overrides.secondary || 'building healthy habits',
+        },
+      }),
+    };
+
+    function buildRequest(prog, fd) {
+      switch (prog.id) {
+        case 'challenge90':
+        case 'summer':
+          return ENDPOINTS.summer(fd);
+        case 'weightloss':
+          return ENDPOINTS.nutrition(fd);
+        case 'muscle':
+          return ENDPOINTS.generate(fd, {
+            primary: 'muscle gain and hypertrophy',
+            secondary: 'strength',
+          });
+        case 'beginner':
+          return ENDPOINTS.generate(fd, {
+            level: 'beginner',
+            exp: 0,
+            primary: 'beginner fitness transformation and building habits',
+            secondary: 'confidence and consistency',
+          });
+        case 'home':
+          return ENDPOINTS.generate(fd, {
+            equipment: 'bodyweight and minimal home equipment',
+            primary: fd.goals || 'home workout fitness without a gym',
+            secondary: 'building a sustainable routine at home',
+          });
+        default:
+          return ENDPOINTS.generate(fd);
+      }
+    }
+
     /* ---- Generate program ---- */
     async function generateProgram() {
       // Check auth
@@ -873,14 +960,14 @@
       genScreen.style.display = 'block';
       document.getElementById('wizardOverlay').scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Animate stages
+      // Animate stages (fixed visual rhythm)
       const stages = ['genStage1', 'genStage2', 'genStage3', 'genStage4'];
-      const delays = [0, 2500, 5000, 7000];
+      const delays = [0, 2500, 5000, 7500];
+      const stageTimers = [];
       stages.forEach((id, i) => {
-        setTimeout(() => {
+        stageTimers.push(setTimeout(() => {
           const el = document.getElementById(id);
           if (!el) return;
-          // Mark previous as done
           if (i > 0) {
             const prev = document.getElementById(stages[i - 1]);
             if (prev) {
@@ -890,39 +977,33 @@
             }
           }
           el.classList.add('gen-stage--active');
-        }, delays[i]);
+        }, delays[i]));
       });
 
-      try {
-        const payload = {
-          program_type:     selectedProgram.type,
-          level:            formData.level || 'intermediate',
-          experience_years: formData.experience_years || 2,
-          weight:           formData.weight || 75,
-          height:           formData.height || 175,
-          age:              formData.age || 28,
-          sex:              formData.sex || 'other',
-          schedule:         formData.schedule || 3,
-          session_mins:     formData.session_mins || 45,
-          equipment:        formData.equipment || 'full commercial gym',
-          goals:            (selectedProgram.goal ? selectedProgram.goal + '. ' : '') + (formData.goals || ''),
-          injuries:         formData.injuries || 'None',
-        };
+      const MIN_DISPLAY_MS = 9000; // let all 4 stages animate before showing result
 
-        const res = await fetch(`${API_BASE_HUB}/api/program/generate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(window.authHeaders ? window.authHeaders() : {}),
-          },
-          body: JSON.stringify(payload),
-        });
+      try {
+        const { url, body } = buildRequest(selectedProgram, formData);
+
+        // Run API call and minimum display time in parallel
+        const [res] = await Promise.all([
+          fetch(`${API_BASE_HUB}${url}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(window.authHeaders ? window.authHeaders() : {}),
+            },
+            body: JSON.stringify(body),
+          }),
+          new Promise(resolve => setTimeout(resolve, MIN_DISPLAY_MS)),
+        ]);
 
         const data = await res.json();
 
         if (!res.ok) {
+          stageTimers.forEach(clearTimeout);
+          genScreen.style.display = 'none';
           if (res.status === 401) {
-            genScreen.style.display = 'none';
             document.getElementById('wizSteps').style.display = 'block';
             document.getElementById('wizProgress').style.display = 'flex';
             showStep(1);
@@ -931,7 +1012,6 @@
             return;
           }
           if (res.status === 403) {
-            genScreen.style.display = 'none';
             closeWizard();
             if (typeof showCheckoutModal === 'function') showCheckoutModal();
             return;
@@ -939,21 +1019,22 @@
           throw new Error(data.error || 'Generation failed. Please try again.');
         }
 
-        // Mark last stage done after animation completes
+        // Mark all stages done
+        stages.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('gen-stage--active');
+          el.classList.add('gen-stage--done');
+          el.querySelector('.gen-stage__icon').textContent = '✓';
+        });
+
         setTimeout(() => {
-          const last = document.getElementById(stages[stages.length - 1]);
-          if (last) {
-            last.classList.remove('gen-stage--active');
-            last.classList.add('gen-stage--done');
-            last.querySelector('.gen-stage__icon').textContent = '✓';
-          }
-          setTimeout(() => {
-            genScreen.style.display = 'none';
-            showResult(data.program || data.result || data.content || JSON.stringify(data));
-          }, 800);
-        }, 8500);
+          genScreen.style.display = 'none';
+          showResult(data.program || data.result || data.content || '');
+        }, 600);
 
       } catch (err) {
+        stageTimers.forEach(clearTimeout);
         genScreen.style.display = 'none';
         document.getElementById('wizSteps').style.display = 'block';
         document.getElementById('wizProgress').style.display = 'flex';
