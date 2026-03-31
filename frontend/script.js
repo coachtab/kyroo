@@ -442,8 +442,12 @@ function showImprint(data) {
 // ========================================
 // Auth state
 // ========================================
-let currentUser = null;
 let authToken = localStorage.getItem('kyroo_token');
+
+// Restore user instantly from cache so nav renders without waiting for network
+const _cachedUser = authToken ? (() => { try { return JSON.parse(localStorage.getItem('kyroo_user')); } catch(e) { return null; } })() : null;
+let currentUser = _cachedUser;
+window.currentUser = _cachedUser;
 
 function authHeaders() {
   return authToken ? { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
@@ -453,14 +457,20 @@ function setAuth(user, token) {
   currentUser = user;
   window.currentUser = user;   // expose for inline scripts
   authToken = token;
-  if (token) localStorage.setItem('kyroo_token', token);
-  else localStorage.removeItem('kyroo_token');
+  if (token) {
+    localStorage.setItem('kyroo_token', token);
+    if (user) localStorage.setItem('kyroo_user', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('kyroo_token');
+    localStorage.removeItem('kyroo_user');
+  }
   updateAuthUI();
 }
 
 function clearAuth() {
   setAuth(null, null);
   localStorage.removeItem('kyroo_token');
+  localStorage.removeItem('kyroo_user');
   localStorage.removeItem('kyroo_cookie_consent');
   sessionStorage.clear();
 }
@@ -954,7 +964,8 @@ async function restoreSession() {
     if (!res.ok) { clearAuth(); return; }
     const user = await res.json();
     currentUser = user;
-    window.currentUser = user;   // expose for inline scripts
+    window.currentUser = user;
+    localStorage.setItem('kyroo_user', JSON.stringify(user));
     updateAuthUI();
   } catch (e) {
     clearAuth();
@@ -1286,6 +1297,9 @@ function initAnimations() {
 
 // ---- Main ----
 document.addEventListener('DOMContentLoaded', async () => {
+
+  // Render nav immediately with cached user (no network wait)
+  if (currentUser) updateAuthUI();
 
   // Nav scroll effect
   const nav = document.getElementById('nav');
