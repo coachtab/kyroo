@@ -416,14 +416,88 @@
           </div>
         </div>
 
-        <!-- STEP 6: INJURIES + GENERATE -->
+        <!-- STEP 6: NUTRITION PREFERENCES -->
         <div class="wiz-step" data-step="6">
+          <h2 class="wiz-question">Your nutrition approach?</h2>
+          <p class="wiz-hint">Your guide will include a nutrition overview matched to how you eat.</p>
+          <div class="wiz-tiles" id="tilesNutrition">
+            <div class="wiz-tile" data-value="balanced — moderate carbs, protein, and healthy fats">
+              <span class="wiz-tile__icon">⚖️</span>
+              <span class="wiz-tile__label">Balanced</span>
+              <span class="wiz-tile__sub">Carbs + protein + fats</span>
+            </div>
+            <div class="wiz-tile" data-value="high protein — prioritizing lean protein with controlled carbs">
+              <span class="wiz-tile__icon">🥩</span>
+              <span class="wiz-tile__label">High protein</span>
+              <span class="wiz-tile__sub">Lean meats, eggs, fish</span>
+            </div>
+            <div class="wiz-tile" data-value="vegetarian — no meat but includes eggs and dairy">
+              <span class="wiz-tile__icon">🥗</span>
+              <span class="wiz-tile__label">Vegetarian</span>
+              <span class="wiz-tile__sub">No meat</span>
+            </div>
+            <div class="wiz-tile" data-value="vegan — fully plant-based nutrition">
+              <span class="wiz-tile__icon">🌱</span>
+              <span class="wiz-tile__label">Vegan</span>
+              <span class="wiz-tile__sub">Fully plant-based</span>
+            </div>
+            <div class="wiz-tile" data-value="low carb or keto — minimal carbohydrates, high fat">
+              <span class="wiz-tile__icon">🥑</span>
+              <span class="wiz-tile__label">Low-carb / Keto</span>
+              <span class="wiz-tile__sub">Minimal carbs, high fat</span>
+            </div>
+            <div class="wiz-tile selected" data-value="flexible — no strict diet, open to general healthy eating advice">
+              <span class="wiz-tile__icon">🍽️</span>
+              <span class="wiz-tile__label">Flexible</span>
+              <span class="wiz-tile__sub">General healthy eating</span>
+            </div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step6Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step6Next">Continue</button>
+          </div>
+        </div>
+
+        <!-- STEP 7: MOTIVATION LEVEL -->
+        <div class="wiz-step" data-step="7">
+          <h2 class="wiz-question">How committed are you?</h2>
+          <p class="wiz-hint">Honest answers lead to better plans. Your guide will match your reality.</p>
+          <div class="wiz-tiles wiz-tiles--2col" id="tilesMotivation">
+            <div class="wiz-tile" data-value="casual — I want something light and easy to stick to">
+              <span class="wiz-tile__icon">😌</span>
+              <span class="wiz-tile__label">Casual</span>
+              <span class="wiz-tile__sub">Light, sustainable, low pressure</span>
+            </div>
+            <div class="wiz-tile selected" data-value="serious — I am ready to push myself and stay consistent">
+              <span class="wiz-tile__icon">💪</span>
+              <span class="wiz-tile__label">Serious</span>
+              <span class="wiz-tile__sub">Consistent and committed</span>
+            </div>
+            <div class="wiz-tile" data-value="very driven — I want an intense, challenging program">
+              <span class="wiz-tile__icon">🔥</span>
+              <span class="wiz-tile__label">Very driven</span>
+              <span class="wiz-tile__sub">Push hard, expect results</span>
+            </div>
+            <div class="wiz-tile" data-value="all-in — maximum effort, I want the most demanding plan possible">
+              <span class="wiz-tile__icon">🏆</span>
+              <span class="wiz-tile__label">All-in</span>
+              <span class="wiz-tile__sub">Maximum effort, no excuses</span>
+            </div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step7Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step7Next">Continue</button>
+          </div>
+        </div>
+
+        <!-- STEP 8: INJURIES + GENERATE -->
+        <div class="wiz-step" data-step="8">
           <h2 class="wiz-question">Any injuries or limitations?</h2>
           <p class="wiz-hint">Your coach will work around these. Type "None" if you're injury-free.</p>
           <textarea class="wiz-textarea" id="inpInjuries" placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."></textarea>
           <p id="wizError" class="wiz-error"></p>
           <div class="wiz-actions wiz-actions--between">
-            <button type="button" class="btn btn--ghost" id="step6Back">Back</button>
+            <button type="button" class="btn btn--ghost" id="step8Back">Back</button>
             <button type="button" class="btn btn--primary" id="generateBtn">Generate my guide ✨</button>
           </div>
         </div>
@@ -433,45 +507,115 @@
       <!-- GENERATION SCREEN -->
       <div id="genScreen">
         <div class="gen-icon">✨</div>
-        <h2 class="gen-title">Building your guide</h2>
-        <p class="gen-sub">Your AI coach is crafting your personalized plan.</p>
+        <h2 class="gen-title">Crafting your guide</h2>
+        <p class="gen-sub">Your AI coach is building a plan built around <em>you</em>.</p>
         <div class="gen-stages">
           <div class="gen-stage" id="genStage1">
             <div class="gen-stage__icon">◎</div>
-            <span class="gen-stage__label">Analyzing your profile</span>
+            <div class="gen-stage__content">
+              <span class="gen-stage__label">Analyzing your profile</span>
+              <span class="gen-stage__sub">Reading your goals, body stats, and experience</span>
+            </div>
           </div>
           <div class="gen-stage" id="genStage2">
             <div class="gen-stage__icon">◎</div>
-            <span class="gen-stage__label">Building your training schedule</span>
+            <div class="gen-stage__content">
+              <span class="gen-stage__label">Designing your training schedule</span>
+              <span class="gen-stage__sub">Matched to your days, session length, and location</span>
+            </div>
           </div>
           <div class="gen-stage" id="genStage3">
             <div class="gen-stage__icon">◎</div>
-            <span class="gen-stage__label">Crafting your nutrition overview</span>
+            <div class="gen-stage__content">
+              <span class="gen-stage__label">Building your exercise library</span>
+              <span class="gen-stage__sub">Step-by-step instructions for every movement</span>
+            </div>
           </div>
           <div class="gen-stage" id="genStage4">
             <div class="gen-stage__icon">◎</div>
-            <span class="gen-stage__label">Finalizing your guide</span>
+            <div class="gen-stage__content">
+              <span class="gen-stage__label">Crafting your nutrition overview</span>
+              <span class="gen-stage__sub">Aligned with your diet approach and goals</span>
+            </div>
+          </div>
+          <div class="gen-stage" id="genStage5">
+            <div class="gen-stage__icon">◎</div>
+            <div class="gen-stage__content">
+              <span class="gen-stage__label">Finalizing your personalized guide</span>
+              <span class="gen-stage__sub">Packaging everything into your PDF-ready plan</span>
+            </div>
           </div>
         </div>
+        <p class="gen-quote" id="genQuote">"The secret of getting ahead is getting started." — Mark Twain</p>
       </div>
 
       <!-- RESULT AREA -->
       <div id="resultArea">
         <div class="result-header">
+          <div class="result-celebrate">🎉</div>
           <div class="result-badge">Your guide is ready</div>
-          <h2 class="result-title">Your personalized fitness guide</h2>
+          <h2 class="result-title" id="resultTitle">Your personalized fitness guide</h2>
           <p class="result-desc" id="resultDesc">Your AI coach built this specifically for you.</p>
+          <div class="result-pdf-card">
+            <div class="result-pdf-card__header">
+              <div class="result-pdf-card__logo">K</div>
+              <div>
+                <span class="result-pdf-card__name">KYROO</span>
+                <span class="result-pdf-card__sub" id="resultPdfSub">Personalized Fitness Guide</span>
+              </div>
+              <div class="result-pdf-card__ready">✓ Ready</div>
+            </div>
+            <div class="result-pdf-card__sections">
+              <div class="result-pdf-section result-pdf-section--coral">
+                <span>📋</span>
+                <div>
+                  <span class="result-pdf-section__title">Training Plan</span>
+                  <span class="result-pdf-section__meta">Weeks · Days · Exercises</span>
+                </div>
+              </div>
+              <div class="result-pdf-section result-pdf-section--green">
+                <span>💪</span>
+                <div>
+                  <span class="result-pdf-section__title">Exercise Library</span>
+                  <span class="result-pdf-section__meta">Step-by-step instructions</span>
+                </div>
+              </div>
+              <div class="result-pdf-section result-pdf-section--amber">
+                <span>🥗</span>
+                <div>
+                  <span class="result-pdf-section__title">Nutrition Overview</span>
+                  <span class="result-pdf-section__meta">Macros · Meal timing</span>
+                </div>
+              </div>
+              <div class="result-pdf-section result-pdf-section--purple">
+                <span>📈</span>
+                <div>
+                  <span class="result-pdf-section__title">Progress Milestones</span>
+                  <span class="result-pdf-section__meta">Weekly check-ins</span>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="result-actions">
-            <button type="button" class="btn btn--primary" id="downloadBtn">Download PDF</button>
+            <button type="button" class="btn btn--primary" id="downloadBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
             <button type="button" class="btn btn--ghost" id="printBtn">Print</button>
-            <button type="button" class="btn btn--outline" id="regenerateBtn">Regenerate</button>
+            <button type="button" class="btn btn--outline" id="regenerateBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Regenerate
+            </button>
           </div>
         </div>
         <div class="result-body" id="resultBody"></div>
         <div class="result-next">
-          <h3 class="result-next__title">What's next?</h3>
-          <p class="result-next__desc">Try a different program or go deeper into your training.</p>
-          <button type="button" class="btn btn--ghost" id="tryAnotherBtn">Explore more programs</button>
+          <h3 class="result-next__title">What's your next step?</h3>
+          <p class="result-next__desc">Download your guide and start today. Or try a different program for a new challenge.</p>
+          <div class="result-next__actions">
+            <button type="button" class="btn btn--primary" id="downloadBtn2">Download PDF</button>
+            <button type="button" class="btn btn--ghost" id="tryAnotherBtn">Try another program</button>
+          </div>
         </div>
       </div>
 
@@ -640,17 +784,17 @@
     const API_BASE_HUB = window.location.origin;
 
     const PROGRAMS = [
-      { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'Complete 90-day transformation system.',                    duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition' },
-      { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track to beach-ready results.',                        duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results' },
-      { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss program.',                          duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition' },
-      { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload for size and strength.',               duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains' },
-      { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness.',                        duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence' },
-      { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym, no problem. Full program.',                         duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment' },
+      { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation system combining smart training and nutrition to change your body from the inside out.',      duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',           outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'] },
+      { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',             duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                   outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'] },
+      { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',           duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',               outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'] },
+      { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',           duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                   outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'] },
+      { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',    duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',             outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'] },
+      { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',       duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment',  outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'] },
     ];
 
     let selectedProgram = null;
     let currentStep = 1;
-    const TOTAL_STEPS = 6;
+    const TOTAL_STEPS = 8;
     let formData = {};
 
     /* ---- Render hub grid ---- */
@@ -672,14 +816,22 @@
         </div>
       ` + PROGRAMS.map(p => `
         <div class="hub__card" data-program="${p.id}" role="button" tabindex="0" aria-label="Open ${p.name}">
-          <div class="hub__card-icon">${p.icon}</div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+            <div class="hub__card-icon">${p.icon}</div>
+            ${p.badge ? `<span class="hub__card-badge">${p.badge}</span>` : ''}
+          </div>
           <h3 class="hub__card-title">${p.name}</h3>
           <p class="hub__card-desc">${p.desc}</p>
-          <div class="hub__card-meta">
-            <span class="hub__card-meta-tag">${p.duration}</span>
-            <span class="hub__card-meta-tag">${p.difficulty}</span>
+          <ul class="hub__card-outcomes">
+            ${p.outcomes.map(o => `<li class="hub__card-outcome">${o}</li>`).join('')}
+          </ul>
+          <div class="hub__card-footer">
+            <div class="hub__card-meta">
+              <span class="hub__card-tag">${p.duration}</span>
+              <span class="hub__card-tag">${p.difficulty}</span>
+            </div>
+            <span class="hub__card-cta">Start →</span>
           </div>
-          ${p.badge ? `<span class="hub__card-badge">${p.badge}</span>` : ''}
         </div>
       `).join('');
 
@@ -842,6 +994,22 @@
     });
 
     document.getElementById('step6Back').addEventListener('click', () => showStep(5));
+    document.getElementById('step6Next').addEventListener('click', () => {
+      const nutrition = getSelected('tilesNutrition');
+      if (!nutrition) { alert('Please select your nutrition approach.'); return; }
+      formData.nutrition = nutrition;
+      showStep(7);
+    });
+
+    document.getElementById('step7Back').addEventListener('click', () => showStep(6));
+    document.getElementById('step7Next').addEventListener('click', () => {
+      const motivation = getSelected('tilesMotivation');
+      if (!motivation) { alert('Please select your commitment level.'); return; }
+      formData.motivation = motivation;
+      showStep(8);
+    });
+
+    document.getElementById('step8Back').addEventListener('click', () => showStep(7));
 
     document.getElementById('generateBtn').addEventListener('click', async () => {
       const injuries = document.getElementById('inpInjuries').value.trim() || 'None';
@@ -869,7 +1037,8 @@
           current_steps:       '5000',
           sleep_hours:         '7',
           biggest_challenge:   fd.injuries  || 'staying consistent',
-          diet_preference:     fd.goals     || 'balanced nutrition',
+          diet_preference:     fd.nutrition || fd.goals || 'balanced nutrition',
+          motivation:          fd.motivation || 'serious',
         },
       }),
       // Weight Loss Plan → /api/program/nutrition
@@ -893,6 +1062,8 @@
           cooking_style:  'quick meals',
           snack_preference: 'both sweet and savory',
           snack_reason:   'habit',
+          diet_preference: fd.nutrition || 'balanced',
+          motivation:     fd.motivation || 'serious',
         },
       }),
       // Muscle Gain, Beginner Transformation, Home Workout → /api/program/generate
@@ -910,6 +1081,9 @@
           equipment:        overrides.equipment || fd.equipment || 'full commercial gym',
           primary_goal:     overrides.primary  || fd.goals || 'general fitness',
           secondary_goal:   overrides.secondary || 'building healthy habits',
+          diet_preference:  fd.nutrition || 'balanced',
+          motivation:       fd.motivation || 'serious',
+          injuries:         fd.injuries || 'none',
         },
       }),
     };
@@ -961,8 +1135,8 @@
       document.getElementById('wizardOverlay').scrollTo({ top: 0, behavior: 'smooth' });
 
       // Animate stages (fixed visual rhythm)
-      const stages = ['genStage1', 'genStage2', 'genStage3', 'genStage4'];
-      const delays = [0, 2500, 5000, 7500];
+      const stages = ['genStage1', 'genStage2', 'genStage3', 'genStage4', 'genStage5'];
+      const delays = [0, 2200, 4400, 6600, 8800];
       const stageTimers = [];
       stages.forEach((id, i) => {
         stageTimers.push(setTimeout(() => {
@@ -980,7 +1154,27 @@
         }, delays[i]));
       });
 
-      const MIN_DISPLAY_MS = 9000; // let all 4 stages animate before showing result
+      // Cycle motivational quotes during generation
+      const quotes = [
+        '"The secret of getting ahead is getting started." — Mark Twain',
+        '"It always seems impossible until it\'s done." — Nelson Mandela',
+        '"Push yourself, because no one else is going to do it for you."',
+        '"Your only limit is you."',
+        '"Dream it. Believe it. Build it."',
+      ];
+      let quoteIdx = 0;
+      const quoteEl = document.getElementById('genQuote');
+      const quoteInterval = setInterval(() => {
+        if (!quoteEl) return;
+        quoteIdx = (quoteIdx + 1) % quotes.length;
+        quoteEl.style.opacity = '0';
+        setTimeout(() => {
+          quoteEl.textContent = quotes[quoteIdx];
+          quoteEl.style.opacity = '1';
+        }, 400);
+      }, 3000);
+
+      const MIN_DISPLAY_MS = 11000; // let all 5 stages animate before showing result
 
       try {
         const { url, body } = buildRequest(selectedProgram, formData);
@@ -1004,6 +1198,7 @@
           stageTimers.forEach(clearTimeout);
           genScreen.style.display = 'none';
           if (res.status === 401) {
+            clearInterval(quoteInterval);
             document.getElementById('wizSteps').style.display = 'block';
             document.getElementById('wizProgress').style.display = 'flex';
             showStep(1);
@@ -1012,12 +1207,15 @@
             return;
           }
           if (res.status === 403) {
+            clearInterval(quoteInterval);
             closeWizard();
             if (typeof showCheckoutModal === 'function') showCheckoutModal();
             return;
           }
           throw new Error(data.error || 'Generation failed. Please try again.');
         }
+
+        clearInterval(quoteInterval);
 
         // Mark all stages done
         stages.forEach(id => {
@@ -1035,10 +1233,11 @@
 
       } catch (err) {
         stageTimers.forEach(clearTimeout);
+        clearInterval(quoteInterval);
         genScreen.style.display = 'none';
         document.getElementById('wizSteps').style.display = 'block';
         document.getElementById('wizProgress').style.display = 'flex';
-        showStep(6);
+        showStep(8);
         const errEl = document.getElementById('wizError');
         errEl.textContent = err.message || 'Something went wrong. Please try again.';
         errEl.style.removeProperty('display');
@@ -1050,8 +1249,11 @@
     function showResult(content) {
       const resultArea = document.getElementById('resultArea');
       resultArea.style.display = 'block';
+      const progName = selectedProgram ? selectedProgram.name : 'Fitness';
+      document.getElementById('resultTitle').textContent = 'Your ' + progName + ' Guide';
       document.getElementById('resultDesc').textContent =
-        'Your ' + (selectedProgram ? selectedProgram.name : 'fitness') + ' guide, built for you.';
+        'Built around your goals, schedule, and preferences — ready to download.';
+      document.getElementById('resultPdfSub').textContent = progName;
 
       // Convert markdown-like content to HTML
       let html = content
@@ -1071,6 +1273,7 @@
 
     /* ---- Result actions ---- */
     document.getElementById('downloadBtn').addEventListener('click', () => window.print());
+    document.getElementById('downloadBtn2').addEventListener('click', () => window.print());
     document.getElementById('printBtn').addEventListener('click', () => window.print());
 
     document.getElementById('regenerateBtn').addEventListener('click', () => {
@@ -1176,7 +1379,7 @@
     });
 
     /* ---- Wire all tile groups ---- */
-    ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
+    ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'tilesNutrition', 'tilesMotivation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
 
     /* ---- Close on Escape ---- */
     document.addEventListener('keydown', e => {
@@ -1187,7 +1390,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderHubGrid();
       // Re-wire groups after hub grid renders (calcSection groups already wired above)
-      ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
+      ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'tilesNutrition', 'tilesMotivation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
 
       // Auto-open wizard if a program hash is present (e.g. /program.html#challenge90)
       const hash = window.location.hash.slice(1);

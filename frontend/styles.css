@@ -3666,3 +3666,540 @@ h1, h2, h3, h4, h5, h6 {
   h1, h2, h3 { page-break-after: avoid; }
   p, li       { orphans: 3; widows: 3; }
 }
+
+/* ============================================================
+   REDESIGN 2026 — Extended Premium Styles
+   ============================================================ */
+
+/* ---- Wizard: 2-column tile variant ---- */
+.wiz-tiles--2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ---- Wizard: generation screen enhancements ---- */
+.gen-stage__content {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+}
+
+.gen-stage__sub {
+  font-size:  0.75rem;
+  color:      var(--text-3);
+  line-height: 1.4;
+  transition: color 0.4s;
+}
+
+.gen-stage--active .gen-stage__sub,
+.gen-stage--done .gen-stage__sub {
+  color: var(--text-2);
+}
+
+.gen-quote {
+  font-size:   0.875rem;
+  color:       var(--text-3);
+  font-style:  italic;
+  text-align:  center;
+  max-width:   400px;
+  margin:      0 auto;
+  line-height: 1.65;
+  transition:  opacity 0.4s ease;
+  opacity:     1;
+}
+
+/* ---- Result page premium card ---- */
+.result-celebrate {
+  font-size:     2.5rem;
+  margin-bottom: 12px;
+  display:       block;
+  animation:     celebrateBounce 0.8s var(--ease) both;
+}
+
+@keyframes celebrateBounce {
+  0%   { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.result-pdf-card {
+  background:    var(--surface-2);
+  border:        1px solid var(--border-hover);
+  border-radius: var(--r-xl);
+  padding:       24px 28px;
+  max-width:     440px;
+  margin:        28px auto 32px;
+  text-align:    left;
+  position:      relative;
+  overflow:      hidden;
+}
+
+.result-pdf-card::before {
+  content:    '';
+  position:   absolute;
+  top:        0;
+  left:       0;
+  right:      0;
+  height:     3px;
+  background: linear-gradient(90deg, var(--accent), var(--warm), var(--sage));
+}
+
+.result-pdf-card__header {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  margin-bottom: 20px;
+}
+
+.result-pdf-card__logo {
+  width:           40px;
+  height:          40px;
+  background:      linear-gradient(135deg, var(--accent), var(--warm));
+  border-radius:   var(--r-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-family:     var(--heading);
+  font-size:       1.25rem;
+  font-weight:     900;
+  color:           #fff;
+  flex-shrink:     0;
+}
+
+.result-pdf-card__name {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:       var(--text-3);
+}
+
+.result-pdf-card__sub {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.9375rem;
+  font-weight: 700;
+  color:       var(--text);
+  margin-top:  2px;
+}
+
+.result-pdf-card__ready {
+  margin-left:     auto;
+  font-family:     var(--heading);
+  font-size:       0.75rem;
+  font-weight:     700;
+  letter-spacing:  0.06em;
+  color:           var(--sage);
+  background:      var(--sage-glow);
+  border:          1px solid rgba(130,169,111,0.25);
+  padding:         4px 10px;
+  border-radius:   var(--r-full);
+}
+
+.result-pdf-card__sections {
+  display:    grid;
+  grid-template-columns: 1fr 1fr;
+  gap:        8px;
+}
+
+.result-pdf-section {
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  padding:       10px 12px;
+  border-radius: var(--r-md);
+  font-size:     0.9rem;
+}
+
+.result-pdf-section--coral { background: rgba(240,132,90,0.08); border: 1px solid rgba(240,132,90,0.15); }
+.result-pdf-section--green { background: rgba(130,169,111,0.08); border: 1px solid rgba(130,169,111,0.15); }
+.result-pdf-section--amber { background: rgba(252,201,110,0.08); border: 1px solid rgba(252,201,110,0.15); }
+.result-pdf-section--purple { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.15); }
+
+.result-pdf-section__title {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.8rem;
+  font-weight: 700;
+  color:       var(--text);
+}
+
+.result-pdf-section__meta {
+  display:   block;
+  font-size: 0.68rem;
+  color:     var(--text-3);
+  margin-top: 1px;
+}
+
+/* Result next section improvements */
+.result-next__actions {
+  display:   flex;
+  gap:       12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---- Hub card icon variants for program colors ---- */
+.hub__card-icon--sage {
+  background:   var(--sage-glow);
+  border-color: rgba(130,169,111,0.25);
+  color:        var(--sage);
+}
+
+.hub__card-icon--warm {
+  background:   var(--warm-glow);
+  border-color: rgba(252,201,110,0.25);
+  color:        var(--warm);
+}
+
+/* ---- Hub card outcomes list (shown inside card) ---- */
+.hub__card-outcomes {
+  list-style:    none;
+  margin:        0;
+  padding:       0;
+  display:       flex;
+  flex-direction: column;
+  gap:           5px;
+}
+
+.hub__card-outcome {
+  display:     flex;
+  align-items: center;
+  gap:         7px;
+  font-size:   0.78rem;
+  color:       var(--text-3);
+  transition:  color 0.25s;
+}
+
+.hub__card:hover .hub__card-outcome { color: var(--text-2); }
+
+.hub__card-outcome::before {
+  content:     '→';
+  color:       var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ---- PDF card (landing page guide preview) improvements ---- */
+.pdf-card {
+  background:    var(--surface);
+  border:        1px solid var(--border-hover);
+  border-radius: var(--r-xl);
+  overflow:      hidden;
+  box-shadow:    var(--shadow-lg);
+  position:      relative;
+}
+
+.pdf-card::before {
+  content:    '';
+  position:   absolute;
+  top:        0;
+  left:       0;
+  right:      0;
+  height:     3px;
+  background: linear-gradient(90deg, var(--accent), var(--warm), var(--sage));
+}
+
+.pdf-card__header {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  padding:     24px 28px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pdf-card__logo-mark {
+  width:           40px;
+  height:          40px;
+  background:      linear-gradient(135deg, var(--accent), var(--warm));
+  border-radius:   var(--r-md);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-family:     var(--heading);
+  font-size:       1.2rem;
+  font-weight:     900;
+  color:           #fff;
+  flex-shrink:     0;
+}
+
+.pdf-card__header-name {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:       var(--text-3);
+}
+
+.pdf-card__header-sub {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.95rem;
+  font-weight: 700;
+  color:       var(--text);
+}
+
+.pdf-card__body {
+  padding: 20px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap:     10px;
+}
+
+.pdf-card__section {
+  display:       flex;
+  align-items:   center;
+  gap:           12px;
+  padding:       12px 16px;
+  border-radius: var(--r-md);
+}
+
+.pdf-card__section--indigo  { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); }
+.pdf-card__section--green   { background: rgba(130,169,111,0.08); border: 1px solid rgba(130,169,111,0.15); }
+.pdf-card__section--amber   { background: rgba(252,201,110,0.08); border: 1px solid rgba(252,201,110,0.15); }
+.pdf-card__section--pink    { background: rgba(240,132,90,0.08); border: 1px solid rgba(240,132,90,0.15); }
+
+.pdf-card__section-emoji {
+  font-size:   1.1rem;
+  flex-shrink: 0;
+}
+
+.pdf-card__section-title {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.875rem;
+  font-weight: 700;
+  color:       var(--text);
+}
+
+.pdf-card__section-meta {
+  display:   block;
+  font-size: 0.72rem;
+  color:     var(--text-3);
+  margin-top: 1px;
+}
+
+/* ---- Trust stat improvements (legacy class support) ---- */
+.trust-stat__num {
+  font-family: var(--heading);
+  font-size:   2rem;
+  font-weight: 900;
+  background:  linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+/* how__step legacy classes (used in index.html) */
+.how__step-num {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  width:           48px;
+  height:          48px;
+  border-radius:   50%;
+  background:      var(--surface-2);
+  border:          2px solid var(--border-hover);
+  font-family:     var(--heading);
+  font-size:       1.1rem;
+  font-weight:     900;
+  color:           var(--accent);
+  margin-bottom:   20px;
+  box-shadow:      0 0 0 8px var(--bg);
+}
+
+.how__step:hover .how__step-num {
+  border-color: var(--accent);
+  box-shadow:   0 0 0 8px var(--bg), 0 0 24px var(--accent-glow);
+}
+
+.how__step-title {
+  font-family:  var(--heading);
+  font-size:    1.1rem;
+  font-weight:  800;
+  color:        var(--text);
+  margin-bottom: 10px;
+}
+
+.how__step-desc {
+  font-size:   0.9rem;
+  color:       var(--text-2);
+  line-height: 1.65;
+}
+
+/* benefit legacy classes */
+.benefit__num {
+  font-family: var(--heading);
+  font-size:   2rem;
+  font-weight: 900;
+  color:       var(--surface-3);
+  line-height: 1;
+  flex-shrink: 0;
+  min-width:   3rem;
+  transition:  color 0.3s;
+}
+.benefit:hover .benefit__num { color: var(--accent); }
+
+.benefit__title {
+  font-family:  var(--heading);
+  font-size:    1.05rem;
+  font-weight:  800;
+  color:        var(--text);
+  margin-bottom: 8px;
+}
+.benefit__desc {
+  font-size:   0.9rem;
+  color:       var(--text-2);
+  line-height: 1.65;
+}
+
+/* testimonial legacy classes */
+.testimonial__footer {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  margin-top:  auto;
+}
+
+.testimonial__info strong {
+  display:     block;
+  font-family: var(--heading);
+  font-size:   0.9rem;
+  font-weight: 700;
+  color:       var(--text);
+}
+
+.testimonial__info span {
+  font-size: 0.78rem;
+  color:     var(--text-3);
+}
+
+/* ---- Benefit grid for landing page ---- */
+.benefits__grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   20px;
+}
+
+.benefit {
+  background:    var(--surface);
+  border:        1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding:       32px;
+  display:       flex;
+  gap:           20px;
+  align-items:   flex-start;
+  transition:    transform 0.3s var(--ease), border-color 0.25s, box-shadow 0.3s;
+}
+
+.benefit:hover {
+  transform:    translateY(-4px);
+  border-color: var(--border-hover);
+  box-shadow:   var(--shadow-md);
+}
+
+/* ---- Buttons: large size ---- */
+.btn--lg {
+  font-size: 1rem;
+  padding:   14px 32px;
+}
+
+/* ---- cta-final section ---- */
+.cta-final { padding: 120px 0; }
+
+.cta-final__badge {
+  margin:      0 auto 24px;
+  width:       fit-content;
+}
+
+.cta-final__fine {
+  margin-top: 16px;
+  font-size:  0.82rem;
+  color:      var(--text-3);
+}
+
+.cta-final__inner {
+  text-align:    center;
+  background:    linear-gradient(135deg, var(--surface) 0%, rgba(240,132,90,0.06) 100%);
+  border:        1px solid rgba(240,132,90,0.2);
+  border-radius: var(--r-xl);
+  padding:       80px 48px;
+  position:      relative;
+  overflow:      hidden;
+}
+
+.cta-final__inner::before {
+  content:    '';
+  position:   absolute;
+  top:        -200px;
+  left:       50%;
+  transform:  translateX(-50%);
+  width:      600px;
+  height:     600px;
+  background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-final__title {
+  font-family: var(--heading);
+  font-size:   clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  position:    relative;
+  z-index:     1;
+}
+
+.cta-final__desc {
+  font-size:   1.05rem;
+  color:       var(--text-2);
+  margin-bottom: 36px;
+  position:    relative;
+  z-index:     1;
+}
+
+/* ---- Train Together grid ---- */
+.train__grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap:                   16px;
+  margin-top:            40px;
+}
+
+/* ---- Section desc centered variant ---- */
+.section__desc--center {
+  margin:     0 auto;
+  text-align: center;
+}
+
+/* ---- Responsive for new elements ---- */
+@media (max-width: 640px) {
+  .result-pdf-card__sections {
+    grid-template-columns: 1fr;
+  }
+
+  .result-next__actions {
+    flex-direction: column;
+  }
+
+  .result-next__actions .btn {
+    width: 100%;
+  }
+
+  .wiz-tiles--2col {
+    grid-template-columns: 1fr;
+  }
+
+  .benefits__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .benefit {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
