@@ -1,4 +1,3 @@
-const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -9,32 +8,7 @@ const pool = new Pool({
   password: 'kyroo_pass',
 });
 
-async function seed() {
-  // Admin user
-  const hash = await bcrypt.hash('Apache2008//!!', 10);
-  await pool.query(
-    `INSERT INTO users (email, password_hash, name, is_admin, is_premium)
-     VALUES ($1, $2, $3, true, false)
-     ON CONFLICT (email) DO UPDATE SET password_hash = $2, is_admin = true`,
-    ['okamara@gmail.com', hash, 'Damian Kamara']
-  );
-  console.log('Admin user ready');
-
-  // Site settings
-  const settings = {
-    hero_typewriter: 'Your program. Your rules.|Get fit on your terms.|90 days. Your way.|Transform. Starting now.|Change starts here.',
-    articles_tag: 'READ',
-    articles_title: 'Read.',
-    articles_desc: '',
-    imprint_company: 'KYROO UG',
-    imprint_street: 'Schoenhauser Allee 100',
-    imprint_city: '10119 Berlin',
-    imprint_phone: '(+49) 0151 / 55 623 461',
-    imprint_email: 'info@kyroo.de',
-    imprint_vat: 'DE12345566',
-    imprint_founder: 'Damian Kamara',
-    privacy_title: 'Privacy Policy',
-    privacy_body: `<h2>Privacy Policy</h2>
+const PRIVACY_BODY = `<h2>Privacy Policy</h2>
 <p><strong>Last updated: March 2026</strong></p>
 <p>KYROO UG ("Kyroo", "we", "us") operates the Kyroo platform at kyroo.de. This policy explains what personal data we collect, why, and how we protect it.</p>
 
@@ -69,9 +43,9 @@ async function seed() {
 <p>All data is transmitted over HTTPS. Passwords are stored as bcrypt hashes. We apply industry-standard security practices to protect your data.</p>
 
 <h3>8. Contact</h3>
-<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
-    terms_title: 'Terms of Service',
-    terms_body: `<h2>Terms of Service</h2>
+<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`;
+
+const TERMS_BODY = `<h2>Terms of Service</h2>
 <p><strong>Last updated: March 2026</strong></p>
 <p>These Terms govern your use of the Kyroo platform (kyroo.de), operated by KYROO UG, Schoenhauser Allee 100, 10119 Berlin.</p>
 
@@ -106,39 +80,23 @@ async function seed() {
 <p>These Terms are governed by German law. Disputes are subject to the jurisdiction of the courts of Berlin.</p>
 
 <h3>11. Contact</h3>
-<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
-  };
+<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`;
 
-  for (const [k, v] of Object.entries(settings)) {
-    await pool.query(
-      'INSERT INTO site_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
-      [k, v]
-    );
-  }
-  console.log('Settings seeded');
+async function run() {
+  await pool.query(
+    'UPDATE site_settings SET value = $1 WHERE key = $2',
+    [PRIVACY_BODY, 'privacy_body']
+  );
+  console.log('privacy_body updated');
 
-  // Sections
-  await pool.query("UPDATE sections SET title = $1, description = $2 WHERE slug = 'hero'", ['Your program. Your rules.', 'Choose a program. Get your personalized plan.']);
-  await pool.query("UPDATE sections SET title = $1, description = NULL WHERE slug = 'explore'", ['Explore.']);
-  await pool.query("UPDATE sections SET title = $1, description = NULL WHERE slug = 'newsletter'", ['Sunday mornings, sorted.']);
-  console.log('Sections updated');
-
-  // Social links
-  await pool.query("UPDATE social_links SET url = $1 WHERE platform = 'Instagram'", ['https://instagram.com/kyrooai']);
-  await pool.query("UPDATE social_links SET url = $1 WHERE platform = 'Twitter / X'", ['https://x.com/kyroo']);
-  await pool.query("UPDATE social_links SET url = $1 WHERE platform = 'WhatsApp'", ['https://wa.me/4915155623461']);
-  console.log('Social links updated');
-
-  // Footer links — clean single set, no duplicates
-  await pool.query("DELETE FROM footer_links");
-  await pool.query(`INSERT INTO footer_links (column_title, label, url, col_order, sort_order) VALUES
-    ('Legal', 'Privacy Policy', 'privacy', 1, 1),
-    ('Legal', 'Terms of Service', 'terms', 1, 2),
-    ('Legal', 'Imprint', 'imprint', 1, 3)`);
-  console.log('Footer links updated');
+  await pool.query(
+    'UPDATE site_settings SET value = $1 WHERE key = $2',
+    [TERMS_BODY, 'terms_body']
+  );
+  console.log('terms_body updated');
 
   await pool.end();
-  console.log('Production seed complete.');
+  console.log('Done.');
 }
 
-seed().catch(err => { console.error(err); process.exit(1); });
+run().catch(err => { console.error(err); process.exit(1); });
