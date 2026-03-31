@@ -145,59 +145,67 @@ function renderFreeContent(data) {
 }
 
 function renderPremium(data) {
-  // Premium header is now static HTML - skip dynamic render
-
   const grid = document.getElementById('premiumGrid');
+  if (!grid) return;
+
   grid.innerHTML = `
-    <div class="premium__cards">
-      <div class="premium__card" data-animate="fade-up">
-        <div class="premium__card-badge">Free</div>
-        <h3 class="premium__card-title">Free</h3>
-        <div class="premium__card-price">
-          <span class="premium__card-amount">0 EUR</span>
-          <span class="premium__card-period">forever</span>
+    <div class="pricing-cards">
+      <div class="pricing-card" data-animate="fade-up">
+        <span class="pricing-card__tier">Free</span>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount">0</span>
+          <span class="pricing-card__currency">EUR</span>
+          <span class="pricing-card__period">/ forever</span>
         </div>
-        <p class="premium__card-note">No credit card needed</p>
-        <ul class="premium__card-list">
-          <li>BMR Calculator</li>
-          <li>1RM Calculator</li>
-          <li>Macro Calculator</li>
-          <li>Body fat estimator</li>
+        <p class="pricing-card__desc">No credit card needed</p>
+        <ul class="pricing-card__features">
+          <li class="pricing-card__feature">BMR Calculator</li>
+          <li class="pricing-card__feature">1RM Calculator</li>
+          <li class="pricing-card__feature">Macro Calculator</li>
+          <li class="pricing-card__feature">Body fat estimator</li>
+          <li class="pricing-card__feature pricing-card__feature--muted">AI programs</li>
         </ul>
-        <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="free">Get started</button>
+        <div class="pricing-card__cta">
+          <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="free">Get started</button>
+        </div>
       </div>
-      <div class="premium__card premium__card--popular" data-animate="fade-up" data-delay="100">
-        <div class="premium__card-badge premium__card-badge--popular">Most Popular</div>
-        <h3 class="premium__card-title">Basic</h3>
-        <div class="premium__card-price">
-          <span class="premium__card-amount">6 EUR</span>
-          <span class="premium__card-period">/month</span>
+      <div class="pricing-card pricing-card--popular" data-animate="fade-up" data-delay="100">
+        <span class="pricing-card__popular-badge">Most Popular</span>
+        <span class="pricing-card__tier">Basic</span>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount">6</span>
+          <span class="pricing-card__currency">EUR</span>
+          <span class="pricing-card__period">/ month</span>
         </div>
-        <p class="premium__card-note">5 KYROO coach programs per month</p>
-        <ul class="premium__card-list">
-          <li>Everything in Free</li>
-          <li>5 KYROO coach programs/month</li>
-          <li>All 7 training tools</li>
-          <li>Train Together</li>
+        <p class="pricing-card__desc">5 AI programs per month</p>
+        <ul class="pricing-card__features">
+          <li class="pricing-card__feature">Everything in Free</li>
+          <li class="pricing-card__feature">5 programs / month</li>
+          <li class="pricing-card__feature">All 6 programs</li>
+          <li class="pricing-card__feature">Train Together</li>
         </ul>
-        <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="monthly">Get Basic</button>
+        <div class="pricing-card__cta">
+          <button type="button" class="btn btn--primary btn--full premiumCTA" data-plan="monthly">Get Basic</button>
+        </div>
       </div>
-      <div class="premium__card premium__card--pro" data-animate="fade-up" data-delay="200">
-        <div class="premium__card-badge premium__card-badge--pro">Best Value</div>
-        <h3 class="premium__card-title">Pro</h3>
-        <div class="premium__card-price">
-          <span class="premium__card-amount">14 EUR</span>
-          <span class="premium__card-period">/month</span>
+      <div class="pricing-card" data-animate="fade-up" data-delay="200">
+        <span class="pricing-card__tier">Pro</span>
+        <div class="pricing-card__price">
+          <span class="pricing-card__amount">14</span>
+          <span class="pricing-card__currency">EUR</span>
+          <span class="pricing-card__period">/ month</span>
         </div>
-        <p class="premium__card-note">Unlimited KYROO coach programs</p>
-        <ul class="premium__card-list">
-          <li>Everything in Basic</li>
-          <li>Unlimited programs</li>
-          <li>Priority generation</li>
-          <li>Train Together</li>
+        <p class="pricing-card__desc">Unlimited AI programs</p>
+        <ul class="pricing-card__features">
+          <li class="pricing-card__feature">Everything in Basic</li>
+          <li class="pricing-card__feature">Unlimited programs</li>
+          <li class="pricing-card__feature">Priority generation</li>
+          <li class="pricing-card__feature">Train Together</li>
         </ul>
-        <button type="button" class="btn btn--primary btn--full premiumCTA" data-plan="yearly">Get Pro</button>
-        <p class="premium__card-guarantee">14-day free trial. Cancel anytime.</p>
+        <div class="pricing-card__cta">
+          <button type="button" class="btn btn--ghost btn--full premiumCTA" data-plan="yearly">Get Pro</button>
+          <p class="pricing-card__guarantee">14-day free trial. Cancel anytime.</p>
+        </div>
       </div>
     </div>
   `;
@@ -1286,18 +1294,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mobile nav toggle
   const navToggle = document.getElementById('navToggle');
   const navMenu = document.getElementById('navMenu');
+  const navDrawer = document.getElementById('navDrawer');
+
+  function closeNav() {
+    navToggle.classList.remove('active', 'nav__toggle--open');
+    if (navMenu) navMenu.classList.remove('active');
+    if (navDrawer) navDrawer.classList.remove('nav__drawer--open');
+    document.body.style.overflow = '';
+  }
+
   navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navMenu.classList.toggle('active');
-    document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+    const isOpen = navToggle.classList.contains('active') || navToggle.classList.contains('nav__toggle--open');
+    if (isOpen) {
+      closeNav();
+    } else {
+      navToggle.classList.add('active', 'nav__toggle--open');
+      if (navMenu) navMenu.classList.add('active');
+      if (navDrawer) navDrawer.classList.add('nav__drawer--open');
+      document.body.style.overflow = 'hidden';
+    }
   });
-  navMenu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navToggle.classList.remove('active');
-      navMenu.classList.remove('active');
-      document.body.style.overflow = '';
+
+  if (navMenu) navMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeNav));
+  if (navDrawer) navDrawer.querySelectorAll('a').forEach(link => link.addEventListener('click', closeNav));
+
+  // Mobile auth button (drawer)
+  const navAuthBtnMobile = document.getElementById('navAuthBtnMobile');
+  if (navAuthBtnMobile) {
+    navAuthBtnMobile.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeNav();
+      if (currentUser) showAccountModal();
+      else showAuthModal('login');
     });
-  });
+  }
 
   // Smooth scroll (skip '#' only links and the auth button)
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1308,11 +1338,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
-        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 60;
+        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
         window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
       }
     });
   });
+
+  // data-scroll attribute handler (new nav links)
+  document.querySelectorAll('[data-scroll]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = el.dataset.scroll;
+      const target = document.getElementById(id);
+      if (target) {
+        const offset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ---- Footer legal buttons (static in new design) ----
+  const _fetchSite = () => fetch(`${API_BASE}/api/site`).then(r => r.json());
+  const privacyBtn = document.getElementById('privacyBtn');
+  const termsBtn = document.getElementById('termsBtn');
+  const imprintBtn = document.getElementById('imprintBtn');
+  if (privacyBtn) privacyBtn.onclick = () => _fetchSite().then(d => showPrivacy(d));
+  if (termsBtn) termsBtn.onclick = () => _fetchSite().then(d => showTerms(d));
+  if (imprintBtn) imprintBtn.onclick = () => _fetchSite().then(d => showImprint(d));
 
   // ---- Modal wiring (close via X button or Escape only) ----
   document.getElementById('authModalClose').onclick = () => hideModal('authModal');
@@ -1411,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---- Newsletter form ----
   const form = document.getElementById('newsletterForm');
   const success = document.getElementById('newsletterSuccess');
-  form.addEventListener('submit', async (e) => {
+  if (form) form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     const email = document.getElementById('emailInput').value;
@@ -1443,9 +1495,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
 
-    renderHero(data);
-    renderPremium(data);
-    renderNewsletter(data);
+    if (document.getElementById('heroTitle')) renderHero(data);
+    if (document.getElementById('premiumGrid')) renderPremium(data);
+    if (document.getElementById('newsletterTitle')) renderNewsletter(data);
     renderSocials(data);
     renderFooterLinks(data);
     initAnimations();
@@ -1456,15 +1508,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Articles disabled for launch
   // loadArticles();
 
-  // Train Together
-  loadTrainTogether();
+  // Train Together (only on pages with the grid)
+  if (document.getElementById('trainGrid')) loadTrainTogether();
 
   // Allow auth modal only after page is fully initialized
   pageReady = true;
 
   // ---- DSGVO Cookie Banner ----
-  if (!localStorage.getItem('kyroo_cookie_consent')) {
-    const banner = document.getElementById('cookieBanner');
+  const banner = document.getElementById('cookieBanner');
+  if (banner && !localStorage.getItem('kyroo_cookie_consent')) {
     banner.hidden = false;
     document.getElementById('cookieAccept').addEventListener('click', () => {
       localStorage.setItem('kyroo_cookie_consent', Date.now());

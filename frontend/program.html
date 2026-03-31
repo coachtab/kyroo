@@ -3,1048 +3,1111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYROO - Program</title>
+  <title>KYROO — ProgramHub</title>
+  <meta name="description" content="Pick a program, answer a few guided questions, and get your personalized AI fitness guide — ready to download.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0d0c14;--surface:#161521;--surface-2:#1e1d2a;--surface-3:#262535;--border:rgba(255,255,255,0.04);--border-hover:rgba(255,255,255,0.08);--text:#f2ede6;--text-2:#928d84;--text-3:#524e48;--accent:#f0845a;--accent-h:#ff9e78;--accent-glow:rgba(240,132,90,0.15);--accent-deep:rgba(240,132,90,0.06);--warm:#fcc96e;--sage:#82a96f;--sage-glow:rgba(130,169,111,0.1);--heading:'Nunito',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--ease:cubic-bezier(0.34,1.56,0.64,1);--ease-out:cubic-bezier(0.22,1,0.36,1)}
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-    ::selection{background:var(--accent);color:#fff}
-    a{color:inherit;text-decoration:none}
+    /* ============================================================
+       PROGRAMHUB — Page-specific styles
+       ============================================================ */
 
-    .page{max-width:960px;margin:0 auto;padding:40px 32px 80px}
-    .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px}
-    .nav__logo{font-family:var(--heading);font-size:1.25rem;font-weight:900;letter-spacing:0.12em;text-transform:uppercase;background:linear-gradient(135deg,var(--accent),var(--warm),var(--sage));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;transition:transform 0.4s var(--ease)}
-    .nav__logo:hover{transform:scale(1.05)}
-    .nav__back{font-family:var(--heading);font-size:0.6875rem;font-weight:700;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;transition:color 0.3s}
-    .nav__back:hover{color:var(--text)}
+    .hub-page { padding-top: var(--nav-h); min-height: 100vh; }
 
-    /* Hub */
-    .hub__header{text-align:center;margin-bottom:56px}
-    .hub__tag{display:inline-block;font-family:var(--heading);font-size:0.6875rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);background:var(--accent-deep);padding:6px 14px;border-radius:8px;margin-bottom:16px}
-    .hub__title{font-family:var(--heading);font-size:2.5rem;font-weight:900;line-height:1.1;margin-bottom:12px;letter-spacing:-0.02em}
-    .hub__desc{font-size:0.9375rem;color:var(--text-2);max-width:420px;margin:0 auto}
+    /* Hero */
+    .hub-hero { padding: 64px 0 48px; }
+    .hub-hero__inner { max-width: 640px; }
+    .hub-hero__tag { margin-bottom: 20px; }
+    .hub-hero__title { font-family: var(--heading); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; color: var(--text); }
+    .hub-hero__desc { font-size: 1rem; color: var(--text-2); line-height: 1.7; max-width: 520px; }
 
-    .hub__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .hub__card{background:linear-gradient(160deg,var(--surface),var(--surface-2));border:1px solid var(--border);border-radius:20px;padding:32px 24px;cursor:pointer;transition:all 0.5s var(--ease);text-align:center;position:relative;overflow:hidden}
-    .hub__card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--warm));opacity:0;transition:opacity 0.4s}
-    .hub__card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--accent-deep),transparent 60%);opacity:0;transition:opacity 0.4s}
-    .hub__card:hover{border-color:rgba(240,132,90,0.12);transform:translateY(-6px) scale(1.01);box-shadow:0 20px 48px rgba(0,0,0,0.3),0 4px 16px rgba(240,132,90,0.06)}
-    .hub__card:hover::before{opacity:1}
-    .hub__card:hover::after{opacity:1}
-    .hub__card:active{transform:translateY(-2px) scale(0.98)}
-    .hub__card-icon{font-size:1.75rem;margin-bottom:18px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-deep),rgba(252,201,110,0.06));border-radius:16px;margin-left:auto;margin-right:auto;position:relative;z-index:1;transition:all 0.4s var(--ease);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
-    .hub__card:hover .hub__card-icon{transform:scale(1.1) translateY(-2px);box-shadow:0 8px 20px rgba(240,132,90,0.12)}
-    .hub__card-title{font-family:var(--heading);font-size:1.125rem;font-weight:800;margin-bottom:8px;position:relative;z-index:1}
-    .hub__card-desc{font-size:0.75rem;color:var(--text-3);line-height:1.65;position:relative;z-index:1}
-    .hub__card-badge{display:inline-block;font-family:var(--heading);font-size:0.5625rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--sage);margin-top:14px;padding:5px 12px;background:var(--sage-glow);border-radius:8px;position:relative;z-index:1}
+    /* Hub sections */
+    .hub-section { padding: 48px 0 80px; }
+    .hub-section + .hub-section { border-top: 1px solid var(--border); }
 
-    .hero__tag--free{background:var(--sage-glow);color:var(--sage)}
-    .input--flex{flex:1}
-    .input--half{flex:0.5}
-    .hub__card--free::before{background:linear-gradient(90deg,var(--sage),#a8d090)}
-    .hub__card-icon--sage{background:var(--sage-glow)!important}
-    .hub__card-badge--free{color:var(--sage)!important;background:var(--sage-glow)!important}
+    /* ============================================================
+       WIZARD OVERLAY
+       ============================================================ */
+    #wizardOverlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--bg);
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    #wizardOverlay.active { transform: translateY(0); }
+    .wizard-inner { max-width: 640px; margin: 0 auto; padding: 80px 28px 120px; width: 100%; }
 
-    @media(max-width:768px){.hub__grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:640px){.hub__grid{grid-template-columns:1fr}}
+    /* Progress */
+    .wiz-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 56px; }
+    .wiz-progress__back { background: none; border: none; cursor: pointer; color: var(--text-3); font-family: var(--heading); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.3s; }
+    .wiz-progress__back:hover { color: var(--text); }
+    .wiz-progress__bar { flex: 1; height: 3px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+    .wiz-progress__fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--warm)); border-radius: 99px; transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+    .wiz-progress__label { font-size: 0.6875rem; color: var(--text-3); font-weight: 600; min-width: 40px; text-align: right; }
 
-    /* Wizard shared */
-    .wizard{display:none;max-width:580px;margin:0 auto}
-    .wizard--active{display:block;animation:fadeIn 0.5s var(--ease-out)}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    .wizard__back{font-family:var(--heading);font-size:0.6875rem;font-weight:700;color:var(--text-3);cursor:pointer;margin-bottom:32px;display:inline-block;transition:all 0.3s var(--ease)}
-    .wizard__back:hover{color:var(--text);transform:translateX(-3px)}
+    /* Steps */
+    .wiz-steps { position: relative; }
+    .wiz-step { display: none; }
+    .wiz-step.active { display: block; animation: stepIn 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes stepIn { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: translateX(0); } }
 
-    .hero{text-align:center;margin-bottom:48px}
-    .hero__tag{display:inline-block;font-family:var(--heading);font-size:0.6875rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);background:var(--accent-deep);padding:6px 14px;border-radius:8px;margin-bottom:16px}
-    .hero__title{font-family:var(--heading);font-size:2rem;font-weight:900;line-height:1.15;margin-bottom:8px;letter-spacing:-0.02em}
-    .hero__desc{font-size:0.8125rem;color:var(--text-2);max-width:360px;margin:0 auto}
+    .wiz-program-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--heading); font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); background: var(--accent-glow); padding: 6px 14px; border-radius: 8px; margin-bottom: 20px; }
+    .wiz-question { font-family: var(--heading); font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; color: var(--text); margin-bottom: 8px; }
+    .wiz-hint { font-size: 0.875rem; color: var(--text-3); margin-bottom: 36px; }
 
-    .steps{display:flex;justify-content:center;gap:8px;margin-bottom:48px}
-    .step{width:32px;height:3px;background:var(--border);transition:background 0.3s}
-    .step--active{background:var(--accent)}
-    .step--done{background:var(--sage)}
+    /* Tiles */
+    .wiz-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 36px; }
+    .wiz-tiles--3col { grid-template-columns: repeat(3, 1fr); }
+    .wiz-tile { border: 1.5px solid var(--border); border-radius: 20px; padding: 24px 20px; cursor: pointer; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); text-align: center; background: var(--surface); }
+    .wiz-tile:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+    .wiz-tile.selected { border-color: var(--accent); background: var(--accent-glow); box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(240,132,90,0.15); }
+    .wiz-tile__icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+    .wiz-tile__label { font-family: var(--heading); font-size: 0.9375rem; font-weight: 800; color: var(--text); }
+    .wiz-tile__sub { font-size: 0.75rem; color: var(--text-3); margin-top: 4px; }
 
-    .card{display:none}
-    .card--active{display:block;animation:fadeIn 0.4s var(--ease)}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .card__title{font-family:var(--heading);font-size:1.25rem;font-weight:900;margin-bottom:6px}
-    .card__desc{font-size:0.8125rem;color:var(--text-3);margin-bottom:28px}
+    /* Numeric inputs */
+    .wiz-inputs { display: flex; gap: 16px; margin-bottom: 36px; }
+    .wiz-input-group { flex: 1; }
+    .wiz-label { display: block; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+    .wiz-input { width: 100%; padding: 16px 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; color: var(--text); font-family: var(--heading); font-size: 1.25rem; font-weight: 800; text-align: center; outline: none; transition: all 0.3s; }
+    .wiz-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .wiz-input::placeholder { color: var(--text-3); font-weight: 600; }
 
-    .selector{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
-    .selector__btn{padding:14px 20px;font-family:var(--heading);font-size:0.8125rem;font-weight:700;border:1.5px solid var(--border);border-radius:14px;background:transparent;color:var(--text-2);cursor:pointer;transition:all 0.4s var(--ease);flex:1;min-width:100px;text-align:center}
-    .selector__btn:hover{border-color:var(--border-hover);color:var(--text);transform:translateY(-1px)}
-    .selector__btn--selected{border-color:var(--accent);color:var(--accent);background:var(--accent-deep);box-shadow:0 4px 16px var(--accent-glow)}
-    .selector__btn:active{transform:scale(0.96)}
-    .selector__sub{font-size:0.6875rem;color:var(--text-3);font-weight:400}
+    /* Actions row */
+    .wiz-actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .wiz-actions--between { justify-content: space-between; }
 
-    .input-group{margin-bottom:20px}
-    .input-label{font-size:0.6875rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;display:block}
-    .input{width:100%;padding:14px 18px;background:rgba(255,255,255,0.02);border:1.5px solid var(--border);border-radius:14px;color:var(--text);font-family:var(--body);font-size:1rem;font-weight:600;outline:none;transition:all 0.3s var(--ease-out);text-align:center}
-    .input:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(240,132,90,0.08);background:rgba(255,255,255,0.03)}
-    .input::placeholder{color:var(--text-3);font-weight:400}
-    .textarea{width:100%;padding:14px 18px;background:rgba(255,255,255,0.02);border:1.5px solid var(--border);border-radius:14px;color:var(--text);font-family:var(--body);font-size:0.875rem;outline:none;transition:all 0.3s var(--ease-out);resize:vertical;min-height:80px;line-height:1.6}
-    .textarea:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(240,132,90,0.08);background:rgba(255,255,255,0.03)}
-    .textarea::placeholder{color:var(--text-3)}
-    .input-row{display:flex;gap:12px}
-    .input-row>*{flex:1}
-    .input-hint{font-size:0.6875rem;color:var(--text-3);margin-top:4px;text-align:center}
+    /* Textarea */
+    .wiz-textarea { width: 100%; padding: 16px 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; color: var(--text); font-family: var(--body); font-size: 0.9375rem; outline: none; transition: all 0.3s; resize: vertical; min-height: 100px; line-height: 1.65; margin-bottom: 36px; }
+    .wiz-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .wiz-textarea::placeholder { color: var(--text-3); }
 
-    .card__actions{display:flex;gap:12px;margin-top:36px}
-    .btn{display:flex;align-items:center;justify-content:center;padding:14px;font-family:var(--heading);font-size:0.8125rem;font-weight:700;letter-spacing:0.01em;border:none;cursor:pointer;transition:all 0.4s var(--ease);width:100%;border-radius:14px}
-    .btn--primary{background:linear-gradient(135deg,var(--accent),#e86f3a);color:#fff;box-shadow:0 4px 12px var(--accent-glow),inset 0 1px 0 rgba(255,255,255,0.15)}
-    .btn--primary:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 12px 32px rgba(240,132,90,0.3),inset 0 1px 0 rgba(255,255,255,0.2)}
-    .btn--primary:active{transform:translateY(0) scale(0.98);box-shadow:0 2px 8px var(--accent-glow)}
-    .btn--primary:disabled{opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none}
-    .btn--ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-2);border-radius:14px}
-    .btn--ghost:hover{border-color:var(--border-hover);color:var(--text);transform:translateY(-2px)}
-    .btn--ghost:active{transform:translateY(0)}
-    .error{font-size:0.8125rem;color:#d46b6b;text-align:center;margin-top:16px}
+    /* Generation screen */
+    #genScreen { display: none; text-align: center; padding: 80px 0; }
+    .gen-icon { width: 72px; height: 72px; margin: 0 auto 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--warm)); display: flex; align-items: center; justify-content: center; animation: glow-pulse 2s ease-in-out infinite; font-size: 2rem; }
+    @keyframes glow-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,132,90,0.4)} 50%{box-shadow:0 0 0 20px rgba(240,132,90,0)} }
+    .gen-title { font-family: var(--heading); font-size: 1.75rem; font-weight: 900; margin-bottom: 8px; }
+    .gen-sub { color: var(--text-3); font-size: 0.875rem; margin-bottom: 48px; }
+    .gen-stages { display: flex; flex-direction: column; gap: 16px; max-width: 360px; margin: 0 auto 48px; text-align: left; }
+    .gen-stage { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; transition: all 0.4s; }
+    .gen-stage--done { border-color: var(--sage); background: rgba(130,169,111,0.06); }
+    .gen-stage--active { border-color: var(--accent); background: var(--accent-glow); }
+    .gen-stage__icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; background: var(--surface-2); flex-shrink: 0; }
+    .gen-stage--done .gen-stage__icon { background: var(--sage); color: #fff; }
+    .gen-stage--active .gen-stage__icon { background: var(--accent); color: #fff; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .gen-stage__label { font-family: var(--heading); font-size: 0.875rem; font-weight: 700; color: var(--text-2); }
+    .gen-stage--done .gen-stage__label, .gen-stage--active .gen-stage__label { color: var(--text); }
 
-    .generating{text-align:center;padding:80px 0}
-    .spinner{width:32px;height:32px;border:2px solid var(--text-3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 20px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .generating__text{font-family:var(--heading);font-size:1.25rem;margin-bottom:6px}
-    .generating__sub{font-size:0.75rem;color:var(--text-3)}
+    /* Result */
+    #resultArea { display: none; }
+    .result-header { text-align: center; margin-bottom: 48px; padding: 48px 28px; background: linear-gradient(135deg, var(--surface), var(--surface-2)); border: 1px solid var(--border); border-radius: 28px; }
+    .result-badge { display: inline-block; font-family: var(--heading); font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sage); background: var(--sage-glow); padding: 6px 14px; border-radius: 8px; margin-bottom: 20px; }
+    .result-title { font-family: var(--heading); font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 900; margin-bottom: 12px; }
+    .result-desc { color: var(--text-2); font-size: 0.9375rem; margin-bottom: 32px; max-width: 460px; margin-left: auto; margin-right: auto; }
+    .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .result-body { font-size: 0.9375rem; line-height: 1.85; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 40px; }
+    .result-body h1, .result-body h2, .result-body h3 { font-family: var(--heading); font-weight: 800; color: var(--text); margin: 32px 0 12px; }
+    .result-body h1 { font-size: 1.5rem; margin-top: 0; }
+    .result-body h2 { font-size: 1.25rem; padding-top: 24px; border-top: 1px solid var(--border); }
+    .result-body h3 { font-size: 1rem; }
+    .result-body strong { color: var(--text); font-weight: 700; }
+    .result-body p { margin-bottom: 12px; }
+    .result-body li { margin-left: 20px; margin-bottom: 6px; }
+    .result-next { margin-top: 48px; padding: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; text-align: center; }
+    .result-next__title { font-family: var(--heading); font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; }
+    .result-next__desc { color: var(--text-3); font-size: 0.875rem; margin-bottom: 24px; }
 
-    .result{display:none}
-    .result__actions{display:flex;gap:8px;margin-bottom:40px}
-    .result__btn{padding:10px 20px;font-family:var(--heading);font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:1.5px solid var(--border);border-radius:12px;background:transparent;color:var(--text-2);cursor:pointer;transition:all 0.3s var(--ease)}
-    .result__btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
-    .result__body{font-size:0.875rem;line-height:1.85;color:var(--text-2)}
-    .result__body strong{color:var(--text);font-weight:600}
-    .result__body h1,.result__body h2,.result__body h3{font-family:var(--heading);font-weight:400;color:var(--text);margin:32px 0 12px}
-    .result__body h1{font-size:1.5rem;margin-top:0}
-    .result__body h2{font-size:1.25rem;padding-top:20px;border-top:1px solid var(--border)}
-    .result__body h3{font-size:1rem}
+    /* Calc results */
+    .calc-results { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 32px; margin-top: 32px; display: none; }
+    .calc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
+    .calc-stat { text-align: center; }
+    .calc-stat__num { font-family: var(--heading); font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--warm)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .calc-stat__label { font-size: 0.75rem; color: var(--text-3); margin-top: 4px; }
+    .calc-macro-bar { margin: 8px 0; }
+    .calc-macro-label { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px; color: var(--text-2); }
+    .calc-macro-track { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+    .calc-macro-fill { height: 100%; border-radius: 99px; }
 
-    .locked{text-align:center;padding:80px 0}
-    .locked__title{font-family:var(--heading);font-size:1.5rem;margin-bottom:8px}
-    .locked__desc{font-size:0.875rem;color:var(--text-3);margin-bottom:28px}
-    .locked__btn{display:inline-flex;padding:14px 32px;background:var(--accent);color:#fff;font-family:var(--body);font-size:0.8125rem;font-weight:600;border-radius:999px}
+    /* Locked */
+    .locked-view { text-align: center; padding: 80px 0; }
+    .locked-view__icon { font-size: 3rem; margin-bottom: 20px; }
+    .locked-view__title { font-family: var(--heading); font-size: 1.75rem; font-weight: 900; margin-bottom: 12px; }
+    .locked-view__desc { color: var(--text-3); font-size: 0.9375rem; margin-bottom: 32px; max-width: 400px; margin-left: auto; margin-right: auto; }
 
-    /* Chat */
-    .chat{max-height:60vh;display:flex;flex-direction:column}
-    .chat__messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding:8px 0 20px;min-height:200px}
-    .chat__msg{max-width:90%;font-size:0.875rem;line-height:1.7;padding:14px 18px;white-space:pre-wrap}
-    .chat__msg--ai{background:var(--surface);border:1px solid var(--border);color:var(--text-2);align-self:flex-start}
-    .chat__msg--user{background:rgba(194,122,86,0.08);border:1px solid rgba(194,122,86,0.15);color:var(--text);align-self:flex-end}
-    .chat__msg--final{background:var(--surface);border:1px solid var(--border);color:var(--text-2);align-self:flex-start;max-width:100%}
-    .chat__msg--final h1,.chat__msg--final h2,.chat__msg--final h3{font-family:var(--heading);font-weight:400;color:var(--text);margin:20px 0 8px}
-    .chat__msg--final h1{font-size:1.375rem;margin-top:0}
-    .chat__msg--final h2{font-size:1.125rem;padding-top:16px;border-top:1px solid var(--border)}
-    .chat__msg--final h3{font-size:1rem}
-    .chat__msg--final strong{color:var(--text)}
-    .chat__input-wrap{display:flex;gap:8px;border-top:1px solid var(--border);padding-top:16px}
-    .chat__input{flex:1;padding:12px 14px;background:transparent;border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:0.875rem;outline:none;resize:none;line-height:1.5}
-    .chat__input:focus{border-color:var(--accent)}
-    .chat__input::placeholder{color:var(--text-3)}
-    .chat__send{padding:12px 24px;background:var(--accent);color:#fff;font-family:var(--body);font-size:0.8125rem;font-weight:600;border:none;cursor:pointer;transition:background 0.2s;flex-shrink:0}
-    .chat__send:hover{background:var(--accent-h)}
-    .chat__send:disabled{opacity:0.3;cursor:not-allowed}
-    .chat__typing{font-size:0.75rem;color:var(--text-3);padding:8px 0}
-    .chat__actions{display:flex;gap:8px;margin-top:16px}
+    /* hub__card-meta-tag (alias for hub__card-tag) */
+    .hub__card-meta { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 14px; }
+    .hub__card-meta-tag { font-family: var(--heading); font-size: 0.5625rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); background: var(--surface-3); padding: 4px 10px; border-radius: 6px; }
 
-    @media print{body{background:#fff;color:#111}.nav,.steps,.card__actions,.result__actions,.locked,.hub,.wizard__back{display:none!important}.result{display:block!important}.result__body,.result__body *{color:#111!important}.result__body h2{border-top:1px solid #ddd}.page{max-width:100%;padding:0}}
-    @media(max-width:640px){.input-row{flex-direction:column}.hub__grid{grid-template-columns:1fr}.selector__btn{min-width:0}}
+    /* Utility: initial fill width for progress bar */
+    .wiz-progress__fill--zero { width: 0%; }
+
+    /* wiz-progress__fill spacer (used in calc section) */
+    .wiz-progress__spacer { flex: 1; }
+
+    /* Wizard error message */
+    .wiz-error { color: #d46b6b; font-size: 0.875rem; display: none; margin-bottom: 16px; }
+    .wiz-error--visible { display: block; }
+
+    /* Step 4 sub-heading */
+    .wiz-question--sub { font-size: 1.25rem; margin-top: 32px; }
+
+    /* calc section hidden by default */
+    .calc-section--hidden { display: none; }
+
+    /* calc-section tiles spacing */
+    .wiz-tiles--mb-sm { margin-bottom: 24px; }
+    .wiz-tiles--mb-md { margin-bottom: 36px; }
+
+    /* calc label sage variant */
+    .wiz-program-label--sage { background: var(--sage-glow); color: var(--sage); }
+
+    @media (max-width: 640px) {
+      .wiz-tiles { grid-template-columns: 1fr; }
+      .wiz-tiles--3col { grid-template-columns: repeat(2, 1fr); }
+      .wiz-inputs { flex-direction: column; }
+      .calc-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      .nav, #wizardOverlay .wiz-progress, .wiz-actions, .result-next, .result-actions, #hubSection { display: none !important; }
+      #wizardOverlay { position: static; transform: none !important; }
+      .result-body { border: none; padding: 0; background: transparent; }
+      .result-body, .result-body * { color: #111 !important; }
+      .result-body h2 { border-top: 1px solid #ddd; }
+      body { background: #fff; }
+    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="nav">
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav__container container">
       <a href="/" class="nav__logo">KYROO</a>
-      <a href="/" class="nav__back">Back</a>
+      <button class="nav__toggle" id="navToggle" aria-label="Menu">
+        <span class="nav__toggle-line"></span>
+        <span class="nav__toggle-line"></span>
+        <span class="nav__toggle-line"></span>
+      </button>
+      <div class="nav__menu" id="navMenu">
+        <a href="/program.html" class="nav__link nav__link--active">Programs</a>
+        <a href="/#how" class="nav__link">How it works</a>
+        <a href="/#pricing" class="nav__link">Pricing</a>
+        <a href="javascript:void(0)" class="nav__link nav__auth" id="navAuthBtn">Log in</a>
+      </div>
+    </div>
+    <!-- Mobile drawer -->
+    <div class="nav__drawer" id="navDrawer">
+      <a href="/program.html" class="nav__link">Programs</a>
+      <a href="/#how" class="nav__link">How it works</a>
+      <a href="/#pricing" class="nav__link">Pricing</a>
+      <a href="javascript:void(0)" class="nav__link" id="navAuthBtnMobile">Log in</a>
+    </div>
+  </nav>
+
+  <div class="hub-page">
+
+    <!-- HUB HERO -->
+    <section class="hub-hero section" id="hubHero">
+      <div class="container">
+        <div class="hub-hero__inner">
+          <span class="hub-hero__tag section__tag">PROGRAMHUB</span>
+          <h1 class="hub-hero__title">Choose your program.</h1>
+          <p class="hub-hero__desc">Pick a program, answer a few guided questions, and get your personalized AI fitness guide — ready to download.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRAMS GRID -->
+    <section class="programs-hub hub-section" id="hubSection">
+      <div class="container">
+        <!-- Grid injected by JS -->
+      </div>
+    </section>
+
+    <!-- AUTH LOCKED VIEW -->
+    <div id="lockedView" hidden>
+      <div class="container">
+        <div class="locked-view">
+          <div class="locked-view__icon">🔒</div>
+          <h2 class="locked-view__title">Premium feature</h2>
+          <p class="locked-view__desc">AI-powered programs require a Basic or Pro subscription. Free calculators are always available.</p>
+          <button type="button" class="btn btn--primary" id="lockedUpgradeBtn">Upgrade to unlock</button>
+        </div>
+      </div>
     </div>
 
-    <div id="app">
-      <!-- Locked -->
-      <div id="lockedView" hidden>
-        <div class="locked">
-          <p class="locked__title">Premium Feature</p>
-          <p class="locked__desc">Training programs are for KYROO Premium members.</p>
-          <a href="/" class="locked__btn">Go to KYROO</a>
-        </div>
+  </div><!-- end hub-page -->
+
+  <!-- ============================================================
+       WIZARD OVERLAY
+       ============================================================ -->
+  <div id="wizardOverlay">
+    <div class="wizard-inner">
+
+      <!-- PROGRESS BAR -->
+      <div class="wiz-progress" id="wizProgress">
+        <button type="button" class="wiz-progress__back" id="wizBackBtn">&#8592; Back</button>
+        <div class="wiz-progress__bar"><div class="wiz-progress__fill wiz-progress__fill--zero" id="wizFill"></div></div>
+        <span class="wiz-progress__label" id="wizLabel">1 / 6</span>
       </div>
 
-      <!-- Hub -->
-      <div id="hubView">
-        <div class="hub__header">
-          <p class="hub__tag">PREMIUM</p>
-          <h1 class="hub__title">Your training hub.</h1>
-          <p class="hub__desc">Pick a program. Answer a few questions. Get a plan you can start today.</p>
-        </div>
-        <div class="hub__grid">
-          <div class="hub__card hub__card--free" onclick="showWizard('calculators')">
-            <div class="hub__card-icon hub__card-icon--sage">&#9874;</div>
-            <h3 class="hub__card-title">Calculators</h3>
-            <p class="hub__card-desc">BMR, 1RM, macros, body fat. Instant results, no AI needed.</p>
-            <span class="hub__card-badge hub__card-badge--free">Free</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('12week')">
-            <div class="hub__card-icon">&#9776;</div>
-            <h3 class="hub__card-title">12-Week Plan</h3>
-            <p class="hub__card-desc">Complete periodized training program. Personalized to your level, schedule, and goals.</p>
-            <span class="hub__card-badge">12 weeks</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('plateau')">
-            <div class="hub__card-icon">&#9889;</div>
-            <h3 class="hub__card-title">Plateau Breaker</h3>
-            <p class="hub__card-desc">Stuck on your lifts? Get a diagnostic and an 8-week plan to break through.</p>
-            <span class="hub__card-badge">8 weeks</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('tracker')">
-            <div class="hub__card-icon">&#9638;</div>
-            <h3 class="hub__card-title">Progress Tracker</h3>
-            <p class="hub__card-desc">Professional tracking system for bodyweight, lifts, photos, measurements, and decisions.</p>
-            <span class="hub__card-badge">Monitoring</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('summer')">
-            <div class="hub__card-icon">&#9728;</div>
-            <h3 class="hub__card-title">90-Day Summer Shred</h3>
-            <p class="hub__card-desc">Deficit, diet, training, steps, sleep. Five steps, no BS. Start tomorrow.</p>
-            <span class="hub__card-badge">90 days</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('nutrition')">
-            <div class="hub__card-icon">&#9733;</div>
-            <h3 class="hub__card-title">Nutrition Shredder</h3>
-            <p class="hub__card-desc">Your KYROO nutritionist builds your meal plan, macros, snack swaps, and timeline.</p>
-            <span class="hub__card-badge">Meal plan</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('injury')">
-            <div class="hub__card-icon">&#9769;</div>
-            <h3 class="hub__card-title">Injury Prevention</h3>
-            <p class="hub__card-desc">Prehab, warm-ups, red flags, and technique fixes. Stay healthy, train forever.</p>
-            <span class="hub__card-badge">Prevention</span>
-          </div>
-          <div class="hub__card" onclick="showWizard('weakpoint')">
-            <div class="hub__card-icon">&#9881;</div>
-            <h3 class="hub__card-title">Weak Point Fixer</h3>
-            <p class="hub__card-desc">Identify underdeveloped muscles or lift breakdowns. Get a targeted fix plan.</p>
-            <span class="hub__card-badge">Action plan</span>
-          </div>
-        </div>
-      </div>
+      <!-- STEPS CONTAINER -->
+      <div class="wiz-steps" id="wizSteps">
 
-      <!-- Calculators Wizard (Free - no API) -->
-      <div class="wizard" id="wizardCalculators">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag hero__tag--free">FREE TOOLS</p>
-          <h1 class="hero__title">Calculators.</h1>
-          <p class="hero__desc">Instant results. No account needed.</p>
-        </div>
-        <div class="steps" id="stepsCalc"></div>
-        <div id="cardsCalc">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Your stats.</p>
-            <p class="card__desc">We calculate everything from this.</p>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="wc_weight" placeholder="80"></div>
-              <div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="wc_height" placeholder="180"></div>
+        <!-- STEP 1: FITNESS GOAL -->
+        <div class="wiz-step active" data-step="1">
+          <div class="wiz-program-label" id="wizProgramLabel">🔥 90-Day Challenge</div>
+          <h2 class="wiz-question">What's your main goal?</h2>
+          <p class="wiz-hint">This shapes everything about your program.</p>
+          <div class="wiz-tiles" id="tilesGoal">
+            <div class="wiz-tile" data-value="lose weight and reduce body fat">
+              <span class="wiz-tile__icon">🔥</span>
+              <span class="wiz-tile__label">Lose weight</span>
+              <span class="wiz-tile__sub">Burn fat, feel lighter</span>
             </div>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="wc_age" placeholder="28"></div>
-              <div class="input-group"><label class="input-label">Sex</label><div class="selector" id="wc_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button></div></div>
+            <div class="wiz-tile" data-value="build muscle and increase strength">
+              <span class="wiz-tile__icon">💪</span>
+              <span class="wiz-tile__label">Build muscle</span>
+              <span class="wiz-tile__sub">Gain size and strength</span>
             </div>
-            <div class="input-group"><label class="input-label">Activity level</label>
-              <div class="selector" id="wc_activity">
-                <button type="button" class="selector__btn" data-value="1.2">Sedentary</button>
-                <button type="button" class="selector__btn selector__btn--selected" data-value="1.55">Moderate</button>
-                <button type="button" class="selector__btn" data-value="1.725">Very active</button>
-              </div>
+            <div class="wiz-tile" data-value="improve overall fitness and conditioning">
+              <span class="wiz-tile__icon">⚡</span>
+              <span class="wiz-tile__label">Get fitter</span>
+              <span class="wiz-tile__sub">Energy, endurance, health</span>
             </div>
-            <div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextC()">Continue</button></div>
+            <div class="wiz-tile" data-value="improve health, mobility, and wellbeing">
+              <span class="wiz-tile__icon">❤️</span>
+              <span class="wiz-tile__label">Feel better</span>
+              <span class="wiz-tile__sub">Health and longevity</span>
+            </div>
           </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Your lifts (optional).</p>
-            <p class="card__desc">For 1RM estimates. Leave blank to skip.</p>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Squat (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_sq_w" placeholder="100" class="input--flex"><input type="number" class="input" id="wc_sq_r" placeholder="5" class="input--half"></div></div>
-              <div class="input-group"><label class="input-label">Bench (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_bp_w" placeholder="70" class="input--flex"><input type="number" class="input" id="wc_bp_r" placeholder="5" class="input--half"></div></div>
-            </div>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Deadlift (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_dl_w" placeholder="120" class="input--flex"><input type="number" class="input" id="wc_dl_r" placeholder="5" class="input--half"></div></div>
-              <div class="input-group"><label class="input-label">OHP (kg x reps)</label><div class="input-row"><input type="number" class="input" id="wc_oh_w" placeholder="40" class="input--flex"><input type="number" class="input" id="wc_oh_r" placeholder="5" class="input--half"></div></div>
-            </div>
-            <p class="error" id="errC" hidden></p>
-            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevC()">Back</button><button type="button" class="btn btn--primary" onclick="calcResults()">Calculate</button></div>
+          <div class="wiz-actions">
+            <button type="button" class="btn btn--ghost" id="wizCloseBtn">Cancel</button>
+            <button type="button" class="btn btn--primary" id="step1Next">Continue</button>
           </div>
         </div>
-      </div>
 
-      <!-- 12-Week Wizard -->
-      <div class="wizard" id="wizard12week">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">12-WEEK PLAN</p>
-          <h1 class="hero__title">Build your program.</h1>
-          <p class="hero__desc">Five questions. One complete plan.</p>
+        <!-- STEP 2: FITNESS LEVEL -->
+        <div class="wiz-step" data-step="2">
+          <h2 class="wiz-question">Your experience level?</h2>
+          <p class="wiz-hint">How long have you been training consistently?</p>
+          <div class="wiz-tiles wiz-tiles--3col" id="tilesLevel">
+            <div class="wiz-tile" data-value="beginner" data-years="0">
+              <span class="wiz-tile__icon">🌱</span>
+              <span class="wiz-tile__label">Beginner</span>
+              <span class="wiz-tile__sub">Under 1 year</span>
+            </div>
+            <div class="wiz-tile selected" data-value="intermediate" data-years="2">
+              <span class="wiz-tile__icon">💫</span>
+              <span class="wiz-tile__label">Intermediate</span>
+              <span class="wiz-tile__sub">1–4 years</span>
+            </div>
+            <div class="wiz-tile" data-value="advanced" data-years="6">
+              <span class="wiz-tile__icon">🏆</span>
+              <span class="wiz-tile__label">Advanced</span>
+              <span class="wiz-tile__sub">5+ years</span>
+            </div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step2Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step2Next">Continue</button>
+          </div>
         </div>
-        <div class="steps" id="steps12"></div>
-        <div id="cards12">
-          <div class="card card--active" data-step="1"><p class="card__title">Your level.</p><p class="card__desc">How long have you been training?</p><div class="selector" id="w12_level"><button type="button" class="selector__btn" data-value="beginner">Beginner<br><span class="selector__sub">Under 1 year</span></button><button type="button" class="selector__btn selector__btn--selected" data-value="intermediate">Intermediate<br><span class="selector__sub">1-4 years</span></button><button type="button" class="selector__btn" data-value="advanced">Advanced<br><span class="selector__sub">5+ years</span></button></div><div class="card__actions"><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
-          <div class="card" data-step="2"><p class="card__title">Your body.</p><p class="card__desc">The basics for your plan.</p><div class="input-row"><div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="w12_weight" placeholder="80"></div><div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="w12_height" placeholder="180"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="w12_age" placeholder="28"></div><div class="input-group"><label class="input-label">Sex</label><div class="selector" id="w12_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button><button type="button" class="selector__btn" data-value="diverse">Diverse</button></div></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
-          <div class="card" data-step="3"><p class="card__title">Your strength.</p><p class="card__desc">Current 1RM estimates. Skip if unsure.</p><div class="input-row"><div class="input-group"><label class="input-label">Squat</label><input type="number" class="input" id="w12_squat" placeholder="--"><p class="input-hint">kg</p></div><div class="input-group"><label class="input-label">Bench</label><input type="number" class="input" id="w12_bench" placeholder="--"><p class="input-hint">kg</p></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift</label><input type="number" class="input" id="w12_deadlift" placeholder="--"><p class="input-hint">kg</p></div><div class="input-group"><label class="input-label">OHP</label><input type="number" class="input" id="w12_ohp" placeholder="--"><p class="input-hint">kg</p></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
-          <div class="card" data-step="4"><p class="card__title">Your schedule.</p><p class="card__desc">How much time can you commit?</p><div class="input-group"><label class="input-label">Days per week</label><div class="selector" id="w12_days"><button type="button" class="selector__btn" data-value="3">3</button><button type="button" class="selector__btn selector__btn--selected" data-value="4">4</button><button type="button" class="selector__btn" data-value="5">5</button><button type="button" class="selector__btn" data-value="6">6</button></div></div><div class="input-group"><label class="input-label">Session length</label><div class="selector" id="w12_mins"><button type="button" class="selector__btn" data-value="45">45 min</button><button type="button" class="selector__btn selector__btn--selected" data-value="60">60 min</button><button type="button" class="selector__btn" data-value="75">75 min</button><button type="button" class="selector__btn" data-value="90">90 min</button></div></div><div class="input-group"><label class="input-label">Equipment</label><div class="selector" id="w12_equip"><button type="button" class="selector__btn selector__btn--selected" data-value="full commercial gym">Full gym</button><button type="button" class="selector__btn" data-value="home gym with barbell and dumbbells">Home gym</button><button type="button" class="selector__btn" data-value="bodyweight and calisthenics park">Bodyweight</button></div></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" onclick="next12()">Continue</button></div></div>
-          <div class="card" data-step="5"><p class="card__title">Your goal.</p><p class="card__desc">What matters most?</p><div class="input-group"><label class="input-label">Primary</label><div class="selector" id="w12_goal1"><button type="button" class="selector__btn selector__btn--selected" data-value="hypertrophy">Muscle growth</button><button type="button" class="selector__btn" data-value="strength">Strength</button><button type="button" class="selector__btn" data-value="fat loss while maintaining muscle">Fat loss</button></div></div><div class="input-group"><label class="input-label">Secondary</label><div class="selector" id="w12_goal2"><button type="button" class="selector__btn selector__btn--selected" data-value="building raw strength">Raw strength</button><button type="button" class="selector__btn" data-value="improving conditioning">Conditioning</button><button type="button" class="selector__btn" data-value="mobility and injury prevention">Mobility</button></div></div><p class="error" id="err12" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prev12()">Back</button><button type="button" class="btn btn--primary" id="gen12Btn" onclick="generate12()">Generate program</button></div></div>
-        </div>
-      </div>
 
-      <!-- Plateau Wizard -->
-      <div class="wizard" id="wizardPlateau">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">PLATEAU BREAKER</p>
-          <h1 class="hero__title">Break through.</h1>
-          <p class="hero__desc">Tell us where you are stuck. Get a plan to fix it.</p>
+        <!-- STEP 3: BODY STATS -->
+        <div class="wiz-step" data-step="3">
+          <h2 class="wiz-question">Tell us about yourself.</h2>
+          <p class="wiz-hint">Used to calibrate your program precisely.</p>
+          <div class="wiz-inputs">
+            <div class="wiz-input-group">
+              <label class="wiz-label" for="inpAge">Age</label>
+              <input class="wiz-input" type="number" id="inpAge" placeholder="28" min="14" max="90">
+            </div>
+            <div class="wiz-input-group">
+              <label class="wiz-label" for="inpWeight">Weight (kg)</label>
+              <input class="wiz-input" type="number" id="inpWeight" placeholder="75" min="30" max="300">
+            </div>
+            <div class="wiz-input-group">
+              <label class="wiz-label" for="inpHeight">Height (cm)</label>
+              <input class="wiz-input" type="number" id="inpHeight" placeholder="175" min="100" max="250">
+            </div>
+          </div>
+          <div class="wiz-tiles wiz-tiles--3col wiz-tiles--mb-md" id="tilesSex">
+            <div class="wiz-tile" data-value="male">
+              <span class="wiz-tile__icon">♂</span>
+              <span class="wiz-tile__label">Male</span>
+            </div>
+            <div class="wiz-tile" data-value="female">
+              <span class="wiz-tile__icon">♀</span>
+              <span class="wiz-tile__label">Female</span>
+            </div>
+            <div class="wiz-tile" data-value="other">
+              <span class="wiz-tile__icon">⚬</span>
+              <span class="wiz-tile__label">Other</span>
+            </div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step3Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step3Next">Continue</button>
+          </div>
         </div>
-        <div class="steps" id="stepsPlateau"></div>
-        <div id="cardsPlateau">
-          <div class="card card--active" data-step="1"><p class="card__title">Where are you stuck?</p><p class="card__desc">Your current numbers and how long you have been stalled.</p><div class="input-group"><label class="input-label">Weeks stuck</label><input type="number" class="input" id="wp_weeks" placeholder="6"></div><div class="input-row"><div class="input-group"><label class="input-label">Squat (kg)</label><input type="number" class="input" id="wp_squat" placeholder="120"></div><div class="input-group"><label class="input-label">Bench (kg)</label><input type="number" class="input" id="wp_bench" placeholder="80"></div></div><div class="input-row"><div class="input-group"><label class="input-label">Deadlift (kg)</label><input type="number" class="input" id="wp_deadlift" placeholder="140"></div><div class="input-group"><label class="input-label">OHP (kg)</label><input type="number" class="input" id="wp_ohp" placeholder="50"></div></div><div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
-          <div class="card" data-step="2"><p class="card__title">Your current training.</p><p class="card__desc">What does your program look like right now?</p><div class="input-group"><label class="input-label">Current program</label><textarea class="textarea" id="wp_program" placeholder="e.g. Upper/Lower split, 4 days, been running it for 3 months..."></textarea></div><div class="input-group"><label class="input-label">Typical training week</label><textarea class="textarea" id="wp_week" placeholder="e.g. Monday: Squat 5x5, Bench 4x8... Tuesday: Rest..."></textarea></div><div class="input-group"><label class="input-label">Years lifting</label><input type="number" class="input" id="wp_years" placeholder="3"></div><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" onclick="nextP()">Continue</button></div></div>
-          <div class="card" data-step="3"><p class="card__title">Your recovery.</p><p class="card__desc">Sleep, stress, nutrition - the stuff outside the gym.</p><div class="input-row"><div class="input-group"><label class="input-label">Sleep (hours/night)</label><input type="number" class="input" id="wp_sleep" placeholder="7"></div><div class="input-group"><label class="input-label">Stress level</label><div class="selector" id="wp_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Moderate</button><button type="button" class="selector__btn" data-value="high">High</button></div></div></div><div class="input-group"><label class="input-label">Main stress source</label><input type="text" class="input" id="wp_stressReason" placeholder="e.g. work, family, finances"></div><div class="input-group"><label class="input-label">Nutrition overview</label><textarea class="textarea" id="wp_nutrition" placeholder="e.g. ~2500 cal, 150g protein, 3 meals a day, no tracking..."></textarea></div><p class="error" id="errP" hidden></p><div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevP()">Back</button><button type="button" class="btn btn--primary" id="genPBtn" onclick="generateP()">Diagnose and fix</button></div></div>
-        </div>
-      </div>
 
-      <!-- Tracker Wizard -->
-      <div class="wizard" id="wizardTracker">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">PROGRESS TRACKER</p>
-          <h1 class="hero__title">Track like a pro.</h1>
-          <p class="hero__desc">Get a complete monitoring system for your training.</p>
-        </div>
-        <div class="steps" id="stepsTracker"></div>
-        <div id="cardsTracker">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Your setup.</p>
-            <p class="card__desc">What are you tracking for?</p>
-            <div class="input-group">
-              <label class="input-label">Program type</label>
-              <div class="selector" id="wt_type">
-                <button type="button" class="selector__btn selector__btn--selected" data-value="12-week muscle-building program">Muscle building</button>
-                <button type="button" class="selector__btn" data-value="strength program">Strength</button>
-                <button type="button" class="selector__btn" data-value="fat loss program">Fat loss</button>
-              </div>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Duration (weeks)</label>
-              <div class="selector" id="wt_duration">
-                <button type="button" class="selector__btn" data-value="8">8</button>
-                <button type="button" class="selector__btn selector__btn--selected" data-value="12">12</button>
-                <button type="button" class="selector__btn" data-value="16">16</button>
-              </div>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--primary" onclick="nextT()">Continue</button>
-            </div>
+        <!-- STEP 4: SCHEDULE -->
+        <div class="wiz-step" data-step="4">
+          <h2 class="wiz-question">How many days per week?</h2>
+          <p class="wiz-hint">Be honest — your plan will match what you can actually commit to.</p>
+          <div class="wiz-tiles wiz-tiles--3col" id="tilesDays">
+            <div class="wiz-tile" data-value="2"><span class="wiz-tile__icon">2</span><span class="wiz-tile__label">2 days</span></div>
+            <div class="wiz-tile selected" data-value="3"><span class="wiz-tile__icon">3</span><span class="wiz-tile__label">3 days</span></div>
+            <div class="wiz-tile" data-value="4"><span class="wiz-tile__icon">4</span><span class="wiz-tile__label">4 days</span></div>
+            <div class="wiz-tile" data-value="5"><span class="wiz-tile__icon">5</span><span class="wiz-tile__label">5 days</span></div>
+            <div class="wiz-tile" data-value="6"><span class="wiz-tile__icon">6</span><span class="wiz-tile__label">6 days</span></div>
           </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Your details.</p>
-            <p class="card__desc">Quick context for your tracking system.</p>
-            <div class="input-group">
-              <label class="input-label">Tracking experience</label>
-              <div class="selector" id="wt_exp">
-                <button type="button" class="selector__btn selector__btn--selected" data-value="beginner - never tracked before">Never tracked</button>
-                <button type="button" class="selector__btn" data-value="some experience with tracking">Some experience</button>
-                <button type="button" class="selector__btn" data-value="experienced tracker">Experienced</button>
-              </div>
-            </div>
-            <div class="input-row">
-              <div class="input-group">
-                <label class="input-label">Current bodyweight (kg)</label>
-                <input type="number" class="input" id="wt_weight" placeholder="80">
-              </div>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Key lifts to track</label>
-              <input type="text" class="input" id="wt_lifts" placeholder="e.g. squat, bench, deadlift, OHP">
-            </div>
-            <p class="error" id="errT" hidden></p>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevT()">Back</button>
-              <button type="button" class="btn btn--primary" onclick="generateT()">Build tracking system</button>
-            </div>
+          <h2 class="wiz-question wiz-question--sub">Session length?</h2>
+          <div class="wiz-tiles wiz-tiles--3col" id="tilesMins">
+            <div class="wiz-tile" data-value="30"><span class="wiz-tile__label">30 min</span></div>
+            <div class="wiz-tile selected" data-value="45"><span class="wiz-tile__label">45 min</span></div>
+            <div class="wiz-tile" data-value="60"><span class="wiz-tile__label">60 min</span></div>
+            <div class="wiz-tile" data-value="75"><span class="wiz-tile__label">75 min</span></div>
+            <div class="wiz-tile" data-value="90"><span class="wiz-tile__label">90 min</span></div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step4Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step4Next">Continue</button>
           </div>
         </div>
-      </div>
 
-      <!-- Summer Shred Wizard -->
-      <div class="wizard" id="wizardSummer">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">90-DAY SUMMER SHRED</p>
-          <h1 class="hero__title">Get lean. No BS.</h1>
-          <p class="hero__desc">Five steps. Personalized to you. Start tomorrow.</p>
+        <!-- STEP 5: LOCATION + EQUIPMENT -->
+        <div class="wiz-step" data-step="5">
+          <h2 class="wiz-question">Where will you train?</h2>
+          <p class="wiz-hint">Your program adapts to your environment and equipment.</p>
+          <div class="wiz-tiles" id="tilesLocation">
+            <div class="wiz-tile" data-value="home">
+              <span class="wiz-tile__icon">🏠</span>
+              <span class="wiz-tile__label">At home</span>
+              <span class="wiz-tile__sub">Home setup</span>
+            </div>
+            <div class="wiz-tile selected" data-value="full commercial gym">
+              <span class="wiz-tile__icon">🏋️</span>
+              <span class="wiz-tile__label">At the gym</span>
+              <span class="wiz-tile__sub">Full equipment</span>
+            </div>
+            <div class="wiz-tile" data-value="outdoor park or calisthenics setup">
+              <span class="wiz-tile__icon">🌳</span>
+              <span class="wiz-tile__label">Outdoors</span>
+              <span class="wiz-tile__sub">Park / bars</span>
+            </div>
+            <div class="wiz-tile" data-value="mixed home and gym">
+              <span class="wiz-tile__icon">🔄</span>
+              <span class="wiz-tile__label">Mixed</span>
+              <span class="wiz-tile__sub">Home + gym</span>
+            </div>
+          </div>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step5Back">Back</button>
+            <button type="button" class="btn btn--primary" id="step5Next">Continue</button>
+          </div>
         </div>
-        <div class="steps" id="stepsSummer"></div>
-        <div id="cardsSummer">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Where you are now.</p>
-            <p class="card__desc">Be honest. Better data means a better plan.</p>
-            <div class="input-row">
-              <div class="input-group">
-                <label class="input-label">Bodyweight (kg)</label>
-                <input type="number" class="input" id="ws_weight" placeholder="85">
-              </div>
-              <div class="input-group">
-                <label class="input-label">Body fat estimate</label>
-                <div class="selector" id="ws_bf">
-                  <button type="button" class="selector__btn" data-value="15-20%">15-20%</button>
-                  <button type="button" class="selector__btn selector__btn--selected" data-value="20-25%">20-25%</button>
-                  <button type="button" class="selector__btn" data-value="25-30%">25-30%</button>
-                  <button type="button" class="selector__btn" data-value="30%+">30%+</button>
-                </div>
-              </div>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--primary" onclick="nextS()">Continue</button>
-            </div>
+
+        <!-- STEP 6: INJURIES + GENERATE -->
+        <div class="wiz-step" data-step="6">
+          <h2 class="wiz-question">Any injuries or limitations?</h2>
+          <p class="wiz-hint">Your coach will work around these. Type "None" if you're injury-free.</p>
+          <textarea class="wiz-textarea" id="inpInjuries" placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."></textarea>
+          <p id="wizError" class="wiz-error"></p>
+          <div class="wiz-actions wiz-actions--between">
+            <button type="button" class="btn btn--ghost" id="step6Back">Back</button>
+            <button type="button" class="btn btn--primary" id="generateBtn">Generate my guide ✨</button>
           </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Your lifestyle.</p>
-            <p class="card__desc">Training, steps, sleep - what does your week look like?</p>
-            <div class="input-group">
-              <label class="input-label">Training days per week</label>
-              <div class="selector" id="ws_days">
-                <button type="button" class="selector__btn" data-value="3">3</button>
-                <button type="button" class="selector__btn selector__btn--selected" data-value="4">4</button>
-                <button type="button" class="selector__btn" data-value="5">5</button>
-              </div>
-            </div>
-            <div class="input-row">
-              <div class="input-group">
-                <label class="input-label">Current daily steps</label>
-                <input type="number" class="input" id="ws_steps" placeholder="5000">
-              </div>
-              <div class="input-group">
-                <label class="input-label">Sleep (hours/night)</label>
-                <input type="number" class="input" id="ws_sleep" placeholder="7">
-              </div>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevS()">Back</button>
-              <button type="button" class="btn btn--primary" onclick="nextS()">Continue</button>
-            </div>
+        </div>
+
+      </div><!-- end wiz-steps -->
+
+      <!-- GENERATION SCREEN -->
+      <div id="genScreen">
+        <div class="gen-icon">✨</div>
+        <h2 class="gen-title">Building your guide</h2>
+        <p class="gen-sub">Your AI coach is crafting your personalized plan.</p>
+        <div class="gen-stages">
+          <div class="gen-stage" id="genStage1">
+            <div class="gen-stage__icon">◎</div>
+            <span class="gen-stage__label">Analyzing your profile</span>
           </div>
-          <div class="card" data-step="3">
-            <p class="card__title">Your biggest challenge.</p>
-            <p class="card__desc">What has stopped you before?</p>
-            <div class="input-group">
-              <label class="input-label">Biggest obstacle</label>
-              <div class="selector" id="ws_challenge">
-                <button type="button" class="selector__btn selector__btn--selected" data-value="staying consistent after week 2">Consistency</button>
-                <button type="button" class="selector__btn" data-value="not knowing what to eat">Diet confusion</button>
-                <button type="button" class="selector__btn" data-value="no structured training plan">No plan</button>
-              </div>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Diet preference</label>
-              <div class="selector" id="ws_diet">
-                <button type="button" class="selector__btn selector__btn--selected" data-value="no preference, just effective">No preference</button>
-                <button type="button" class="selector__btn" data-value="high protein, moderate carb">High protein</button>
-                <button type="button" class="selector__btn" data-value="meal prep friendly, simple meals">Meal prep</button>
-              </div>
-            </div>
-            <p class="error" id="errS" hidden></p>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevS()">Back</button>
-              <button type="button" class="btn btn--primary" onclick="generateS()">Build my shred plan</button>
-            </div>
+          <div class="gen-stage" id="genStage2">
+            <div class="gen-stage__icon">◎</div>
+            <span class="gen-stage__label">Building your training schedule</span>
+          </div>
+          <div class="gen-stage" id="genStage3">
+            <div class="gen-stage__icon">◎</div>
+            <span class="gen-stage__label">Crafting your nutrition overview</span>
+          </div>
+          <div class="gen-stage" id="genStage4">
+            <div class="gen-stage__icon">◎</div>
+            <span class="gen-stage__label">Finalizing your guide</span>
           </div>
         </div>
       </div>
 
-      <!-- Injury Prevention Wizard -->
-      <div class="wizard" id="wizardInjury">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">INJURY PREVENTION</p>
-          <h1 class="hero__title">Stay healthy. Train forever.</h1>
-          <p class="hero__desc">Prehab, warm-ups, and red flags for heavy lifters.</p>
+      <!-- RESULT AREA -->
+      <div id="resultArea">
+        <div class="result-header">
+          <div class="result-badge">Your guide is ready</div>
+          <h2 class="result-title">Your personalized fitness guide</h2>
+          <p class="result-desc" id="resultDesc">Your AI coach built this specifically for you.</p>
+          <div class="result-actions">
+            <button type="button" class="btn btn--primary" id="downloadBtn">Download PDF</button>
+            <button type="button" class="btn btn--ghost" id="printBtn">Print</button>
+            <button type="button" class="btn btn--outline" id="regenerateBtn">Regenerate</button>
+          </div>
         </div>
-        <div class="steps" id="stepsInjury"></div>
-        <div id="cardsInjury">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Your lifts.</p>
-            <p class="card__desc">Which compound lifts do you train regularly?</p>
-            <div class="input-group">
-              <label class="input-label">Main lifts</label>
-              <input type="text" class="input" id="wi_lifts" placeholder="squat, bench, deadlift, OHP, rows" value="squat, bench press, deadlift, overhead press, barbell rows">
-            </div>
-            <div class="input-group">
-              <label class="input-label">Training age</label>
-              <div class="selector" id="wi_age">
-                <button type="button" class="selector__btn" data-value="under 1 year">Under 1yr</button>
-                <button type="button" class="selector__btn selector__btn--selected" data-value="1-3 years">1-3 yrs</button>
-                <button type="button" class="selector__btn" data-value="3-5 years">3-5 yrs</button>
-                <button type="button" class="selector__btn" data-value="5+ years">5+ yrs</button>
-              </div>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--primary" onclick="nextI()">Continue</button>
-            </div>
-          </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Your body right now.</p>
-            <p class="card__desc">Any current issues or past injuries?</p>
-            <div class="input-group">
-              <label class="input-label">Current niggles or discomfort</label>
-              <textarea class="textarea" id="wi_niggles" placeholder="e.g. left shoulder clicks on bench, lower back tight after deadlifts, knee aches on squats... or 'none'"></textarea>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Injury history</label>
-              <textarea class="textarea" id="wi_history" placeholder="e.g. torn rotator cuff 2 years ago, sprained ankle last year... or 'none'"></textarea>
-            </div>
-            <div class="input-group">
-              <label class="input-label">Prehab experience</label>
-              <div class="selector" id="wi_exp">
-                <button type="button" class="selector__btn selector__btn--selected" data-value="none - never done prehab">None</button>
-                <button type="button" class="selector__btn" data-value="some - occasional stretching">Some</button>
-                <button type="button" class="selector__btn" data-value="regular prehab routine">Regular</button>
-              </div>
-            </div>
-            <p class="error" id="errI" hidden></p>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevI()">Back</button>
-              <button type="button" class="btn btn--primary" onclick="generateI()">Build prevention plan</button>
-            </div>
-          </div>
+        <div class="result-body" id="resultBody"></div>
+        <div class="result-next">
+          <h3 class="result-next__title">What's next?</h3>
+          <p class="result-next__desc">Try a different program or go deeper into your training.</p>
+          <button type="button" class="btn btn--ghost" id="tryAnotherBtn">Explore more programs</button>
         </div>
       </div>
 
-      <!-- Weak Point Wizard -->
-      <div class="wizard" id="wizardWeakpoint">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">WEAK POINT FIXER</p>
-          <h1 class="hero__title">Fix what's lagging.</h1>
-          <p class="hero__desc">Tell us what's weak. Get a targeted action plan.</p>
+      <!-- CALCULATOR SECTION -->
+      <div id="calcSection" class="calc-section--hidden">
+        <div class="wiz-progress">
+          <button type="button" class="wiz-progress__back" id="calcBackBtn">&#8592; Back</button>
+          <div class="wiz-progress__spacer"></div>
+          <span class="wiz-progress__label">FREE TOOLS</span>
         </div>
-        <div class="steps" id="stepsWeak"></div>
-        <div id="cardsWeak">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Aesthetic weak points.</p>
-            <p class="card__desc">Which muscle groups look underdeveloped compared to the rest of your body?</p>
-            <div class="input-group">
-              <label class="input-label">Lagging muscles</label>
-              <textarea class="textarea" id="ww_aesthetic" placeholder="e.g. rear delts, upper chest, hamstrings, calves..."></textarea>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--primary" onclick="nextW()">Continue</button>
-            </div>
+        <div class="wiz-program-label wiz-program-label--sage">🧮 Calculators</div>
+        <h2 class="wiz-question">Your numbers.</h2>
+        <p class="wiz-hint">Calculate BMR, 1RM, macros, and body fat instantly.</p>
+        <div class="wiz-inputs">
+          <div class="wiz-input-group">
+            <label class="wiz-label" for="cInpAge">Age</label>
+            <input class="wiz-input" type="number" id="cInpAge" placeholder="28">
           </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Performance weak points.</p>
-            <p class="card__desc">Where do your lifts break down or fail?</p>
-            <div class="input-group">
-              <label class="input-label">Lift breakdowns</label>
-              <textarea class="textarea" id="ww_performance" placeholder="e.g. squat collapses at the bottom, bench stalls off the chest, deadlift hitches at the knee..."></textarea>
-            </div>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevW()">Back</button>
-              <button type="button" class="btn btn--primary" onclick="nextW()">Continue</button>
-            </div>
+          <div class="wiz-input-group">
+            <label class="wiz-label" for="cInpWeight">Weight (kg)</label>
+            <input class="wiz-input" type="number" id="cInpWeight" placeholder="75">
           </div>
-          <div class="card" data-step="3">
-            <p class="card__title">Your current training.</p>
-            <p class="card__desc">What are you doing right now?</p>
-            <div class="input-group">
-              <label class="input-label">Current program</label>
-              <textarea class="textarea" id="ww_program" placeholder="e.g. Push/Pull/Legs, 5 days, been running for 4 months..."></textarea>
-            </div>
-            <p class="error" id="errW" hidden></p>
-            <div class="card__actions">
-              <button type="button" class="btn btn--ghost" onclick="prevW()">Back</button>
-              <button type="button" class="btn btn--primary" id="genWBtn" onclick="generateW()">Build fix plan</button>
-            </div>
+          <div class="wiz-input-group">
+            <label class="wiz-label" for="cInpHeight">Height (cm)</label>
+            <input class="wiz-input" type="number" id="cInpHeight" placeholder="175">
           </div>
         </div>
+        <div class="wiz-tiles wiz-tiles--3col wiz-tiles--mb-sm" id="cTilesSex">
+          <div class="wiz-tile" data-value="male"><span class="wiz-tile__icon">♂</span><span class="wiz-tile__label">Male</span></div>
+          <div class="wiz-tile" data-value="female"><span class="wiz-tile__icon">♀</span><span class="wiz-tile__label">Female</span></div>
+          <div class="wiz-tile" data-value="other"><span class="wiz-tile__icon">⚬</span><span class="wiz-tile__label">Other</span></div>
+        </div>
+        <div class="wiz-tiles wiz-tiles--3col wiz-tiles--mb-md" id="cTilesActivity">
+          <div class="wiz-tile" data-value="1.2"><span class="wiz-tile__label">Sedentary</span><span class="wiz-tile__sub">Little exercise</span></div>
+          <div class="wiz-tile selected" data-value="1.55"><span class="wiz-tile__label">Moderate</span><span class="wiz-tile__sub">3–5 days/week</span></div>
+          <div class="wiz-tile" data-value="1.725"><span class="wiz-tile__label">Very active</span><span class="wiz-tile__sub">6–7 days/week</span></div>
+        </div>
+        <div class="wiz-actions">
+          <button type="button" class="btn btn--primary" id="calcBtn">Calculate</button>
+        </div>
+        <div class="calc-results" id="calcResults"></div>
       </div>
 
-      <!-- Nutrition Wizard -->
-      <div class="wizard" id="wizardNutrition">
-        <span class="wizard__back" onclick="showHub()">Back to programs</span>
-        <div class="hero">
-          <p class="hero__tag">NUTRITION SHREDDER</p>
-          <h1 class="hero__title">Your meal plan.</h1>
-          <p class="hero__desc">Four steps. One complete nutrition plan.</p>
+    </div><!-- end wizard-inner -->
+  </div><!-- end wizardOverlay -->
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a href="/" class="footer__logo">KYROO</a>
+          <p class="footer__tagline">Your AI fitness coach.</p>
+          <div class="footer__socials" id="footerSocials"></div>
         </div>
-        <div class="steps" id="stepsNutrition"></div>
-        <div id="cardsNutrition">
-          <div class="card card--active" data-step="1">
-            <p class="card__title">Your body.</p>
-            <p class="card__desc">The basics for calculating your calories.</p>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Age</label><input type="number" class="input" id="wn_age" placeholder="28"></div>
-              <div class="input-group"><label class="input-label">Sex</label><div class="selector" id="wn_sex"><button type="button" class="selector__btn" data-value="male">Male</button><button type="button" class="selector__btn" data-value="female">Female</button><button type="button" class="selector__btn" data-value="diverse">Diverse</button></div></div>
-            </div>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Weight (kg)</label><input type="number" class="input" id="wn_weight" placeholder="85"></div>
-              <div class="input-group"><label class="input-label">Height (cm)</label><input type="number" class="input" id="wn_height" placeholder="180"></div>
-            </div>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Goal weight (kg)</label><input type="number" class="input" id="wn_goal" placeholder="75"></div>
-              <div class="input-group"><label class="input-label">Timeline</label><div class="selector" id="wn_timeline"><button type="button" class="selector__btn selector__btn--selected" data-value="steady and sustainable">Steady</button><button type="button" class="selector__btn" data-value="as fast as safely possible">Fast</button></div></div>
-            </div>
-            <div class="card__actions"><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
-          </div>
-          <div class="card" data-step="2">
-            <p class="card__title">Your lifestyle.</p>
-            <p class="card__desc">Activity, sleep, stress, alcohol.</p>
-            <div class="input-group"><label class="input-label">Job type</label><div class="selector" id="wn_job"><button type="button" class="selector__btn selector__btn--selected" data-value="desk job">Desk job</button><button type="button" class="selector__btn" data-value="on my feet most of the day">On feet</button><button type="button" class="selector__btn" data-value="manual labour">Manual</button></div></div>
-            <div class="input-group"><label class="input-label">Exercise</label><div class="selector" id="wn_exercise"><button type="button" class="selector__btn" data-value="1-2 times per week">1-2x</button><button type="button" class="selector__btn selector__btn--selected" data-value="3-4 times per week, weights and cardio">3-4x</button><button type="button" class="selector__btn" data-value="5-6 times per week">5-6x</button></div></div>
-            <div class="input-row">
-              <div class="input-group"><label class="input-label">Sleep (hrs)</label><input type="number" class="input" id="wn_sleep" placeholder="7"></div>
-              <div class="input-group"><label class="input-label">Stress</label><div class="selector" id="wn_stress"><button type="button" class="selector__btn" data-value="low">Low</button><button type="button" class="selector__btn selector__btn--selected" data-value="moderate">Med</button><button type="button" class="selector__btn" data-value="high">High</button></div></div>
-            </div>
-            <div class="input-group"><label class="input-label">Alcohol</label><div class="selector" id="wn_alcohol"><button type="button" class="selector__btn" data-value="none">None</button><button type="button" class="selector__btn selector__btn--selected" data-value="1-3 drinks per week">Light</button><button type="button" class="selector__btn" data-value="4-8 drinks per week">Moderate</button><button type="button" class="selector__btn" data-value="10+ drinks per week">Heavy</button></div></div>
-            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
-          </div>
-          <div class="card" data-step="3">
-            <p class="card__title">Your food.</p>
-            <p class="card__desc">What you love, what you hate, how you cook.</p>
-            <div class="input-group"><label class="input-label">Top 5 favorite meals</label><input type="text" class="input" id="wn_fav" placeholder="e.g. pasta, stir fry, tacos, curry, burgers"></div>
-            <div class="input-group"><label class="input-label">Foods you hate</label><input type="text" class="input" id="wn_hate" placeholder="e.g. fish, mushrooms... or 'none'"></div>
-            <div class="input-group"><label class="input-label">Restrictions</label><div class="selector" id="wn_restrict"><button type="button" class="selector__btn selector__btn--selected" data-value="none">None</button><button type="button" class="selector__btn" data-value="vegetarian">Vegetarian</button><button type="button" class="selector__btn" data-value="vegan">Vegan</button><button type="button" class="selector__btn" data-value="dairy-free">Dairy-free</button><button type="button" class="selector__btn" data-value="gluten-free">Gluten-free</button></div></div>
-            <div class="input-group"><label class="input-label">Cooking style</label><div class="selector" id="wn_cook"><button type="button" class="selector__btn" data-value="cooking from scratch">From scratch</button><button type="button" class="selector__btn selector__btn--selected" data-value="quick meals under 15 minutes">Quick meals</button><button type="button" class="selector__btn" data-value="batch cooking and meal prep">Meal prep</button></div></div>
-            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="nextN()">Continue</button></div>
-          </div>
-          <div class="card" data-step="4">
-            <p class="card__title">Your snacks.</p>
-            <p class="card__desc">What you reach for and why.</p>
-            <div class="input-group"><label class="input-label">Snack preference</label><div class="selector" id="wn_snacktype"><button type="button" class="selector__btn" data-value="sweet">Sweet</button><button type="button" class="selector__btn" data-value="savory">Savory</button><button type="button" class="selector__btn selector__btn--selected" data-value="both sweet and savory">Both</button></div></div>
-            <div class="input-group"><label class="input-label">Why do you snack?</label><div class="selector" id="wn_snackwhy"><button type="button" class="selector__btn" data-value="genuine hunger">Hunger</button><button type="button" class="selector__btn selector__btn--selected" data-value="boredom or habit">Boredom</button><button type="button" class="selector__btn" data-value="stress or emotions">Stress</button></div></div>
-            <p class="error" id="errN" hidden></p>
-            <div class="card__actions"><button type="button" class="btn btn--ghost" onclick="prevN()">Back</button><button type="button" class="btn btn--primary" onclick="generateN()">Build my nutrition plan</button></div>
-          </div>
+        <div class="footer__links" id="footerLinks"></div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copy">&copy; 2026 KYROO. Berlin.</p>
+        <div class="footer__legal">
+          <button type="button" class="footer__legal-btn" id="privacyBtn">Privacy</button>
+          <button type="button" class="footer__legal-btn" id="termsBtn">Terms</button>
+          <button type="button" class="footer__legal-btn" id="imprintBtn">Imprint</button>
         </div>
       </div>
+    </div>
+  </footer>
 
-      <!-- Generating -->
-      <div id="generatingView" hidden>
-        <div class="generating">
-          <div class="spinner"></div>
-          <p class="generating__text" id="genText">Building your plan...</p>
-          <p class="generating__sub">This takes about 30 seconds.</p>
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="authModal" hidden>
+    <div class="modal">
+      <button type="button" class="modal__close" id="authModalClose">&times;</button>
+      <div id="authModalContent">
+        <div id="loginView">
+          <h2 class="modal__title">Welcome back</h2>
+          <form id="loginForm" class="modal__form">
+            <input type="email" placeholder="Email" required class="modal__input" id="loginEmail">
+            <input type="password" placeholder="Password" required minlength="6" class="modal__input" id="loginPassword">
+            <div class="modal__error" id="loginError" hidden></div>
+            <button type="submit" class="btn btn--primary btn--full">Log in</button>
+          </form>
+          <p class="modal__switch">New here? <a href="#" id="showSignup">Create account</a></p>
+          <p class="modal__switch"><a href="#" id="showForgot">Forgot password?</a></p>
         </div>
-      </div>
-
-      <!-- Result -->
-      <div class="result" id="resultView">
-        <div class="result__actions">
-          <button type="button" class="result__btn" onclick="window.print()">Print / PDF</button>
-          <button type="button" class="result__btn" onclick="showHub()">New program</button>
-          <a href="/" class="result__btn">Back to KYROO</a>
+        <div id="forgotView" hidden>
+          <h2 class="modal__title">Reset password</h2>
+          <form id="forgotForm" class="modal__form">
+            <input type="email" placeholder="Email" required class="modal__input" id="forgotEmail">
+            <div class="modal__error" id="forgotError" hidden></div>
+            <button type="submit" class="btn btn--primary btn--full">Send reset link</button>
+          </form>
+          <p class="modal__switch"><a href="#" id="backToLogin">Back to log in</a></p>
+          <div id="forgotSuccess" hidden>
+            <p class="modal__success-msg">If an account exists with that email, we sent a reset link.</p>
+          </div>
         </div>
-        <div class="result__body" id="resultBody"></div>
+        <div id="signupView" hidden>
+          <h2 class="modal__title">Join KYROO</h2>
+          <form id="signupForm" class="modal__form">
+            <input type="text" placeholder="Name" class="modal__input" id="signupName">
+            <input type="email" placeholder="Email" required class="modal__input" id="signupEmail">
+            <input type="password" placeholder="Password" required minlength="6" class="modal__input" id="signupPassword">
+            <div class="modal__error" id="signupError" hidden></div>
+            <button type="submit" class="btn btn--primary btn--full">Create account</button>
+          </form>
+          <p class="modal__switch">Have an account? <a href="#" id="showLogin">Log in</a></p>
+        </div>
+        <div id="accountView" hidden>
+          <h2 class="modal__title">Account</h2>
+          <div id="accountInfo"></div>
+          <div id="accountActions"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const API = window.location.origin;
-    const token = localStorage.getItem('kyroo_token');
+  <!-- Checkout Modal -->
+  <div class="modal-overlay" id="checkoutModal" hidden>
+    <div class="modal modal--checkout">
+      <button type="button" class="modal__close" id="checkoutModalClose">&times;</button>
+      <div id="checkoutContent"></div>
+    </div>
+  </div>
 
-    // Selector wiring
-    document.querySelectorAll('.selector').forEach(sel => {
-      sel.querySelectorAll('.selector__btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          sel.querySelectorAll('.selector__btn').forEach(b => b.classList.remove('selector__btn--selected'));
-          btn.classList.add('selector__btn--selected');
+  <!-- Privacy Modal -->
+  <div class="modal-overlay" id="privacyModal" hidden>
+    <div class="modal modal--wide">
+      <button type="button" class="modal__close" id="privacyModalClose">&times;</button>
+      <div id="privacyContent"></div>
+    </div>
+  </div>
+
+  <!-- Terms Modal -->
+  <div class="modal-overlay" id="termsModal" hidden>
+    <div class="modal modal--wide">
+      <button type="button" class="modal__close" id="termsModalClose">&times;</button>
+      <div id="termsContent"></div>
+    </div>
+  </div>
+
+  <!-- Imprint Modal -->
+  <div class="modal-overlay" id="imprintModal" hidden>
+    <div class="modal">
+      <button type="button" class="modal__close" id="imprintModalClose">&times;</button>
+      <div id="imprintContent"></div>
+    </div>
+  </div>
+
+  <!-- Cookie Banner -->
+  <div class="cookie-banner" id="cookieBanner" hidden>
+    <div class="cookie-banner__inner container">
+      <p class="cookie-banner__text">We only use essential cookies. No tracking, no ads. <a href="javascript:void(0)" id="cookiePrivacyLink">Privacy Policy</a></p>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn--primary btn--small" id="cookieAccept">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="script.js"></script>
+  <script>
+    /* ============================================================
+       PROGRAMHUB LOGIC
+       ============================================================ */
+
+    const API_BASE_HUB = window.location.origin;
+
+    const PROGRAMS = [
+      { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'Complete 90-day transformation system.',                    duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition' },
+      { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track to beach-ready results.',                        duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results' },
+      { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss program.',                          duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition' },
+      { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload for size and strength.',               duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains' },
+      { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness.',                        duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence' },
+      { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym, no problem. Full program.',                         duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment' },
+    ];
+
+    let selectedProgram = null;
+    let currentStep = 1;
+    const TOTAL_STEPS = 6;
+    let formData = {};
+
+    /* ---- Render hub grid ---- */
+    function renderHubGrid() {
+      const container = document.querySelector('.programs-hub .container');
+      const grid = document.createElement('div');
+      grid.className = 'hub__grid';
+
+      grid.innerHTML = `
+        <div class="hub__card hub__card--free hub__card--calculators" id="calcCard" role="button" tabindex="0" aria-label="Open free calculators">
+          <div class="hub__card-icon hub__card-icon--sage">🧮</div>
+          <h3 class="hub__card-title">Calculators</h3>
+          <p class="hub__card-desc">BMR, 1RM, macros, body fat. Instant results, no AI needed.</p>
+          <div class="hub__card-meta">
+            <span class="hub__card-meta-tag">Free</span>
+            <span class="hub__card-meta-tag">No account needed</span>
+          </div>
+          <span class="hub__card-badge hub__card-badge--free">Always free</span>
+        </div>
+      ` + PROGRAMS.map(p => `
+        <div class="hub__card" data-program="${p.id}" role="button" tabindex="0" aria-label="Open ${p.name}">
+          <div class="hub__card-icon">${p.icon}</div>
+          <h3 class="hub__card-title">${p.name}</h3>
+          <p class="hub__card-desc">${p.desc}</p>
+          <div class="hub__card-meta">
+            <span class="hub__card-meta-tag">${p.duration}</span>
+            <span class="hub__card-meta-tag">${p.difficulty}</span>
+          </div>
+          ${p.badge ? `<span class="hub__card-badge">${p.badge}</span>` : ''}
+        </div>
+      `).join('');
+
+      container.appendChild(grid);
+
+      // Wire program card clicks
+      grid.querySelectorAll('[data-program]').forEach(card => {
+        card.addEventListener('click', () => {
+          const prog = PROGRAMS.find(p => p.id === card.dataset.program);
+          if (prog) openWizard(prog);
+        });
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
         });
       });
-    });
 
-    function sel(id) { const e = document.querySelector('#'+id+' .selector__btn--selected'); return e ? e.dataset.value : ''; }
-    function val(id) { return document.getElementById(id)?.value || ''; }
-
-    // Navigation
-    function showHub() {
-      document.querySelectorAll('.wizard').forEach(w => w.classList.remove('wizard--active'));
-      document.getElementById('hubView').style.display = 'block';
-      document.getElementById('resultView').style.display = 'none';
-      document.getElementById('generatingView').hidden = true;
-    }
-
-    function showWizard(type) {
-      document.getElementById('hubView').style.display = 'none';
-      document.getElementById('resultView').style.display = 'none';
-      const ids = { calculators: 'wizardCalculators', '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', summer: 'wizardSummer', nutrition: 'wizardNutrition', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
-      const w = document.getElementById(ids[type]);
-      w.classList.add('wizard--active');
-      initSteps(type);
-    }
-
-    // Steps
-    let step12 = 1, stepP = 1, stepW = 1, stepT = 1, stepS = 1, stepN = 1, stepI = 1, stepC = 1;
-
-    const wizardConfig = {
-      calculators: { cards: 'cardsCalc', steps: 'stepsCalc', count: 2 },
-      '12week': { cards: 'cards12', steps: 'steps12', count: 5 },
-      plateau: { cards: 'cardsPlateau', steps: 'stepsPlateau', count: 3 },
-      tracker: { cards: 'cardsTracker', steps: 'stepsTracker', count: 2 },
-      nutrition: { cards: 'cardsNutrition', steps: 'stepsNutrition', count: 4 },
-      summer: { cards: 'cardsSummer', steps: 'stepsSummer', count: 3 },
-      injury: { cards: 'cardsInjury', steps: 'stepsInjury', count: 2 },
-      weakpoint: { cards: 'cardsWeak', steps: 'stepsWeak', count: 3 },
-    };
-
-    function initSteps(type) {
-      const cfg = wizardConfig[type];
-      const container = document.getElementById(cfg.steps);
-      container.innerHTML = Array.from({length: cfg.count}, (_, i) => `<div class="step ${i === 0 ? 'step--active' : ''}"></div>`).join('');
-      if (type === 'calculators') stepC = 1; else if (type === '12week') step12 = 1; else if (type === 'plateau') stepP = 1; else if (type === 'tracker') stepT = 1; else if (type === 'nutrition') stepN = 1; else if (type === 'summer') stepS = 1; else if (type === 'injury') stepI = 1; else stepW = 1;
-      showCard(type, 1);
-    }
-
-    function showCard(type, n) {
-      const cfg = wizardConfig[type];
-      const prefix = cfg.cards;
-      const stepsId = cfg.steps;
-      document.querySelectorAll('#'+prefix+' .card').forEach(c => c.classList.remove('card--active'));
-      const card = document.querySelector('#'+prefix+' [data-step="'+n+'"]');
-      if (card) card.classList.add('card--active');
-      document.querySelectorAll('#'+stepsId+' .step').forEach((s, i) => {
-        s.className = 'step';
-        if (i + 1 < n) s.classList.add('step--done');
-        if (i + 1 === n) s.classList.add('step--active');
+      // Wire calculators
+      const calcCard = document.getElementById('calcCard');
+      calcCard.addEventListener('click', openCalculators);
+      calcCard.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCalculators(); }
       });
     }
 
-    function nextC() { if (stepC < 2) { stepC++; showCard('calculators', stepC); } }
-    function prevC() { if (stepC > 1) { stepC--; showCard('calculators', stepC); } }
+    /* ---- Open wizard ---- */
+    function openWizard(prog) {
+      selectedProgram = prog;
+      formData = {};
+      currentStep = 1;
 
-    function calc1RM(weight, reps) {
-      if (!weight || !reps || reps < 1) return 0;
-      return Math.round(weight * (1 + reps / 30));
+      document.getElementById('wizProgramLabel').textContent = prog.icon + ' ' + prog.name;
+
+      // Reset steps
+      document.querySelectorAll('.wiz-step').forEach(s => s.classList.remove('active'));
+      document.querySelector('.wiz-step[data-step="1"]').classList.add('active');
+
+      // Hide other panels
+      document.getElementById('genScreen').style.display = 'none';
+      document.getElementById('resultArea').style.display = 'none';
+      document.getElementById('calcSection').classList.add('calc-section--hidden');
+      document.getElementById('wizSteps').style.display = 'block';
+      document.getElementById('wizProgress').style.display = 'flex';
+
+      // Reset gen stages
+      document.querySelectorAll('.gen-stage').forEach(s => {
+        s.classList.remove('gen-stage--done', 'gen-stage--active');
+        s.querySelector('.gen-stage__icon').textContent = '◎';
+      });
+
+      updateProgress(1);
+      document.getElementById('wizardOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    function calcResults() {
-      const w = parseFloat(val('wc_weight'));
-      const h = parseFloat(val('wc_height'));
-      const age = parseFloat(val('wc_age'));
-      const sex = sel('wc_sex');
-      const activity = parseFloat(sel('wc_activity')) || 1.55;
+    /* ---- Open calculators ---- */
+    function openCalculators() {
+      document.getElementById('wizSteps').style.display = 'none';
+      document.getElementById('wizProgress').style.display = 'none';
+      document.getElementById('genScreen').style.display = 'none';
+      document.getElementById('resultArea').style.display = 'none';
+      document.getElementById('calcSection').classList.remove('calc-section--hidden');
+      document.getElementById('calcResults').style.display = 'none';
+      document.getElementById('wizardOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
 
-      if (!w || !h || !age || !sex) {
-        document.getElementById('errC').textContent = 'Fill in your stats on step 1.';
-        document.getElementById('errC').hidden = false;
+    /* ---- Close wizard ---- */
+    function closeWizard() {
+      document.getElementById('wizardOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    /* ---- Progress ---- */
+    function updateProgress(step) {
+      const pct = ((step - 1) / TOTAL_STEPS) * 100;
+      document.getElementById('wizFill').style.width = pct + '%';
+      document.getElementById('wizLabel').textContent = step + ' / ' + TOTAL_STEPS;
+    }
+
+    /* ---- Get selected tile value ---- */
+    function getSelected(tilesId) {
+      const tiles = document.getElementById(tilesId);
+      const sel = tiles ? tiles.querySelector('.wiz-tile.selected') : null;
+      return sel ? sel.dataset.value : null;
+    }
+
+    /* ---- Show step ---- */
+    function showStep(n) {
+      document.querySelectorAll('.wiz-step').forEach(s => s.classList.remove('active'));
+      const next = document.querySelector(`.wiz-step[data-step="${n}"]`);
+      if (next) next.classList.add('active');
+      currentStep = n;
+      updateProgress(n);
+      // Clear any error on navigation
+      const errEl = document.getElementById('wizError');
+      if (errEl) { errEl.textContent = ''; errEl.classList.remove('wiz-error--visible'); }
+      // Scroll wizard to top
+      document.getElementById('wizardOverlay').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---- Wire tile group (single-select) ---- */
+    function wireGroup(groupId) {
+      const group = document.getElementById(groupId);
+      if (!group) return;
+      group.querySelectorAll('.wiz-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+          group.querySelectorAll('.wiz-tile').forEach(t => t.classList.remove('selected'));
+          tile.classList.add('selected');
+        });
+      });
+    }
+
+    /* ---- Step navigation ---- */
+    document.getElementById('step1Next').addEventListener('click', () => {
+      const goal = getSelected('tilesGoal');
+      if (!goal) { alert('Please select a goal to continue.'); return; }
+      formData.goals = goal;
+      showStep(2);
+    });
+
+    document.getElementById('step2Back').addEventListener('click', () => showStep(1));
+    document.getElementById('step2Next').addEventListener('click', () => {
+      const sel = document.getElementById('tilesLevel').querySelector('.selected');
+      if (!sel) { alert('Please select your experience level.'); return; }
+      formData.level = sel.dataset.value;
+      formData.experience_years = parseInt(sel.dataset.years) || 1;
+      showStep(3);
+    });
+
+    document.getElementById('step3Back').addEventListener('click', () => showStep(2));
+    document.getElementById('step3Next').addEventListener('click', () => {
+      const age = document.getElementById('inpAge').value;
+      const weight = document.getElementById('inpWeight').value;
+      const height = document.getElementById('inpHeight').value;
+      const sex = getSelected('tilesSex');
+      if (!age || !weight || !height) { alert('Please fill in your age, weight and height.'); return; }
+      formData.age = parseInt(age);
+      formData.weight = parseFloat(weight);
+      formData.height = parseFloat(height);
+      formData.sex = sex || 'other';
+      showStep(4);
+    });
+
+    document.getElementById('step4Back').addEventListener('click', () => showStep(3));
+    document.getElementById('step4Next').addEventListener('click', () => {
+      const days = getSelected('tilesDays');
+      const mins = getSelected('tilesMins');
+      if (!days) { alert('Please select how many days per week.'); return; }
+      formData.schedule = parseInt(days);
+      formData.session_mins = parseInt(mins || 45);
+      showStep(5);
+    });
+
+    document.getElementById('step5Back').addEventListener('click', () => showStep(4));
+    document.getElementById('step5Next').addEventListener('click', () => {
+      const loc = getSelected('tilesLocation');
+      if (!loc) { alert('Please select where you will train.'); return; }
+      formData.equipment = loc;
+      showStep(6);
+    });
+
+    document.getElementById('step6Back').addEventListener('click', () => showStep(5));
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const injuries = document.getElementById('inpInjuries').value.trim() || 'None';
+      formData.injuries = injuries;
+      await generateProgram();
+    });
+
+    document.getElementById('wizBackBtn').addEventListener('click', () => {
+      if (currentStep > 1) showStep(currentStep - 1);
+      else closeWizard();
+    });
+
+    document.getElementById('wizCloseBtn').addEventListener('click', closeWizard);
+    document.getElementById('calcBackBtn').addEventListener('click', closeWizard);
+
+    /* ---- Generate program ---- */
+    async function generateProgram() {
+      // Check auth
+      if (!window.currentUser) {
+        closeWizard();
+        if (typeof showAuthModal === 'function') showAuthModal('login');
         return;
       }
 
-      // BMR (Mifflin-St Jeor)
+      // Hide steps, show generation screen
+      document.getElementById('wizSteps').style.display = 'none';
+      document.getElementById('wizProgress').style.display = 'none';
+      const genScreen = document.getElementById('genScreen');
+      genScreen.style.display = 'block';
+      document.getElementById('wizardOverlay').scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Animate stages
+      const stages = ['genStage1', 'genStage2', 'genStage3', 'genStage4'];
+      const delays = [0, 2500, 5000, 7000];
+      stages.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          // Mark previous as done
+          if (i > 0) {
+            const prev = document.getElementById(stages[i - 1]);
+            if (prev) {
+              prev.classList.remove('gen-stage--active');
+              prev.classList.add('gen-stage--done');
+              prev.querySelector('.gen-stage__icon').textContent = '✓';
+            }
+          }
+          el.classList.add('gen-stage--active');
+        }, delays[i]);
+      });
+
+      try {
+        const payload = {
+          program_type:     selectedProgram.type,
+          level:            formData.level || 'intermediate',
+          experience_years: formData.experience_years || 2,
+          weight:           formData.weight || 75,
+          height:           formData.height || 175,
+          age:              formData.age || 28,
+          sex:              formData.sex || 'other',
+          schedule:         formData.schedule || 3,
+          session_mins:     formData.session_mins || 45,
+          equipment:        formData.equipment || 'full commercial gym',
+          goals:            (selectedProgram.goal ? selectedProgram.goal + '. ' : '') + (formData.goals || ''),
+          injuries:         formData.injuries || 'None',
+        };
+
+        const res = await fetch(`${API_BASE_HUB}/api/program/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(window.authHeaders ? window.authHeaders() : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            genScreen.style.display = 'none';
+            document.getElementById('wizSteps').style.display = 'block';
+            document.getElementById('wizProgress').style.display = 'flex';
+            showStep(1);
+            closeWizard();
+            if (typeof showAuthModal === 'function') showAuthModal('login');
+            return;
+          }
+          if (res.status === 403) {
+            genScreen.style.display = 'none';
+            closeWizard();
+            if (typeof showCheckoutModal === 'function') showCheckoutModal();
+            return;
+          }
+          throw new Error(data.error || 'Generation failed. Please try again.');
+        }
+
+        // Mark last stage done after animation completes
+        setTimeout(() => {
+          const last = document.getElementById(stages[stages.length - 1]);
+          if (last) {
+            last.classList.remove('gen-stage--active');
+            last.classList.add('gen-stage--done');
+            last.querySelector('.gen-stage__icon').textContent = '✓';
+          }
+          setTimeout(() => {
+            genScreen.style.display = 'none';
+            showResult(data.program || data.result || data.content || JSON.stringify(data));
+          }, 800);
+        }, 8500);
+
+      } catch (err) {
+        genScreen.style.display = 'none';
+        document.getElementById('wizSteps').style.display = 'block';
+        document.getElementById('wizProgress').style.display = 'flex';
+        showStep(6);
+        const errEl = document.getElementById('wizError');
+        errEl.textContent = err.message || 'Something went wrong. Please try again.';
+        errEl.style.removeProperty('display');
+        errEl.classList.add('wiz-error--visible');
+      }
+    }
+
+    /* ---- Show result ---- */
+    function showResult(content) {
+      const resultArea = document.getElementById('resultArea');
+      resultArea.style.display = 'block';
+      document.getElementById('resultDesc').textContent =
+        'Your ' + (selectedProgram ? selectedProgram.name : 'fitness') + ' guide, built for you.';
+
+      // Convert markdown-like content to HTML
+      let html = content
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/\n\n/g, '</p><p>');
+
+      if (!html.startsWith('<')) html = '<p>' + html + '</p>';
+      document.getElementById('resultBody').innerHTML = html;
+
+      document.getElementById('wizardOverlay').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---- Result actions ---- */
+    document.getElementById('downloadBtn').addEventListener('click', () => window.print());
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('regenerateBtn').addEventListener('click', () => {
+      document.getElementById('resultArea').style.display = 'none';
+      // Reset gen stages
+      document.querySelectorAll('.gen-stage').forEach(s => {
+        s.classList.remove('gen-stage--done', 'gen-stage--active');
+        s.querySelector('.gen-stage__icon').textContent = '◎';
+      });
+      document.getElementById('wizSteps').style.display = 'block';
+      document.getElementById('wizProgress').style.display = 'flex';
+      showStep(1);
+    });
+
+    document.getElementById('tryAnotherBtn').addEventListener('click', closeWizard);
+
+    /* ---- Locked upgrade button ---- */
+    document.getElementById('lockedUpgradeBtn').addEventListener('click', () => {
+      if (typeof showCheckoutModal === 'function') showCheckoutModal();
+    });
+
+    /* ---- Calculator logic ---- */
+    document.getElementById('calcBtn').addEventListener('click', () => {
+      const age    = parseFloat(document.getElementById('cInpAge').value)    || 28;
+      const weight = parseFloat(document.getElementById('cInpWeight').value) || 75;
+      const height = parseFloat(document.getElementById('cInpHeight').value) || 175;
+      const sexSel = document.getElementById('cTilesSex').querySelector('.selected');
+      const sex    = sexSel ? sexSel.dataset.value : 'male';
+      const actSel = document.getElementById('cTilesActivity').querySelector('.selected');
+      const activity = parseFloat(actSel ? actSel.dataset.value : 1.55);
+
+      // Mifflin-St Jeor BMR
       let bmr;
-      if (sex === 'male') bmr = (10 * w) + (6.25 * h) - (5 * age) + 5;
-      else bmr = (10 * w) + (6.25 * h) - (5 * age) - 161;
-      const tdee = Math.round(bmr * activity);
-      const deficit = tdee - 500;
-
-      // Macros
-      const proteinG = Math.round(w * 2.2);
-      const fatG = Math.round(w * 0.9);
-      const carbG = Math.round((deficit - (proteinG * 4) - (fatG * 9)) / 4);
-
-      // Body fat estimate (Navy method simplified)
-      const bfEstimate = sex === 'male' ? Math.round(0.3 * w / (h / 100) - 5) : Math.round(0.4 * w / (h / 100) - 3);
-
-      // 1RMs
-      const sq = calc1RM(parseFloat(val('wc_sq_w')), parseFloat(val('wc_sq_r')));
-      const bp = calc1RM(parseFloat(val('wc_bp_w')), parseFloat(val('wc_bp_r')));
-      const dl = calc1RM(parseFloat(val('wc_dl_w')), parseFloat(val('wc_dl_r')));
-      const oh = calc1RM(parseFloat(val('wc_oh_w')), parseFloat(val('wc_oh_r')));
-
-      // Water intake
-      const water = ((w * 35) / 1000).toFixed(1);
-
-      let html = `<h1>KYROO Calculator Results</h1>`;
-      html += `<h2>Calories</h2><p><strong>BMR:</strong> ${Math.round(bmr)} kcal/day (what your body burns at rest)<br>`;
-      html += `<strong>TDEE:</strong> ${tdee} kcal/day (your total daily burn)<br>`;
-      html += `<strong>Fat loss target:</strong> ${deficit} kcal/day (500 below TDEE)</p>`;
-
-      html += `<h2>Macros (for fat loss)</h2>`;
-      html += `<p><strong>Protein:</strong> ${proteinG}g/day (protects muscle)<br>`;
-      html += `<strong>Fat:</strong> ${fatG}g/day (hormones and health)<br>`;
-      html += `<strong>Carbs:</strong> ${Math.max(carbG, 50)}g/day (energy for training)</p>`;
-
-      html += `<h2>Body Composition</h2>`;
-      html += `<p><strong>Estimated body fat:</strong> ~${bfEstimate}% (rough estimate)<br>`;
-      html += `<strong>BMI:</strong> ${(w / ((h/100) * (h/100))).toFixed(1)}</p>`;
-
-      if (sq || bp || dl || oh) {
-        html += `<h2>Estimated 1 Rep Max</h2><p>`;
-        if (sq) html += `<strong>Squat:</strong> ${sq}kg<br>`;
-        if (bp) html += `<strong>Bench:</strong> ${bp}kg<br>`;
-        if (dl) html += `<strong>Deadlift:</strong> ${dl}kg<br>`;
-        if (oh) html += `<strong>OHP:</strong> ${oh}kg<br>`;
-        html += `</p>`;
+      if (sex === 'female') {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
       }
+      const tdee = bmr * activity;
 
-      html += `<h2>Daily Water</h2><p><strong>Target:</strong> ${water} litres/day</p>`;
+      // Body fat estimate (BMI-based Deurenberg)
+      const bmi = weight / Math.pow(height / 100, 2);
+      const bf = sex === 'female'
+        ? (1.20 * bmi + 0.23 * age - 5.4)
+        : (1.20 * bmi + 0.23 * age - 16.2);
+      const bfClamped = Math.max(3, Math.min(60, bf));
 
-      html += `<h2>What to do next</h2>`;
-      html += `<p>These numbers are your starting point. Track your weight for 2 weeks eating at ${deficit} kcal. If you lose 0.5-1kg per week, you are on track. If not, adjust by 100-200 kcal.</p>`;
-      html += `<p>For a full personalized training + nutrition plan, try the <strong>KYROO coach programs</strong>.</p>`;
+      const leanMass = weight * (1 - bfClamped / 100);
+      const proteinG = Math.round(weight * 2.0);
+      const fatG     = Math.round((tdee * 0.25) / 9);
+      const carbG    = Math.round((tdee - proteinG * 4 - fatG * 9) / 4);
 
-      showResult(html);
-      document.getElementById('wizardCalculators').classList.remove('wizard--active');
-    }
+      const proteinPct = Math.round(proteinG * 4 / tdee * 100);
+      const carbPct    = Math.round(carbG    * 4 / tdee * 100);
+      const fatPct     = Math.round(fatG     * 9 / tdee * 100);
 
-    function next12() { if (step12 < 5) { step12++; showCard('12week', step12); } }
-    function prev12() { if (step12 > 1) { step12--; showCard('12week', step12); } }
-    function nextP() { if (stepP < 3) { stepP++; showCard('plateau', stepP); } }
-    function prevP() { if (stepP > 1) { stepP--; showCard('plateau', stepP); } }
-    function nextT() { if (stepT < 2) { stepT++; showCard('tracker', stepT); } }
-    function prevT() { if (stepT > 1) { stepT--; showCard('tracker', stepT); } }
-    function nextN() { if (stepN < 4) { stepN++; showCard('nutrition', stepN); } }
-    function prevN() { if (stepN > 1) { stepN--; showCard('nutrition', stepN); } }
-    function nextS() { if (stepS < 3) { stepS++; showCard('summer', stepS); } }
-    function prevS() { if (stepS > 1) { stepS--; showCard('summer', stepS); } }
-    function nextI() { if (stepI < 2) { stepI++; showCard('injury', stepI); } }
-    function prevI() { if (stepI > 1) { stepI--; showCard('injury', stepI); } }
-    function nextW() { if (stepW < 3) { stepW++; showCard('weakpoint', stepW); } }
-    function prevW() { if (stepW > 1) { stepW--; showCard('weakpoint', stepW); } }
+      const el = document.getElementById('calcResults');
+      el.style.display = 'block';
+      el.innerHTML = `
+        <div class="calc-grid">
+          <div class="calc-stat">
+            <div class="calc-stat__num">${Math.round(bmr)}</div>
+            <div class="calc-stat__label">BMR (kcal/day)</div>
+          </div>
+          <div class="calc-stat">
+            <div class="calc-stat__num">${Math.round(tdee)}</div>
+            <div class="calc-stat__label">TDEE (kcal/day)</div>
+          </div>
+          <div class="calc-stat">
+            <div class="calc-stat__num">${Math.round(bfClamped)}%</div>
+            <div class="calc-stat__label">Est. Body Fat</div>
+          </div>
+          <div class="calc-stat">
+            <div class="calc-stat__num">${Math.round(leanMass)}kg</div>
+            <div class="calc-stat__label">Lean Mass</div>
+          </div>
+        </div>
+        <h3 style="font-family:var(--heading);font-size:1rem;font-weight:800;margin-bottom:16px;color:var(--text-2)">
+          Macros for maintenance
+        </h3>
+        <div class="calc-macro-bar">
+          <div class="calc-macro-label"><span>Protein</span><span>${proteinG}g</span></div>
+          <div class="calc-macro-track">
+            <div class="calc-macro-fill" style="width:${proteinPct}%;background:var(--accent)"></div>
+          </div>
+        </div>
+        <div class="calc-macro-bar">
+          <div class="calc-macro-label"><span>Carbs</span><span>${carbG}g</span></div>
+          <div class="calc-macro-track">
+            <div class="calc-macro-fill" style="width:${carbPct}%;background:var(--warm)"></div>
+          </div>
+        </div>
+        <div class="calc-macro-bar">
+          <div class="calc-macro-label"><span>Fat</span><span>${fatG}g</span></div>
+          <div class="calc-macro-track">
+            <div class="calc-macro-fill" style="width:${fatPct}%;background:var(--lavender)"></div>
+          </div>
+        </div>
+      `;
 
-    // Generate 12-week
-    async function generate12() {
-      const err = document.getElementById('err12');
-      err.hidden = true;
-      if (!val('w12_weight') || !val('w12_height') || !val('w12_age') || !sel('w12_sex')) {
-        err.textContent = 'Please fill in your body stats (step 2).'; err.hidden = false; return;
-      }
-      document.getElementById('wizard12week').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Building your 12-week plan...';
+      // Scroll to results
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
 
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/generate`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            level: sel('w12_level') || 'intermediate', weight: val('w12_weight'), height: val('w12_height'), age: val('w12_age'), sex: sel('w12_sex'),
-            squat: val('w12_squat'), bench: val('w12_bench'), deadlift: val('w12_deadlift'), ohp: val('w12_ohp'),
-            days_per_week: sel('w12_days') || '4', session_minutes: sel('w12_mins') || '60',
-            equipment: sel('w12_equip') || 'full commercial gym', primary_goal: sel('w12_goal1') || 'hypertrophy', secondary_goal: sel('w12_goal2') || 'building raw strength',
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('12week', ex.message); }
-    }
+    /* ---- Wire all tile groups ---- */
+    ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
 
-    // Generate plateau
-    async function generateP() {
-      const err = document.getElementById('errP');
-      err.hidden = true;
-      document.getElementById('wizardPlateau').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Diagnosing your plateau...';
+    /* ---- Close on Escape ---- */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeWizard();
+    });
 
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/plateau`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            weeks_stuck: val('wp_weeks'), squat: val('wp_squat'), bench: val('wp_bench'), deadlift: val('wp_deadlift'), ohp: val('wp_ohp'),
-            current_program: val('wp_program'), training_week: val('wp_week'), years_lifting: val('wp_years'),
-            sleep_hours: val('wp_sleep'), stress_level: sel('wp_stress') || 'moderate', stress_reason: val('wp_stressReason'), nutrition: val('wp_nutrition'),
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('plateau', ex.message); }
-    }
-
-    // Generate summer shred
-    async function generateS() {
-      const err = document.getElementById('errS');
-      err.hidden = true;
-      document.getElementById('wizardSummer').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Building your shred plan...';
-
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/summer`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            bodyweight: val('ws_weight'),
-            body_fat_estimate: sel('ws_bf') || '20-25%',
-            training_days: sel('ws_days') || '4',
-            current_steps: val('ws_steps'),
-            sleep_hours: val('ws_sleep'),
-            biggest_challenge: sel('ws_challenge') || 'staying consistent',
-            diet_preference: sel('ws_diet') || 'no preference',
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('summer', ex.message); }
-    }
-
-    // Generate tracker
-    async function generateT() {
-      const err = document.getElementById('errT');
-      err.hidden = true;
-      document.getElementById('wizardTracker').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Building your tracking system...';
-
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/tracker`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            program_type: sel('wt_type') || '12-week muscle-building program',
-            duration_weeks: sel('wt_duration') || '12',
-            tracking_experience: sel('wt_exp') || 'beginner',
-            current_bodyweight: val('wt_weight'),
-            key_lifts: val('wt_lifts') || 'squat, bench, deadlift, OHP',
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('tracker', ex.message); }
-    }
-
-    // Generate injury prevention
-    async function generateI() {
-      const err = document.getElementById('errI');
-      err.hidden = true;
-      document.getElementById('wizardInjury').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Building your prevention plan...';
-
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/injury`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            main_lifts: val('wi_lifts') || 'squat, bench press, deadlift, overhead press, barbell rows',
-            training_age: sel('wi_age') || '1-3 years',
-            current_niggles: val('wi_niggles'),
-            injury_history: val('wi_history'),
-            prehab_experience: sel('wi_exp') || 'none',
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('injury', ex.message); }
-    }
-
-    // Generate weak point fix
-    async function generateW() {
-      const err = document.getElementById('errW');
-      err.hidden = true;
-      if (!val('ww_aesthetic') && !val('ww_performance')) {
-        err.textContent = 'Please describe at least one weak point.'; err.hidden = false; return;
-      }
-      document.getElementById('wizardWeakpoint').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Analyzing your weak points...';
-
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/weakpoints`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            aesthetic_weakpoints: val('ww_aesthetic'),
-            performance_weakpoints: val('ww_performance'),
-            current_program: val('ww_program'),
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('weakpoint', ex.message); }
-    }
-
-    // ---- Nutrition Generate ----
-    async function generateN() {
-      const err = document.getElementById('errN');
-      err.hidden = true;
-      if (!val('wn_weight') || !val('wn_height') || !val('wn_age') || !sel('wn_sex')) {
-        err.textContent = 'Please fill in your stats (step 1).'; err.hidden = false; return;
-      }
-      document.getElementById('wizardNutrition').classList.remove('wizard--active');
-      document.getElementById('generatingView').hidden = false;
-      document.getElementById('genText').textContent = 'Building your nutrition plan...';
-
-      try {
-        const freshToken = localStorage.getItem('kyroo_token');
-        if (!freshToken) throw new Error('Please log in first.');
-        const res = await fetch(`${API}/api/program/nutrition`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${freshToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            age: val('wn_age'), sex: sel('wn_sex'), height: val('wn_height'), weight: val('wn_weight'),
-            goal_weight: val('wn_goal'), timeline: sel('wn_timeline') || 'steady and sustainable',
-            job_type: sel('wn_job') || 'desk job', exercise: sel('wn_exercise') || '3-4 times per week',
-            sleep_hours: val('wn_sleep'), stress: sel('wn_stress') || 'moderate', alcohol: sel('wn_alcohol') || 'light',
-            fav_meals: val('wn_fav'), hated_foods: val('wn_hate'), restrictions: sel('wn_restrict') || 'none',
-            cooking_style: sel('wn_cook') || 'quick meals', snack_preference: sel('wn_snacktype') || 'both',
-            snack_reason: sel('wn_snackwhy') || 'habit',
-          }),
-        });
-        const text = await res.text();
-        let data; try { data = JSON.parse(text); } catch(e) { throw new Error('Session expired. Please log out and log in again.'); }
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        showResult(data.program);
-      } catch (ex) { showError('nutrition', ex.message); }
-    }
-
-    function showResult(text) {
-      let html = text.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
-      document.getElementById('resultBody').innerHTML = '<p>' + html + '</p>';
-      document.getElementById('generatingView').hidden = true;
-      document.getElementById('resultView').style.display = 'block';
-    }
-
-    function showError(type, msg) {
-      document.getElementById('generatingView').hidden = true;
-      const ids = { '12week': 'wizard12week', plateau: 'wizardPlateau', tracker: 'wizardTracker', nutrition: 'wizardNutrition', summer: 'wizardSummer', injury: 'wizardInjury', weakpoint: 'wizardWeakpoint' };
-      const errIds = { calculators: 'errC', '12week': 'err12', plateau: 'errP', tracker: 'errT', nutrition: 'errN', summer: 'errS', injury: 'errI', weakpoint: 'errW' };
-      document.getElementById(ids[type]).classList.add('wizard--active');
-      const err = document.getElementById(errIds[type]);
-      err.textContent = msg; err.hidden = false;
-    }
-
-    // Auth check
-    async function init() {
-      // Everyone can see the hub - calculators are free
-      if (!token) return;
-      try {
-        const res = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) user = await res.json();
-      } catch (e) {}
-    }
-    function showLocked() { document.getElementById('hubView').style.display = 'none'; document.getElementById('lockedView').hidden = false; }
-    init();
+    /* ---- Init on DOMContentLoaded ---- */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHubGrid();
+      // Re-wire groups after hub grid renders (calcSection groups already wired above)
+      ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
+    });
   </script>
 </body>
 </html>

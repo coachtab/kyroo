@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KYROO - Your AI Fitness Coach</title>
-  <meta name="description" content="KYROO - personalized AI fitness programs. Answer a few questions, get a complete training plan as a downloadable PDF. Built in Prenzlauer Berg.">
+  <title>KYROO — Your AI Fitness Coach</title>
+  <meta name="description" content="Answer a few questions. Kyroo builds your complete, personalized fitness guide — powered by AI and ready to download.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
@@ -18,32 +18,63 @@
     <div class="nav__container container">
       <a href="/" class="nav__logo">KYROO</a>
       <button class="nav__toggle" id="navToggle" aria-label="Menu">
-        <span></span><span></span>
+        <span class="nav__toggle-line"></span>
+        <span class="nav__toggle-line"></span>
+        <span class="nav__toggle-line"></span>
       </button>
       <div class="nav__menu" id="navMenu">
         <a href="/program.html" class="nav__link">Programs</a>
-        <a href="#how" class="nav__link" onclick="event.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</a>
-        <a href="#premium" class="nav__link" onclick="event.preventDefault();document.getElementById('premium').scrollIntoView({behavior:'smooth'})">Pricing</a>
+        <a href="#how" class="nav__link" data-scroll="how">How it works</a>
+        <a href="#pricing" class="nav__link" data-scroll="pricing">Pricing</a>
         <a href="javascript:void(0)" class="nav__link nav__auth" id="navAuthBtn">Log in</a>
       </div>
+    </div>
+    <!-- Mobile drawer -->
+    <div class="nav__drawer" id="navDrawer">
+      <a href="/program.html" class="nav__link">Programs</a>
+      <a href="#how" class="nav__link" data-scroll="how">How it works</a>
+      <a href="#pricing" class="nav__link" data-scroll="pricing">Pricing</a>
+      <a href="javascript:void(0)" class="nav__link" id="navAuthBtnMobile">Log in</a>
     </div>
   </nav>
 
   <!-- Hero -->
   <section class="hero" id="hero">
+    <div class="hero__orb hero__orb-1"></div>
+    <div class="hero__orb hero__orb-2"></div>
     <div class="hero__container container">
-      <div class="hero__badge" data-animate="fade-up">Your AI Fitness Coach</div>
-      <h1 class="hero__title" data-animate="fade-up" data-delay="100" id="heroTitle"></h1>
-      <p class="hero__subtitle" data-animate="fade-up" data-delay="200" id="heroSubtitle"></p>
-      <div class="hero__actions" data-animate="fade-up" data-delay="300" id="heroActions">
-        <a href="/program.html" class="btn btn--primary" id="heroCTA1">Start free</a>
-        <a href="#how" class="btn btn--ghost" id="heroCTA2" onclick="event.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</a>
+      <div class="hero__badge" data-animate="fade-up">AI Fitness Coach</div>
+      <h1 class="hero__title" data-animate="fade-up" data-delay="100" id="heroTitle"><span class="hero__title--accent" id="heroTypewriter"></span><span class="hero__cursor">|</span></h1>
+      <p class="hero__subtitle" data-animate="fade-up" data-delay="200" id="heroSubtitle">Answer a few questions. Kyroo builds your complete, personalized fitness guide — powered by AI and ready to download.</p>
+      <div class="hero__actions" data-animate="fade-up" data-delay="300">
+        <a href="/program.html" class="btn btn--primary">Choose a program</a>
+        <a href="#how" class="btn btn--ghost" data-scroll="how">See how it works</a>
       </div>
-      <p class="hero__trust" data-animate="fade-up" data-delay="400">Free calculators included. No credit card needed.</p>
+      <p class="hero__trust" data-animate="fade-up" data-delay="400">Free to start · No credit card needed · Download in minutes</p>
     </div>
   </section>
 
-  <!-- How it works -->
+  <!-- Trust Bar -->
+  <div class="trust-bar" data-animate="fade-up">
+    <div class="trust-bar__inner container">
+      <div class="trust-stats">
+        <div class="trust-stat">
+          <span class="trust-stat__num">10K+</span>
+          <span class="trust-stat__label">Guides generated</span>
+        </div>
+        <div class="trust-stat">
+          <span class="trust-stat__num">6</span>
+          <span class="trust-stat__label">programs</span>
+        </div>
+        <div class="trust-stat">
+          <span class="trust-stat__num">100%</span>
+          <span class="trust-stat__label">personalized</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it Works -->
   <section class="how section" id="how">
     <div class="container">
       <div class="section__label section__label--center" data-animate="fade-up">
@@ -53,76 +84,203 @@
       <div class="how__grid" data-animate="fade-up" data-delay="100">
         <div class="how__step">
           <div class="how__step-num">1</div>
-          <h3 class="how__step-title">Pick a program</h3>
-          <p class="how__step-desc">Choose from 12-week plans, nutrition guides, summer shreds, and more.</p>
+          <div class="how__step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <h3 class="how__step-title">Choose a program</h3>
+          <p class="how__step-desc">Pick from 6 AI-powered programs designed for real results.</p>
         </div>
         <div class="how__step">
           <div class="how__step-num">2</div>
-          <h3 class="how__step-title">Answer a few questions</h3>
-          <p class="how__step-desc">Your body, goals, schedule, and preferences. Takes about 2 minutes.</p>
+          <div class="how__step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <h3 class="how__step-title">Answer your questions</h3>
+          <p class="how__step-desc">5 minutes of guided questions about your goals, schedule, and preferences.</p>
         </div>
         <div class="how__step">
           <div class="how__step-num">3</div>
-          <h3 class="how__step-title">Get your PDF</h3>
-          <p class="how__step-desc">KYROO builds a personalized plan you can print and follow from day one.</p>
+          <div class="how__step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <h3 class="how__step-title">Get your guide</h3>
+          <p class="how__step-desc">Download your personalized PDF fitness guide, ready to follow from day one.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Programs -->
-  <section class="programs section" id="programs">
+  <!-- Programs Preview -->
+  <section class="programs-preview section" id="programs">
     <div class="container">
       <div class="section__label section__label--center" data-animate="fade-up">
         <span class="section__tag">PROGRAMS</span>
-        <h2 class="section__title">Your KYROO coach.</h2>
-        <p class="section__desc section__desc--center">Every program generates a personalized PDF you can print and follow.</p>
+        <h2 class="section__title">Your program. Your rules.</h2>
+        <p class="section__desc section__desc--center">Every plan is built around your answers — not a template.</p>
       </div>
       <div class="programs__grid" data-animate="fade-up" data-delay="100">
-        <a href="/program.html#calc" class="program-card program-card--free">
-          <span class="program-card__badge-free">Free</span>
-          <span class="program-card__icon">&#9874;</span>
-          <h3 class="program-card__title">Calculators</h3>
-          <p class="program-card__desc">BMR, 1RM, macros, body fat</p>
-        </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9776;</span>
-          <h3 class="program-card__title">12-Week Plan</h3>
-          <p class="program-card__desc">Complete periodized training program</p>
+          <div class="program-card__badge program-card__badge--visible">Most Popular</div>
+          <div class="program-card__icon">🔥</div>
+          <h3 class="program-card__title">90-Day Challenge</h3>
+          <p class="program-card__desc">A complete 12-week system combining smart training and nutrition to transform your body from the inside out.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">90 days</span>
+            <span class="program-card__tag">All levels</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9889;</span>
-          <h3 class="program-card__title">Plateau Breaker</h3>
-          <p class="program-card__desc">Diagnose stalls, 8-week fix</p>
+          <div class="program-card__badge program-card__badge--visible">Trending</div>
+          <div class="program-card__icon">☀️</div>
+          <h3 class="program-card__title">Getting Fit for Summer</h3>
+          <p class="program-card__desc">Fast-track your fitness with this time-targeted program designed for maximum visible results before summer.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">8 weeks</span>
+            <span class="program-card__tag">Beginner friendly</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9733;</span>
-          <h3 class="program-card__title">Nutrition Shredder</h3>
-          <p class="program-card__desc">Calories, macros, 7-day meal plan</p>
+          <div class="program-card__badge"></div>
+          <div class="program-card__icon">⚡</div>
+          <h3 class="program-card__title">Weight Loss Plan</h3>
+          <p class="program-card__desc">Science-backed fat loss combining progressive training, cardio strategy, and personalized nutrition guidance.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">12 weeks</span>
+            <span class="program-card__tag">All levels</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9728;</span>
-          <h3 class="program-card__title">90-Day Shred</h3>
-          <p class="program-card__desc">Deficit, diet, training, steps, sleep</p>
+          <div class="program-card__badge"></div>
+          <div class="program-card__icon">💪</div>
+          <h3 class="program-card__title">Muscle Gain Plan</h3>
+          <p class="program-card__desc">Progressive overload programming designed to maximize muscle growth and build real, lasting strength.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">16 weeks</span>
+            <span class="program-card__tag">Intermediate+</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9638;</span>
-          <h3 class="program-card__title">Progress Tracker</h3>
-          <p class="program-card__desc">Professional monitoring system</p>
+          <div class="program-card__badge program-card__badge--visible">Best for Beginners</div>
+          <div class="program-card__icon">🌱</div>
+          <h3 class="program-card__title">Beginner Transformation</h3>
+          <p class="program-card__desc">Your first step into fitness. Gentle, effective, and designed to build lasting habits and real confidence.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">8 weeks</span>
+            <span class="program-card__tag">Beginners</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
+
         <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9769;</span>
-          <h3 class="program-card__title">Injury Prevention</h3>
-          <p class="program-card__desc">Prehab, warm-ups, technique fixes</p>
+          <div class="program-card__badge"></div>
+          <div class="program-card__icon">🏠</div>
+          <h3 class="program-card__title">Home Workout Plan</h3>
+          <p class="program-card__desc">No gym? No problem. A complete strength and conditioning program using bodyweight and minimal equipment.</p>
+          <div class="program-card__meta">
+            <span class="program-card__tag">12 weeks</span>
+            <span class="program-card__tag">All levels</span>
+          </div>
+          <span class="program-card__cta">Start program →</span>
         </a>
-        <a href="/program.html" class="program-card">
-          <span class="program-card__icon">&#9881;</span>
-          <h3 class="program-card__title">Weak Point Fixer</h3>
-          <p class="program-card__desc">Fix lagging muscles and lifts</p>
-        </a>
+
       </div>
       <div class="programs__cta" data-animate="fade-up" data-delay="200">
-        <a href="/program.html" class="btn btn--primary">Open ProgramHub</a>
+        <a href="/program.html" class="btn btn--primary">Explore all programs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guide Preview -->
+  <section class="guide-preview section">
+    <div class="container">
+      <div class="guide-preview__inner">
+
+        <!-- Left: Content -->
+        <div class="guide-preview__content" data-animate="fade-up">
+          <span class="section__tag">WHAT YOU GET</span>
+          <h2 class="section__title">Your complete fitness guide.</h2>
+          <p class="guide-preview__desc">Kyroo generates a professionally structured, personalized fitness guide — not a generic template.</p>
+          <ul class="guide-preview__list">
+            <li class="guide-preview__list-item">
+              <span class="guide-preview__check">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              Weekly training schedule tailored to your days
+            </li>
+            <li class="guide-preview__list-item">
+              <span class="guide-preview__check">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              Every exercise explained step-by-step
+            </li>
+            <li class="guide-preview__list-item">
+              <span class="guide-preview__check">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              Nutrition overview aligned with your goal
+            </li>
+            <li class="guide-preview__list-item">
+              <span class="guide-preview__check">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              Progress milestones and tracking guidance
+            </li>
+          </ul>
+          <a href="/program.html" class="btn btn--primary guide-preview__cta-btn">Get your guide</a>
+        </div>
+
+        <!-- Right: PDF Mockup -->
+        <div class="guide-preview__visual" data-animate="fade-up" data-delay="150">
+          <div class="pdf-card">
+            <div class="pdf-card__header">
+              <div class="pdf-card__logo-mark">K</div>
+              <div class="pdf-card__header-text">
+                <span class="pdf-card__header-name">KYROO</span>
+                <span class="pdf-card__header-sub">Your Fitness Guide</span>
+              </div>
+            </div>
+            <div class="pdf-card__body">
+              <div class="pdf-card__section pdf-card__section--indigo">
+                <span class="pdf-card__section-emoji">📋</span>
+                <div class="pdf-card__section-info">
+                  <span class="pdf-card__section-title">Training Plan</span>
+                  <span class="pdf-card__section-meta">12 weeks · 4 days/week</span>
+                </div>
+              </div>
+              <div class="pdf-card__section pdf-card__section--green">
+                <span class="pdf-card__section-emoji">📖</span>
+                <div class="pdf-card__section-info">
+                  <span class="pdf-card__section-title">Exercise Library</span>
+                  <span class="pdf-card__section-meta">Step-by-step instructions</span>
+                </div>
+              </div>
+              <div class="pdf-card__section pdf-card__section--amber">
+                <span class="pdf-card__section-emoji">🥗</span>
+                <div class="pdf-card__section-info">
+                  <span class="pdf-card__section-title">Nutrition Overview</span>
+                  <span class="pdf-card__section-meta">Macros · Meal timing</span>
+                </div>
+              </div>
+              <div class="pdf-card__section pdf-card__section--pink">
+                <span class="pdf-card__section-emoji">📈</span>
+                <div class="pdf-card__section-info">
+                  <span class="pdf-card__section-title">Progress Tracking</span>
+                  <span class="pdf-card__section-meta">Weekly milestones</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -136,21 +294,80 @@
       </div>
       <div class="benefits__grid" data-animate="fade-up" data-delay="100">
         <div class="benefit">
+          <div class="benefit__num">01</div>
           <h3 class="benefit__title">Truly personal</h3>
-          <p class="benefit__desc">Not a template. Every plan is built from your body, your goals, your schedule.</p>
+          <p class="benefit__desc">Not a template. Every plan is generated from your body, your goals, your schedule, and your equipment.</p>
         </div>
         <div class="benefit">
+          <div class="benefit__num">02</div>
           <h3 class="benefit__title">Print and go</h3>
-          <p class="benefit__desc">Download a clean PDF. Bring it to the gym. No app needed during your workout.</p>
+          <p class="benefit__desc">Download a clean, professional PDF. Bring it to the gym. No app needed during your workout.</p>
         </div>
         <div class="benefit">
+          <div class="benefit__num">03</div>
           <h3 class="benefit__title">Written for humans</h3>
-          <p class="benefit__desc">Simple language. Every exercise explained. A 14-year-old could follow it.</p>
+          <p class="benefit__desc">Simple language. Every exercise explained. Anyone can follow it from day one.</p>
         </div>
         <div class="benefit">
-          <h3 class="benefit__title">Built by coaches</h3>
-          <p class="benefit__desc">Prompts designed by real strength coaches and nutritionists. AI executes.</p>
+          <div class="benefit__num">04</div>
+          <h3 class="benefit__title">Built by experts</h3>
+          <p class="benefit__desc">Prompts engineered by real coaches and nutritionists. AI brings it to life.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials section">
+    <div class="container">
+      <div class="section__label section__label--center" data-animate="fade-up">
+        <span class="section__tag">REAL RESULTS</span>
+        <h2 class="section__title">People who made the switch.</h2>
+      </div>
+      <div class="testimonials__grid" data-animate="fade-up" data-delay="100">
+
+        <div class="testimonial">
+          <div class="testimonial__stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <blockquote class="testimonial__quote">"The 90-Day Challenge guide was incredibly detailed. I lost 9kg following it — and actually understood why every choice was made for me."</blockquote>
+          <div class="testimonial__footer">
+            <div class="testimonial__avatar">S</div>
+            <div class="testimonial__info">
+              <strong>Sarah M.</strong>
+              <span>Berlin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial">
+          <div class="testimonial__stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <blockquote class="testimonial__quote">"Finally a plan that actually fits my schedule. The home workout program understood I only had 4 days and minimal equipment."</blockquote>
+          <div class="testimonial__footer">
+            <div class="testimonial__avatar">M</div>
+            <div class="testimonial__info">
+              <strong>Marcus K.</strong>
+              <span>Hamburg</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial">
+          <div class="testimonial__stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <blockquote class="testimonial__quote">"I was skeptical of AI-generated plans. This changed that. It felt like a personal trainer wrote it specifically for me."</blockquote>
+          <div class="testimonial__footer">
+            <div class="testimonial__avatar">A</div>
+            <div class="testimonial__info">
+              <strong>Ana L.</strong>
+              <span>Munich</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -166,50 +383,68 @@
     </div>
   </section>
 
-  <!-- Premium / Pricing -->
-  <section class="premium section" id="premium">
+  <!-- Pricing -->
+  <section class="pricing-section section" id="pricing">
     <div class="container">
-      <div class="section__label section__label--center" data-animate="fade-up" id="premiumHeader">
+      <div class="section__label section__label--center" data-animate="fade-up">
         <span class="section__tag">PRICING</span>
         <h2 class="section__title">Simple pricing.</h2>
         <p class="section__desc section__desc--center">Start free. Upgrade when you need more.</p>
       </div>
-      <div class="premium__content" id="premiumGrid"></div>
+      <div id="premiumGrid"></div>
     </div>
   </section>
 
   <!-- FAQ -->
-  <section class="faq section" id="faq">
+  <section class="faq-section section" id="faq">
     <div class="container">
       <div class="section__label section__label--center" data-animate="fade-up">
         <span class="section__tag">FAQ</span>
-        <h2 class="section__title">Questions.</h2>
+        <h2 class="section__title">Questions answered.</h2>
       </div>
       <div class="faq__list" data-animate="fade-up" data-delay="100">
+
         <details class="faq__item">
-          <summary class="faq__question">What is KYROO?</summary>
-          <p class="faq__answer">KYROO is an AI fitness coach. You pick a program, answer a few questions about your body and goals, and KYROO generates a complete personalized training or nutrition plan as a downloadable PDF.</p>
+          <summary class="faq__question">What exactly is Kyroo?</summary>
+          <p class="faq__answer">Kyroo is your AI fitness coach. Pick a program, answer a few guided questions about your body and goals, and Kyroo generates a complete personalized training and nutrition guide as a downloadable PDF.</p>
         </details>
+
         <details class="faq__item">
-          <summary class="faq__question">Is it really personalized?</summary>
-          <p class="faq__answer">Yes. Every plan is generated from scratch based on your weight, height, age, goals, schedule, equipment, and preferences. No two plans are the same.</p>
+          <summary class="faq__question">Is my plan really personalized?</summary>
+          <p class="faq__answer">Yes — entirely. Every guide is generated from scratch using your weight, height, age, fitness level, weekly schedule, available equipment, and goals. No two plans are identical.</p>
         </details>
+
         <details class="faq__item">
-          <summary class="faq__question">What can I use for free?</summary>
-          <p class="faq__answer">The calculators are completely free - BMR, 1RM, macros, and body fat estimates. No account needed. The AI-powered programs require a Basic or Pro subscription.</p>
+          <summary class="faq__question">What's included in the free plan?</summary>
+          <p class="faq__answer">The calculators — BMR, 1RM, macros, and body fat estimates — are completely free with no account needed. AI-powered programs require a Basic or Pro plan.</p>
         </details>
+
         <details class="faq__item">
           <summary class="faq__question">How does the PDF work?</summary>
-          <p class="faq__answer">After answering the questions, KYROO generates your plan in about 30 seconds. You can read it on screen, print it, or save it as a PDF to bring to the gym.</p>
+          <p class="faq__answer">After answering your questions, Kyroo generates your complete guide in about 30 seconds. Read it on screen, download it as a PDF, or print it to bring to the gym.</p>
         </details>
+
+        <details class="faq__item">
+          <summary class="faq__question">Can I regenerate if I want changes?</summary>
+          <p class="faq__answer">Yes. With Basic and Pro plans you can regenerate your guide at any time. Adjust your answers and get a fresh plan whenever your goals change.</p>
+        </details>
+
         <details class="faq__item">
           <summary class="faq__question">Can I cancel anytime?</summary>
-          <p class="faq__answer">Yes. Cancel from your account settings at any time. No contracts, no commitments.</p>
+          <p class="faq__answer">Yes. Cancel from your account settings at any time. No contracts, no hidden fees, no commitments.</p>
         </details>
-        <details class="faq__item">
-          <summary class="faq__question">Where is KYROO based?</summary>
-          <p class="faq__answer">KYROO is built in Prenzlauer Berg, Berlin. The Train Together feature connects you with people working out in local parks.</p>
-        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="cta-final section">
+    <div class="container">
+      <div class="cta-final__inner">
+        <h2 class="cta-final__title">Ready to start?</h2>
+        <p class="cta-final__desc">Choose a program and get your personalized guide in minutes.</p>
+        <a href="/program.html" class="btn btn--primary">Start for free</a>
       </div>
     </div>
   </section>
@@ -218,7 +453,7 @@
   <section class="newsletter section" id="newsletter">
     <div class="container">
       <div class="newsletter__inner" data-animate="fade-up">
-        <h2 class="newsletter__title" id="newsletterTitle"></h2>
+        <h2 class="newsletter__title" id="newsletterTitle">Join the community.</h2>
         <form class="newsletter__form" id="newsletterForm">
           <div class="newsletter__input-wrap">
             <input type="email" class="newsletter__input" placeholder="your@email.com" required aria-label="Email" id="emailInput">
@@ -226,7 +461,7 @@
           </div>
         </form>
         <div class="newsletter__success" id="newsletterSuccess" hidden>
-          <p>Done. Check your inbox.</p>
+          <p>Done. Welcome to Kyroo.</p>
         </div>
       </div>
     </div>
@@ -245,11 +480,16 @@
       </div>
       <div class="footer__bottom">
         <p class="footer__copy">&copy; 2026 KYROO. Berlin.</p>
+        <div class="footer__legal">
+          <button type="button" class="footer__legal-btn" id="privacyBtn">Privacy</button>
+          <button type="button" class="footer__legal-btn" id="termsBtn">Terms</button>
+          <button type="button" class="footer__legal-btn" id="imprintBtn">Imprint</button>
+        </div>
       </div>
     </div>
   </footer>
 
-  <!-- Modals -->
+  <!-- Auth Modal -->
   <div class="modal-overlay" id="authModal" hidden>
     <div class="modal">
       <button type="button" class="modal__close" id="authModalClose">&times;</button>
@@ -297,6 +537,7 @@
     </div>
   </div>
 
+  <!-- Checkout Modal -->
   <div class="modal-overlay" id="checkoutModal" hidden>
     <div class="modal modal--checkout">
       <button type="button" class="modal__close" id="checkoutModalClose">&times;</button>
@@ -304,16 +545,31 @@
     </div>
   </div>
 
+  <!-- Privacy Modal -->
   <div class="modal-overlay" id="privacyModal" hidden>
-    <div class="modal modal--wide"><button type="button" class="modal__close" id="privacyModalClose">&times;</button><div id="privacyContent"></div></div>
-  </div>
-  <div class="modal-overlay" id="termsModal" hidden>
-    <div class="modal modal--wide"><button type="button" class="modal__close" id="termsModalClose">&times;</button><div id="termsContent"></div></div>
-  </div>
-  <div class="modal-overlay" id="imprintModal" hidden>
-    <div class="modal"><button type="button" class="modal__close" id="imprintModalClose">&times;</button><div id="imprintContent"></div></div>
+    <div class="modal modal--wide">
+      <button type="button" class="modal__close" id="privacyModalClose">&times;</button>
+      <div id="privacyContent"></div>
+    </div>
   </div>
 
+  <!-- Terms Modal -->
+  <div class="modal-overlay" id="termsModal" hidden>
+    <div class="modal modal--wide">
+      <button type="button" class="modal__close" id="termsModalClose">&times;</button>
+      <div id="termsContent"></div>
+    </div>
+  </div>
+
+  <!-- Imprint Modal -->
+  <div class="modal-overlay" id="imprintModal" hidden>
+    <div class="modal">
+      <button type="button" class="modal__close" id="imprintModalClose">&times;</button>
+      <div id="imprintContent"></div>
+    </div>
+  </div>
+
+  <!-- Cookie Banner -->
   <div class="cookie-banner" id="cookieBanner" hidden>
     <div class="cookie-banner__inner container">
       <p class="cookie-banner__text">We only use essential cookies. No tracking, no ads. <a href="javascript:void(0)" id="cookiePrivacyLink">Privacy Policy</a></p>
