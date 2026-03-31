@@ -22,7 +22,7 @@ async function seed() {
 
   // Site settings
   const settings = {
-    hero_typewriter: 'Curated in Berlin.|Built in Prenzlauer Berg.|Trends before they trend.|Your culture, filtered.|Signal over noise.|AI, fitness, culture.|For the curious.',
+    hero_typewriter: 'Your program. Your rules.|Get fit on your terms.|90 days. Your way.|Transform. Starting now.|Change starts here.',
     articles_tag: 'READ',
     articles_title: 'Read.',
     articles_desc: '',
@@ -46,7 +46,7 @@ async function seed() {
   console.log('Settings seeded');
 
   // Sections
-  await pool.query("UPDATE sections SET title = $1, description = $2 WHERE slug = 'hero'", ['Curated in Berlin.', 'Trends. AI. Fitness. Culture. One place.']);
+  await pool.query("UPDATE sections SET title = $1, description = $2 WHERE slug = 'hero'", ['Your program. Your rules.', 'Choose a program. Get your personalized plan.']);
   await pool.query("UPDATE sections SET title = $1, description = NULL WHERE slug = 'explore'", ['Explore.']);
   await pool.query("UPDATE sections SET title = $1, description = NULL WHERE slug = 'newsletter'", ['Sunday mornings, sorted.']);
   console.log('Sections updated');
