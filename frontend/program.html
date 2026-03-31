@@ -1107,6 +1107,16 @@
       renderHubGrid();
       // Re-wire groups after hub grid renders (calcSection groups already wired above)
       ['tilesGoal', 'tilesLevel', 'tilesSex', 'tilesDays', 'tilesMins', 'tilesLocation', 'cTilesSex', 'cTilesActivity'].forEach(wireGroup);
+
+      // Auto-open wizard if a program hash is present (e.g. /program.html#challenge90)
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const prog = PROGRAMS.find(p => p.id === hash);
+        if (prog) {
+          // Small delay so the page renders before the overlay animates in
+          setTimeout(() => openWizard(prog), 80);
+        }
+      }
     });
   </script>
 </body>
