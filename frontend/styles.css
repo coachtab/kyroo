@@ -1808,10 +1808,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .footer__inner {
-  display:               grid;
-  grid-template-columns: 1fr 2fr;
-  gap:                   64px;
-  margin-bottom:         48px;
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             48px;
+  margin-bottom:   48px;
 }
 
 .footer__brand {}
@@ -1861,37 +1862,22 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(240,132,90,0.2);
 }
 
-.footer__links {
-  display:               grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:                   32px;
-}
-
-.footer__links-group {}
-
-.footer__links-title {
-  font-family:    var(--heading);
-  font-size:      0.78rem;
-  font-weight:    700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color:          var(--text-3);
-  margin-bottom:  16px;
-}
-
-.footer__links-list {
+.footer__nav {
   display:        flex;
   flex-direction: column;
-  gap:            10px;
+  align-items:    flex-end;
+  gap:            14px;
+  padding-top:    4px;
 }
 
-.footer__link {
-  font-size:  0.875rem;
-  color:      var(--text-2);
-  transition: color 0.2s;
+.footer__nav-link {
+  font-size:   0.9rem;
+  color:       var(--text-3);
+  transition:  color 0.2s;
+  white-space: nowrap;
 }
 
-.footer__link:hover { color: var(--text); }
+.footer__nav-link:hover { color: var(--text); }
 
 .footer__bottom {
   border-top: 1px solid var(--border);
@@ -1903,7 +1889,8 @@ h1, h2, h3, h4, h5, h6 {
   gap:        12px;
 }
 
-.footer__copyright {
+.footer__copyright,
+.footer__copy {
   font-size: 0.82rem;
   color:     var(--text-3);
 }
@@ -3339,7 +3326,8 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: 1fr;
     gap:                   40px;
   }
-  .footer__links { grid-template-columns: repeat(2, 1fr); }
+  .footer__inner { flex-direction: column; gap: 32px; }
+  .footer__nav { align-items: flex-start; flex-direction: row; flex-wrap: wrap; gap: 12px 20px; }
 
   /* Hub grid */
   .hub__grid {
@@ -3427,7 +3415,6 @@ h1, h2, h3, h4, h5, h6 {
   .hub-hero__title { font-size: clamp(1.75rem, 7vw, 2.5rem); }
 
   /* Footer */
-  .footer__links { grid-template-columns: 1fr 1fr; }
   .footer__bottom {
     flex-direction: column;
     align-items:    flex-start;
