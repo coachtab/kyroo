@@ -451,6 +451,7 @@ function authHeaders() {
 
 function setAuth(user, token) {
   currentUser = user;
+  window.currentUser = user;   // expose for inline scripts
   authToken = token;
   if (token) localStorage.setItem('kyroo_token', token);
   else localStorage.removeItem('kyroo_token');
@@ -1366,13 +1367,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (termsBtn) termsBtn.onclick = () => _fetchSite().then(d => showTerms(d));
   if (imprintBtn) imprintBtn.onclick = () => _fetchSite().then(d => showImprint(d));
 
-  // ---- Modal wiring (close via X button or Escape only) ----
+  // ---- Modal wiring (close via X button, Escape, or clicking outside) ----
   document.getElementById('authModalClose').onclick = () => hideModal('authModal');
 
   document.getElementById('checkoutModalClose').onclick = () => hideModal('checkoutModal');
   document.getElementById('privacyModalClose').onclick = () => hideModal('privacyModal');
   document.getElementById('termsModalClose').onclick = () => hideModal('termsModal');
   document.getElementById('imprintModalClose').onclick = () => hideModal('imprintModal');
+
+  // Click outside modal (on the dark overlay) closes it — prevents page freeze
+  ['authModal', 'checkoutModal', 'privacyModal', 'termsModal', 'imprintModal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', (e) => {
+      if (e.target === el) hideModal(id);
+    });
+  });
 
   // Escape key closes the topmost modal
   document.addEventListener('keydown', (e) => {
