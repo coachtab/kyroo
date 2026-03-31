@@ -1373,15 +1373,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // ---- Footer legal buttons (static in new design) ----
-  const _fetchSite = () => fetch(`${API_BASE}/api/site`).then(r => r.json());
-  const privacyBtn = document.getElementById('privacyBtn');
-  const termsBtn = document.getElementById('termsBtn');
-  const imprintBtn = document.getElementById('imprintBtn');
-  if (privacyBtn) privacyBtn.onclick = () => _fetchSite().then(d => showPrivacy(d));
-  if (termsBtn) termsBtn.onclick = () => _fetchSite().then(d => showTerms(d));
-  if (imprintBtn) imprintBtn.onclick = () => _fetchSite().then(d => showImprint(d));
-
   // ---- Modal wiring (close via X button, Escape, or clicking outside) ----
   document.getElementById('authModalClose').onclick = () => hideModal('authModal');
 

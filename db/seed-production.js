@@ -57,11 +57,16 @@ async function seed() {
   await pool.query("UPDATE social_links SET url = $1 WHERE platform = 'WhatsApp'", ['https://wa.me/4915155623461']);
   console.log('Social links updated');
 
-  // Footer links
-  await pool.query("DELETE FROM footer_links WHERE label IN ('About', 'Free Content')");
-  await pool.query("UPDATE footer_links SET url = 'privacy' WHERE label = 'Privacy Policy'");
-  await pool.query("UPDATE footer_links SET url = 'terms' WHERE label = 'Terms of Service'");
-  await pool.query("UPDATE footer_links SET url = 'imprint' WHERE label = 'Imprint'");
+  // Footer links — clean single set, no duplicates
+  await pool.query("DELETE FROM footer_links");
+  await pool.query(`INSERT INTO footer_links (column_title, label, url, col_order, sort_order) VALUES
+    ('Programs', '90-Day Challenge', '/program.html#challenge90', 1, 1),
+    ('Programs', 'Getting Fit for Summer', '/program.html#summer', 1, 2),
+    ('Programs', 'Weight Loss Plan', '/program.html#weightloss', 1, 3),
+    ('Programs', 'Muscle Gain Plan', '/program.html#muscle', 1, 4),
+    ('Legal', 'Privacy Policy', 'privacy', 2, 1),
+    ('Legal', 'Terms of Service', 'terms', 2, 2),
+    ('Legal', 'Imprint', 'imprint', 2, 3)`);
   console.log('Footer links updated');
 
   await pool.end();
