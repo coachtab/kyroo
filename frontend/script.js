@@ -1506,6 +1506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---- Restore session (clear stale tokens) ----
   await restoreSession();
+  window.dispatchEvent(new CustomEvent('kyroo:authready'));
   // Ensure modals stay closed on page load
   hideModal('authModal');
 

@@ -6,7 +6,7 @@
 <title>Kyroo — Your Personal Fitness Plan, Built by AI</title>
 <meta name="description" content="Answer a few questions. Get a fully personalized AI fitness plan — downloadable as PDF. No guesswork. Just a clear path forward.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
@@ -17,14 +17,13 @@
   <div class="container nav__inner">
     <a href="/" class="nav__logo">Kyroo</a>
     <div class="nav__links">
-      <a href="/program.html" class="nav__link">Programs</a>
       <a href="#how-it-works" class="nav__link">How it works</a>
       <a href="#pricing" class="nav__link">Pricing</a>
       <span id="navAdminLinkWrap"></span>
     </div>
     <div class="nav__actions">
       <a href="javascript:void(0)" id="navAuthBtn" class="nav__auth">Log in</a>
-      <a href="/program.html" class="btn btn--sm btn--primary">Get my plan</a>
+      <a href="javascript:void(0)" id="navGetStarted" class="btn btn--sm btn--primary">Get started</a>
     </div>
     <button type="button" class="nav__hamburger" id="navToggle" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -34,24 +33,23 @@
 
 <!-- Mobile nav -->
 <div class="nav__mobile-menu" id="navMenu">
-  <a href="/program.html" class="nav__link">Programs</a>
   <a href="#how-it-works" class="nav__link">How it works</a>
   <a href="#pricing" class="nav__link">Pricing</a>
-  <a href="javascript:void(0)" id="navAuthBtnMobile" class="nav__link">Log in</a>
-  <a href="/program.html" class="btn btn--primary nav__mobile-cta">Get my plan</a>
+  <a href="/program.html" class="nav__link">Dashboard</a>
+  <div class="nav__mobile-menu-bottom">
+    <button type="button" id="navAuthBtnMobile" class="nav__mobile-auth-btn">Log in</button>
+    <a href="javascript:void(0)" id="navGetStartedMobile" class="nav__mobile-cta">Get started</a>
+  </div>
 </div>
 
 <!-- ═══ HERO ═══════════════════════════════════════════════ -->
 <section class="hero">
-  <div class="hero__inner">
-    <div class="hero__pill">
-      <div class="hero__pill-dot"></div>
-      AI-Powered Fitness Guidance
-    </div>
+  <div class="hero__left">
+    <div class="hero__eyebrow">AI-powered fitness planning</div>
 
     <h1 class="hero__h1">
       Stop guessing.<br>
-      Start on a plan<br>
+      Get a plan<br>
       <em>built for you.</em>
     </h1>
 
@@ -61,29 +59,61 @@
     </p>
 
     <div class="hero__actions">
-      <a href="/program.html" class="btn btn--primary btn--lg" id="heroCTA1">
-        Choose a program
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <a href="javascript:void(0)" id="heroCTA1" class="btn btn--primary btn--lg">
+        Create free account
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
-      <a href="#how-it-works" class="btn btn--ghost btn--lg" id="heroCTA2">How it works</a>
+      <a href="#how-it-works" class="btn btn--ghost btn--lg">How it works</a>
     </div>
 
-    <div class="hero__social-proof">
-      <div class="proof-item">
-        <span class="proof-num">6</span>
-        <span class="proof-label">AI Programs</span>
+    <div class="hero__stats">
+      <div class="stat-item">
+        <span class="stat-num">6</span>
+        <span class="stat-label">Programs</span>
       </div>
-      <div class="proof-divider"></div>
-      <div class="proof-item">
-        <span class="proof-num">PDF</span>
-        <span class="proof-label">Ready to download</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">PDF</span>
+        <span class="stat-label">Ready to download</span>
       </div>
-      <div class="proof-divider"></div>
-      <div class="proof-item">
-        <span class="proof-num">100%</span>
-        <span class="proof-label">Personalized</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">100%</span>
+        <span class="stat-label">Personalized</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__right">
+    <div class="plan-preview">
+      <div class="plan-preview__bar">
+        <div class="plan-preview__dots">
+          <span class="plan-preview__dot plan-preview__dot--r"></span>
+          <span class="plan-preview__dot plan-preview__dot--a"></span>
+          <span class="plan-preview__dot plan-preview__dot--g"></span>
+        </div>
+        <span class="plan-preview__filename">Your Fitness Plan.pdf</span>
+      </div>
+      <div class="plan-preview__body">
+        <div class="plan-preview__tag">12-Week Strength Program</div>
+        <div class="plan-preview__heading">Week 1 · Strength Foundation</div>
+        <div class="plan-preview__divider"></div>
+        <div class="plan-preview__section">Day 1 — Push (Upper)</div>
+        <div class="plan-preview__row">Bench Press<span>4 × 8 @ 70%</span></div>
+        <div class="plan-preview__row">Incline DB Press<span>3 × 10</span></div>
+        <div class="plan-preview__row">Shoulder Press<span>3 × 10</span></div>
+        <div class="plan-preview__row">Cable Lateral Raise<span>3 × 15</span></div>
+        <div class="plan-preview__divider"></div>
+        <div class="plan-preview__section">Nutrition Targets</div>
+        <div class="plan-preview__row">Daily Calories<span>2,350 kcal</span></div>
+        <div class="plan-preview__row">Protein<span>175g</span></div>
+        <div class="plan-preview__row">Training Days<span>4 per week</span></div>
+        <div class="plan-preview__footer">
+          <span>Male · 80 kg · Intermediate</span>
+          <span class="plan-preview__badge">PDF Ready</span>
+        </div>
       </div>
     </div>
   </div>
@@ -94,38 +124,22 @@
   <div class="container">
     <div class="section-eyebrow">The process</div>
     <h2 class="section-headline">From question to plan<br>in under 3 minutes.</h2>
-    <p class="section-sub">Kyroo removes the guesswork. A structured intake, a precise AI, and a clear plan you can act on immediately.</p>
 
     <div class="hiw__grid">
       <div class="hiw__step">
-        <div class="hiw__num">01</div>
-        <div class="hiw__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-        </div>
+        <div class="hiw__num">01 ·</div>
         <h3 class="hiw__title">Choose a program</h3>
-        <p class="hiw__desc">Select the plan that matches your goal — weight loss, muscle gain, beginner training, or a 90-day transformation. Each program has a clear purpose.</p>
+        <p class="hiw__desc">Pick the training focus that matches your current goal — strength, fat loss, recomposition, beginner foundation, or performance. Each program has a clear purpose and structure.</p>
       </div>
 
       <div class="hiw__step">
-        <div class="hiw__num">02</div>
-        <div class="hiw__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-        </div>
+        <div class="hiw__num">02 ·</div>
         <h3 class="hiw__title">Answer a few questions</h3>
-        <p class="hiw__desc">Tell Kyroo about your body, your schedule, and your real life. The intake is fast, focused, and never asks for more than it needs.</p>
+        <p class="hiw__desc">Tell Kyroo about your body, your schedule, and your real life. The intake is fast, focused, and never asks for more than it needs to build something accurate.</p>
       </div>
 
       <div class="hiw__step">
-        <div class="hiw__num">03</div>
-        <div class="hiw__icon" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-        </div>
+        <div class="hiw__num">03 ·</div>
         <h3 class="hiw__title">Get your PDF plan</h3>
         <p class="hiw__desc">Kyroo generates a structured, print-ready fitness guide specific to you — your schedule, your body, your goal. Download it and start tomorrow.</p>
       </div>
@@ -133,91 +147,151 @@
   </div>
 </section>
 
-<!-- ═══ PROGRAMS PREVIEW ════════════════════════════════════ -->
+<!-- ═══ PROGRAMS PREVIEW — Locked Teasers ══════════════════ -->
 <section class="prog-preview" id="programs">
   <div class="container">
     <div class="prog-preview__top">
       <div>
         <div class="section-eyebrow">Programs</div>
-        <h2 class="section-headline">Find the plan that<br>fits your situation.</h2>
+        <h2 class="section-headline">Six programs.<br>One for your situation.</h2>
+        <p class="section-sub">All programs require a Premium account. Each one is fully personalized through a short intake — no generic templates.</p>
       </div>
-      <a href="/program.html" class="btn btn--ghost">
-        See all programs
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
     </div>
 
     <div class="prog-grid">
-      <div class="prog-card" onclick="location.href='/program.html#strength'">
+
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
         <span class="badge badge--green">Strength</span>
-        <h3 class="prog-card__title">12-Week Training Program</h3>
-        <p class="prog-card__desc">A complete periodized strength program built around your schedule, equipment, and experience level.</p>
+        <h3 class="prog-card__title">12-Week Strength Training</h3>
+        <p class="prog-card__desc">A complete periodized strength program built around your schedule, available equipment, and experience level. Progressive overload, tracked weekly.</p>
         <div class="prog-card__meta">
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>
-            12 weeks
-          </span>
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>
-            All levels
-          </span>
+          <span class="prog-card__meta-item">12 weeks</span>
+          <span class="prog-card__meta-item">All levels</span>
         </div>
         <div class="prog-card__foot">
-          <span class="prog-card__cta">
-            Start program
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="badge badge--grey">Free</span>
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
         </div>
       </div>
 
-      <div class="prog-card" onclick="location.href='/program.html#summer'">
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
         <span class="badge badge--amber">Fat Loss</span>
-        <h3 class="prog-card__title">90-Day Summer Shred</h3>
-        <p class="prog-card__desc">A structured 90-day fat loss plan with training, nutrition, and daily step targets — designed to actually work.</p>
+        <h3 class="prog-card__title">90-Day Fat Loss</h3>
+        <p class="prog-card__desc">A structured 90-day plan combining training, nutrition, and daily targets. Designed for sustainable body composition change — not crash results.</p>
         <div class="prog-card__meta">
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>
-            90 days
-          </span>
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>
-            All levels
-          </span>
+          <span class="prog-card__meta-item">90 days</span>
+          <span class="prog-card__meta-item">All levels</span>
         </div>
         <div class="prog-card__foot">
-          <span class="prog-card__cta">
-            Start program
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="badge badge--green">Premium</span>
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
         </div>
       </div>
 
-      <div class="prog-card" onclick="location.href='/program.html#nutrition'">
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
         <span class="badge badge--grey">Nutrition</span>
-        <h3 class="prog-card__title">Nutrition Plan</h3>
-        <p class="prog-card__desc">A personalised 7-day meal plan with exact macros, calorie targets, and snack swaps — built around your eating style.</p>
+        <h3 class="prog-card__title">Personalized Nutrition</h3>
+        <p class="prog-card__desc">A 7-day meal plan with exact macros, calorie targets, and snack swaps — built around your eating style, preferences, and daily energy needs.</p>
         <div class="prog-card__meta">
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>
-            Ongoing
-          </span>
-          <span class="prog-card__meta-item">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>
-            All levels
-          </span>
+          <span class="prog-card__meta-item">Ongoing</span>
+          <span class="prog-card__meta-item">All levels</span>
         </div>
         <div class="prog-card__foot">
-          <span class="prog-card__cta">
-            Start program
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="badge badge--green">Premium</span>
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
         </div>
       </div>
+
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
+        <span class="badge badge--green">Beginner</span>
+        <h3 class="prog-card__title">Beginner Foundation</h3>
+        <p class="prog-card__desc">8 weeks to build the movement patterns, habits, and baseline strength that last. Designed for people starting from zero — no gym background required.</p>
+        <div class="prog-card__meta">
+          <span class="prog-card__meta-item">8 weeks</span>
+          <span class="prog-card__meta-item">Beginner</span>
+        </div>
+        <div class="prog-card__foot">
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
+        </div>
+      </div>
+
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
+        <span class="badge badge--grey">Performance</span>
+        <h3 class="prog-card__title">Athletic Performance</h3>
+        <p class="prog-card__desc">Sport-specific conditioning built around power, speed, and endurance. Structured for athletes who already train and want to raise their ceiling.</p>
+        <div class="prog-card__meta">
+          <span class="prog-card__meta-item">10 weeks</span>
+          <span class="prog-card__meta-item">Intermediate+</span>
+        </div>
+        <div class="prog-card__foot">
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
+        </div>
+      </div>
+
+      <div class="prog-card">
+        <span class="prog-card__lock" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+        </span>
+        <span class="badge badge--green">Recomposition</span>
+        <h3 class="prog-card__title">Body Recomposition</h3>
+        <p class="prog-card__desc">Lose fat and build muscle at the same time through precision training and nutrition calibration. Requires consistency — delivers compound results.</p>
+        <div class="prog-card__meta">
+          <span class="prog-card__meta-item">16 weeks</span>
+          <span class="prog-card__meta-item">Intermediate</span>
+        </div>
+        <div class="prog-card__foot">
+          <button type="button" class="prog-card__cta js-prog-cta">
+            Unlock program
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="badge badge--amber">Premium</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -270,11 +344,11 @@
 
 <!-- ═══ PRICING ════════════════════════════════════════════ -->
 <section id="pricing" class="pricing-section">
-  <div class="container container--md">
+  <div class="container">
     <div class="pricing-section__head">
       <div class="section-eyebrow pricing-section__eyebrow">Pricing</div>
       <h2 class="section-headline">Simple, honest pricing.</h2>
-      <p class="section-sub pricing-section__sub">One free program to start. Premium unlocks all 6 programs with unlimited generation.</p>
+      <p class="section-sub pricing-section__sub">A free account to get started. Premium unlocks all six programs with unlimited plan generation.</p>
     </div>
 
     <div class="pricing-grid" id="pricingSection">
@@ -284,23 +358,23 @@
         <div class="pricing-tier__price">€0</div>
         <div class="pricing-tier__period">forever</div>
         <div class="pricing-tier__features">
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>1 program (Strength)</div>
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>1 generation / month</div>
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>PDF download</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Account &amp; profile</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Access to dashboard</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Plan history</div>
         </div>
-        <a href="/program.html" class="btn btn--ghost btn--full">Start free</a>
+        <a href="javascript:void(0)" class="btn btn--ghost btn--full js-signup-cta">Create free account</a>
       </div>
 
       <div class="pricing-tier pricing-tier--premium">
         <div class="pricing-tier__popular">
-          <span class="badge badge--amber">Most popular</span>
+          <span class="badge badge--amber">Recommended</span>
         </div>
         <div class="pricing-tier__label">Premium</div>
         <div class="pricing-tier__price">€9</div>
         <div class="pricing-tier__period">per month</div>
         <div class="pricing-tier__features">
           <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>All 6 programs</div>
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Unlimited generation</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Unlimited plan generation</div>
           <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>PDF downloads</div>
           <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Cancel anytime</div>
         </div>
@@ -313,10 +387,10 @@
 
 <!-- ═══ CTA STRIP ═══════════════════════════════════════════ -->
 <section class="cta-strip">
-  <div class="container container--sm">
-    <h2 class="cta-strip__h">Your plan is 3 minutes away.</h2>
-    <p class="cta-strip__sub">No subscription required to start. Pick a program and get your first personalized plan for free.</p>
-    <a href="/program.html" class="btn btn--primary btn--lg">Choose a program</a>
+  <div class="container">
+    <h2 class="cta-strip__h">Your plan is three minutes away.</h2>
+    <p class="cta-strip__sub">Create a free account, upgrade to Premium, and get your first fully personalized fitness plan — built around your body and your schedule.</p>
+    <a href="javascript:void(0)" class="btn btn--primary btn--lg js-signup-cta">Get started</a>
   </div>
 </section>
 
@@ -326,7 +400,7 @@
     <div class="footer__inner">
       <div class="footer__brand">
         <div class="footer__logo">Kyroo</div>
-        <p class="footer__tagline">A personal decision architecture system for physical self-improvement.</p>
+        <p class="footer__tagline">AI-powered fitness planning. Built for people who want a clear path forward.</p>
       </div>
       <div class="footer__links" id="footerLinks"></div>
     </div>
@@ -341,8 +415,8 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
     <div class="modal__header">
       <span class="modal__title" id="authModalTitle">Welcome to Kyroo</span>
-      <button class="modal__close" id="authModalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
+      <button type="button" class="modal__close" id="authModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
       </button>
     </div>
     <div class="modal__body">
@@ -425,8 +499,8 @@
   <div class="modal modal--wide" role="dialog" aria-modal="true" aria-label="Upgrade to Premium">
     <div class="modal__header">
       <span class="modal__title">Upgrade to Premium</span>
-      <button class="modal__close" id="checkoutModalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
+      <button type="button" class="modal__close" id="checkoutModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
       </button>
     </div>
     <div class="modal__body">
@@ -464,8 +538,8 @@
   <div class="modal modal--wide" role="dialog" aria-modal="true" aria-label="Privacy Policy">
     <div class="modal__header">
       <span class="modal__title">Privacy Policy</span>
-      <button class="modal__close" id="privacyModalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
+      <button type="button" class="modal__close" id="privacyModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
       </button>
     </div>
     <div class="modal__body legal-body" id="privacyBody">Loading…</div>
@@ -476,8 +550,8 @@
   <div class="modal modal--wide" role="dialog" aria-modal="true" aria-label="Terms of Service">
     <div class="modal__header">
       <span class="modal__title">Terms of Service</span>
-      <button class="modal__close" id="termsModalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
+      <button type="button" class="modal__close" id="termsModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
       </button>
     </div>
     <div class="modal__body legal-body" id="termsBody">Loading…</div>
@@ -488,8 +562,8 @@
   <div class="modal modal--wide" role="dialog" aria-modal="true" aria-label="Imprint">
     <div class="modal__header">
       <span class="modal__title">Imprint</span>
-      <button class="modal__close" id="imprintModalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
+      <button type="button" class="modal__close" id="imprintModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l16 16M17 1L1 17"/></svg>
       </button>
     </div>
     <div class="modal__body legal-body" id="imprintBody">Loading…</div>
@@ -500,12 +574,32 @@
 <script>
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 
+  // CTA buttons → auth modal
+  function onCTA() {
+    if (window.currentUser) window.location.href = '/program.html';
+    else showAuthModal('signup');
+  }
+  document.getElementById('heroCTA1').addEventListener('click', onCTA);
+  document.getElementById('navGetStarted').addEventListener('click', onCTA);
+  const navGetStartedMobile = document.getElementById('navGetStartedMobile');
+  if (navGetStartedMobile) navGetStartedMobile.addEventListener('click', onCTA);
+  document.querySelectorAll('.js-signup-cta').forEach(el => el.addEventListener('click', onCTA));
+
+  // Locked program cards
+  document.querySelectorAll('.js-prog-cta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!window.currentUser) showAuthModal('signup');
+      else showCheckoutModal();
+    });
+  });
+
+  // Premium CTA
   document.getElementById('premiumCTABtn').addEventListener('click', () => {
     if (!window.currentUser) showAuthModal('signup');
     else showCheckoutModal();
   });
 
-  // Auth tab wiring (Login ↔ Signup tabs inside the modal)
+  // Auth tab wiring
   document.getElementById('tabLogin').addEventListener('click', () => showAuthModal('login'));
   document.getElementById('tabSignup').addEventListener('click', () => showAuthModal('signup'));
   document.getElementById('tabLogin2').addEventListener('click', () => showAuthModal('login'));

@@ -6,7 +6,7 @@
   <title>Kyroo — Programs</title>
   <meta name="description" content="Pick a program, answer a few guided questions, and get your personalized AI fitness plan — ready to download.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
@@ -152,14 +152,13 @@
   <div class="container nav__inner">
     <a href="/" class="nav__logo">Kyroo</a>
     <div class="nav__links">
-      <a href="/program.html" class="nav__link nav__link--current">Programs</a>
+      <a href="/program.html" class="nav__link nav__link--current">Dashboard</a>
       <a href="/#how-it-works" class="nav__link">How it works</a>
       <a href="/#pricing" class="nav__link">Pricing</a>
       <span id="navAdminLinkWrap"></span>
     </div>
     <div class="nav__actions">
       <a href="javascript:void(0)" id="navAuthBtn" class="nav__auth">Log in</a>
-      <a href="/program.html" class="btn btn--sm btn--primary">Get my plan</a>
     </div>
     <button type="button" class="nav__hamburger" id="navToggle" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -169,15 +168,56 @@
 
 <!-- Mobile nav -->
 <div class="nav__mobile-menu" id="navMenu">
-  <a href="/program.html" class="nav__link">Programs</a>
+  <a href="/program.html" class="nav__link">Dashboard</a>
   <a href="/#how-it-works" class="nav__link">How it works</a>
   <a href="/#pricing" class="nav__link">Pricing</a>
-  <a href="javascript:void(0)" id="navAuthBtnMobile" class="nav__link">Log in</a>
-  <a href="/program.html" class="btn btn--primary nav__mobile-cta">Get my plan</a>
+  <div class="nav__mobile-menu-bottom">
+    <button type="button" id="navAuthBtnMobile" class="nav__mobile-auth-btn">Log in</button>
+  </div>
+</div>
+
+<!-- ═══ AUTH GATE: LOADING ══════════════════════════════════ -->
+<div id="dashLoading" class="dash-gate">
+  <div class="gate-card">
+    <div class="gate-card__icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <p class="gate-card__sub">Loading your dashboard…</p>
+  </div>
+</div>
+
+<!-- ═══ AUTH GATE: NOT LOGGED IN ════════════════════════════ -->
+<div id="dashAuth" class="dash-gate" hidden>
+  <div class="gate-card">
+    <div class="gate-card__icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <h2 class="gate-card__h">Access your programs</h2>
+    <p class="gate-card__sub">Create a free account or log in to access your premium fitness dashboard and all six personalized programs.</p>
+    <div class="gate-card__actions">
+      <button type="button" class="btn btn--primary" id="gateSignupBtn">Create free account</button>
+      <button type="button" class="btn btn--ghost" id="gateLoginBtn">Log in</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AUTH GATE: FREE ACCOUNT ═════════════════════════════ -->
+<div id="dashFree" class="dash-gate" hidden>
+  <div class="gate-card">
+    <div class="gate-card__icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2 class="gate-card__h">Upgrade to access programs</h2>
+    <p class="gate-card__sub">Your free account is active. Upgrade to Premium to unlock all six AI-personalized programs with unlimited plan generation.</p>
+    <div class="gate-card__actions">
+      <button type="button" class="btn btn--primary" id="gateUpgradeBtn">Go Premium — €9/mo</button>
+      <a href="/" class="btn btn--ghost">Back to home</a>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ HUB ═════════════════════════════════════════════════ -->
-<main class="hub">
+<main class="hub" id="dashPremium" hidden>
   <div class="container container--md">
 
     <!-- Hub hero -->
@@ -662,7 +702,7 @@
     <div class="footer__inner">
       <div class="footer__brand">
         <div class="footer__logo">Kyroo</div>
-        <p class="footer__tagline">A personal decision architecture system for physical self-improvement.</p>
+        <p class="footer__tagline">AI-powered fitness planning. Built for people who want a clear path forward.</p>
       </div>
       <div class="footer__links" id="footerLinks"></div>
     </div>
@@ -1364,6 +1404,11 @@
   /* ── Wire all option groups ───────────────────────────── */
   ['tilesGoal','tilesLevel','tilesSex','tilesDays','tilesMins','tilesLocation','tilesNutrition','tilesMotivation','cTilesSex','cTilesActivity'].forEach(wireGroup);
 
+  /* ── Auth gate buttons ────────────────────────────────── */
+  document.getElementById('gateSignupBtn').addEventListener('click', () => showAuthModal('signup'));
+  document.getElementById('gateLoginBtn').addEventListener('click', () => showAuthModal('login'));
+  document.getElementById('gateUpgradeBtn').addEventListener('click', () => showCheckoutModal());
+
   /* ── Escape closes wizard ─────────────────────────────── */
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeWizard(); });
 
@@ -1412,6 +1457,21 @@
     if (hash) {
       const prog = PROGRAMS.find(p => p.id === hash);
       if (prog) setTimeout(() => openWizard(prog), 80);
+    }
+  });
+</script>
+
+<script>
+  /* ── Auth gate: show correct view when session resolves ─── */
+  window.addEventListener('kyroo:authready', function () {
+    document.getElementById('dashLoading').hidden = true;
+    var user = window.currentUser;
+    if (!user) {
+      document.getElementById('dashAuth').hidden = false;
+    } else if (!user.is_admin && user.plan !== 'basic' && user.plan !== 'pro') {
+      document.getElementById('dashFree').hidden = false;
+    } else {
+      document.getElementById('dashPremium').hidden = false;
     }
   });
 </script>
