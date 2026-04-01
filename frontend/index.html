@@ -154,7 +154,7 @@
       <div>
         <div class="section-eyebrow">Programs</div>
         <h2 class="section-headline">Six programs.<br>One for your situation.</h2>
-        <p class="section-sub">All programs require a Premium account. Each one is fully personalized through a short intake — no generic templates.</p>
+        <p class="section-sub">Two programs are free with any account. Four require Premium. Each one is fully personalized through a short intake — no generic templates.</p>
       </div>
     </div>
 
@@ -227,11 +227,6 @@
       </div>
 
       <div class="prog-card">
-        <span class="prog-card__lock" aria-hidden="true">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
-          </svg>
-        </span>
         <span class="badge badge--green">Beginner</span>
         <h3 class="prog-card__title">Beginner Foundation</h3>
         <p class="prog-card__desc">8 weeks to build the movement patterns, habits, and baseline strength that last. Designed for people starting from zero — no gym background required.</p>
@@ -240,11 +235,11 @@
           <span class="prog-card__meta-item">Beginner</span>
         </div>
         <div class="prog-card__foot">
-          <button type="button" class="prog-card__cta js-prog-cta">
-            Unlock program
+          <button type="button" class="prog-card__cta js-free-cta">
+            Get started
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <span class="badge badge--amber">Premium</span>
+          <span class="badge badge--green">Free</span>
         </div>
       </div>
 
@@ -271,24 +266,19 @@
       </div>
 
       <div class="prog-card">
-        <span class="prog-card__lock" aria-hidden="true">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/>
-          </svg>
-        </span>
-        <span class="badge badge--green">Recomposition</span>
-        <h3 class="prog-card__title">Body Recomposition</h3>
-        <p class="prog-card__desc">Lose fat and build muscle at the same time through precision training and nutrition calibration. Requires consistency — delivers compound results.</p>
+        <span class="badge badge--grey">Home</span>
+        <h3 class="prog-card__title">Home Workout Plan</h3>
+        <p class="prog-card__desc">No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.</p>
         <div class="prog-card__meta">
-          <span class="prog-card__meta-item">16 weeks</span>
-          <span class="prog-card__meta-item">Intermediate</span>
+          <span class="prog-card__meta-item">12 weeks</span>
+          <span class="prog-card__meta-item">All levels</span>
         </div>
         <div class="prog-card__foot">
-          <button type="button" class="prog-card__cta js-prog-cta">
-            Unlock program
+          <button type="button" class="prog-card__cta js-free-cta">
+            Get started
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <span class="badge badge--amber">Premium</span>
+          <span class="badge badge--green">Free</span>
         </div>
       </div>
 
@@ -358,8 +348,8 @@
         <div class="pricing-tier__price">€0</div>
         <div class="pricing-tier__period">forever</div>
         <div class="pricing-tier__features">
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Account &amp; profile</div>
-          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Access to dashboard</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>2 free programs</div>
+          <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>PDF download</div>
           <div class="pricing-tier__feature"><span class="pricing-tier__feature-check">✓</span>Plan history</div>
         </div>
         <a href="javascript:void(0)" class="btn btn--ghost btn--full js-signup-cta">Create free account</a>
@@ -389,7 +379,7 @@
 <section class="cta-strip">
   <div class="container">
     <h2 class="cta-strip__h">Your plan is three minutes away.</h2>
-    <p class="cta-strip__sub">Create a free account, upgrade to Premium, and get your first fully personalized fitness plan — built around your body and your schedule.</p>
+    <p class="cta-strip__sub">Create a free account and start with two free programs. Upgrade to Premium to unlock all six — fully personalized, downloadable as PDF.</p>
     <a href="javascript:void(0)" class="btn btn--primary btn--lg js-signup-cta">Get started</a>
   </div>
 </section>
@@ -585,11 +575,19 @@
   if (navGetStartedMobile) navGetStartedMobile.addEventListener('click', onCTA);
   document.querySelectorAll('.js-signup-cta').forEach(el => el.addEventListener('click', onCTA));
 
-  // Locked program cards
+  // Locked (premium) program cards
   document.querySelectorAll('.js-prog-cta').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!window.currentUser) showAuthModal('signup');
       else showCheckoutModal();
+    });
+  });
+
+  // Free program cards
+  document.querySelectorAll('.js-free-cta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!window.currentUser) showAuthModal('signup');
+      else window.location.href = '/program.html';
     });
   });
 

@@ -879,12 +879,12 @@
   const API_BASE_HUB = window.location.origin;
 
   const PROGRAMS = [
-    { id: 'challenge90', type: 'summer',    icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation combining smart training and nutrition to change your body from the inside out.',  duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',          outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'], filters: ['transformation', 'strength'] },
-    { id: 'summer',      type: 'summer',    icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',  duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                  outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'],   filters: ['beginner', 'transformation'] },
-    { id: 'weightloss',  type: 'nutrition', icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',              outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'],      filters: ['weight-loss'] },
-    { id: 'muscle',      type: '12week',    icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',  duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                  outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'], filters: ['strength', 'muscle'] },
-    { id: 'beginner',    type: 'plateau',   icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',  duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',            outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'],  filters: ['beginner', 'transformation'] },
-    { id: 'home',        type: '12week',    icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment', outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'],     filters: ['home'] },
+    { id: 'challenge90', type: 'summer',    free: false, icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation combining smart training and nutrition to change your body from the inside out.',  duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',          outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'], filters: ['transformation', 'strength'] },
+    { id: 'summer',      type: 'summer',    free: false, icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',  duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                  outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'],   filters: ['beginner', 'transformation'] },
+    { id: 'weightloss',  type: 'nutrition', free: false, icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',              outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'],      filters: ['weight-loss'] },
+    { id: 'muscle',      type: '12week',    free: false, icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',  duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                  outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'], filters: ['strength', 'muscle'] },
+    { id: 'beginner',    type: 'plateau',   free: true,  icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',  duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',            outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'],  filters: ['beginner', 'transformation'] },
+    { id: 'home',        type: '12week',    free: true,  icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment', outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'],     filters: ['home'] },
   ];
 
   let selectedProgram = null;
@@ -940,7 +940,7 @@
         <div class="hub__card-body">
           <div class="hub__card-top">
             <h3 class="hub__card-title">${p.name}</h3>
-            ${p.badge ? `<span class="badge badge--green">${p.badge}</span>` : ''}
+            <span class="badge ${p.free ? 'badge--green' : 'badge--amber'}">${p.free ? 'Free' : 'Premium'}</span>
           </div>
           <p class="hub__card-desc">${p.desc}</p>
           <div class="hub__card-tags">
@@ -960,6 +960,16 @@
 
   /* ── Open wizard ──────────────────────────────────────── */
   function openWizard(prog) {
+    if (!window.currentUser) {
+      if (typeof showAuthModal === 'function') showAuthModal('signup');
+      return;
+    }
+    const u = window.currentUser;
+    const isPremium = u.is_admin || u.plan === 'pro' || u.plan === 'basic';
+    if (!prog.free && !isPremium) {
+      if (typeof showCheckoutModal === 'function') showCheckoutModal();
+      return;
+    }
     selectedProgram = prog;
     formData = {};
     currentStep = 1;
@@ -1208,7 +1218,7 @@
 
     const u = window.currentUser;
     const isPremium = u.is_admin || u.plan === 'pro' || u.plan === 'basic';
-    if (!isPremium) {
+    if (!selectedProgram.free && !isPremium) {
       closeWizard();
       if (typeof showCheckoutModal === 'function') showCheckoutModal();
       return;
@@ -1476,9 +1486,9 @@
     var user = window.currentUser;
     if (!user) {
       document.getElementById('dashAuth').hidden = false;
-    } else if (!user.is_admin && user.plan !== 'basic' && user.plan !== 'pro') {
-      document.getElementById('dashFree').hidden = false;
     } else {
+      // Any logged-in user sees the hub.
+      // Free users can run free programs; premium programs require upgrade (enforced in openWizard).
       document.getElementById('dashPremium').hidden = false;
     }
   });
