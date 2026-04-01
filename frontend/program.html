@@ -1206,6 +1206,14 @@
       return;
     }
 
+    const u = window.currentUser;
+    const isPremium = u.is_admin || u.plan === 'pro' || u.plan === 'basic';
+    if (!isPremium) {
+      closeWizard();
+      if (typeof showCheckoutModal === 'function') showCheckoutModal();
+      return;
+    }
+
     // Switch to gen screen
     document.getElementById('wizSteps').style.display = 'none';
     document.getElementById('wizProgress').style.display = 'none';
