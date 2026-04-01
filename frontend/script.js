@@ -1413,8 +1413,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     else showAuthModal('login');
   });
 
-  document.getElementById('showSignup').onclick = (e) => { e.preventDefault(); showAuthModal('signup'); };
-  document.getElementById('showLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
+  const showSignupEl = document.getElementById('showSignup');
+  if (showSignupEl) showSignupEl.onclick = (e) => { e.preventDefault(); showAuthModal('signup'); };
+  const showLoginEl = document.getElementById('showLogin');
+  if (showLoginEl) showLoginEl.onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
   document.getElementById('showForgot').onclick = (e) => { e.preventDefault(); showAuthModal('forgot'); };
   document.getElementById('backToLogin').onclick = (e) => { e.preventDefault(); showAuthModal('login'); };
   // Forgot password form
