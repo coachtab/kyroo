@@ -211,6 +211,9 @@ async function checkProgramAccess(req, res, programId) {
   const plan = user.plan || 'free';
   if (plan === 'free' && !user.is_premium) { res.status(403).json({ error: 'Upgrade to unlock all programs', plan: 'free' }); return false; }
 
+  // Premium flag always grants unlimited access regardless of plan column
+  if (user.is_premium) return true;
+
   const { allowed, used, limit } = await canGenerateProgram(req.user.id, plan);
   if (!allowed) {
     res.status(429).json({ error: `You have used all ${limit} programs this month. Upgrade to Pro for unlimited.`, used, limit, plan });
