@@ -101,7 +101,21 @@ async function waitForDb(retries = 15, delay = 2000) {
 }
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: [
+    'https://kyroo.de',
+    'https://www.kyroo.de',
+    'https://app.kyroo.de',
+    'http://localhost:3001',
+    'http://localhost:8081',
+    'http://localhost:19006',
+  ],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // handle preflight for all routes
 app.use(express.json({ type: 'application/json' }));
 app.use(express.urlencoded({ extended: true }));
 

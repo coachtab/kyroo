@@ -121,6 +121,15 @@ export default function WizardScreen() {
           {activeStep}
           {reaction ? <Text style={styles.reaction}>{reaction}</Text> : null}
         </ScrollView>
+        {/* Pinned Generate button on last step so it's always visible */}
+        {step === TOTAL_STEPS && (
+          <View style={styles.pinnedBar}>
+            {!!error && <Text style={styles.pinnedError}>{error}</Text>}
+            <TouchableOpacity style={styles.pinnedBtn} onPress={generate}>
+              <Text style={styles.pinnedBtnText}>Generate my plan →</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -230,14 +239,13 @@ function buildSteps(
       <TextInput
         style={stepStyles.textarea}
         multiline
-        numberOfLines={4}
+        numberOfLines={3}
         placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."
         placeholderTextColor={colors.ink4}
         value={formData.injuries || ''}
         onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
       />
-      {!!error && <Text style={stepStyles.error}>{error}</Text>}
-      <Actions onBack={() => goTo(7)} onNext={generate} nextLabel="Generate my plan →" nextForest />
+      <Actions onBack={() => goTo(7)} />
     </StepWrap>,
   ];
 }
@@ -316,7 +324,7 @@ function NumericRow({ fields, formData, setFormData }: {
 }
 
 function Actions({ onBack, onNext, nextLabel = 'Continue', nextForest = false }: {
-  onBack?: () => void; onNext: () => void; nextLabel?: string; nextForest?: boolean;
+  onBack?: () => void; onNext?: () => void; nextLabel?: string; nextForest?: boolean;
 }) {
   return (
     <View style={stepStyles.actions}>
@@ -325,9 +333,11 @@ function Actions({ onBack, onNext, nextLabel = 'Continue', nextForest = false }:
           <Text style={stepStyles.backActionText}>← Back</Text>
         </TouchableOpacity>
       )}
-      <TouchableOpacity style={[stepStyles.nextBtn, nextForest && stepStyles.nextBtnForest]} onPress={onNext}>
-        <Text style={stepStyles.nextBtnText}>{nextLabel}</Text>
-      </TouchableOpacity>
+      {onNext && (
+        <TouchableOpacity style={[stepStyles.nextBtn, nextForest && stepStyles.nextBtnForest]} onPress={onNext}>
+          <Text style={stepStyles.nextBtnText}>{nextLabel}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -379,6 +389,10 @@ const styles = StyleSheet.create({
   stripe: { height: 3, backgroundColor: colors.line },
   stripeFill: { height: '100%', backgroundColor: colors.forest },
   stepContent: { padding: spacing[5], paddingTop: spacing[6], minHeight: 500 },
+  pinnedBar: { borderTopWidth: 1, borderTopColor: colors.line, backgroundColor: colors.parchment, padding: spacing[4], gap: spacing[2] },
+  pinnedError: { fontFamily: font.sans, fontSize: 13, color: colors.error, textAlign: 'center' },
+  pinnedBtn: { backgroundColor: colors.forest, height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  pinnedBtnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
   counter: { fontFamily: font.mono, fontSize: 11, color: colors.ink4, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing[4] },
   reaction: { fontFamily: font.sans, fontSize: 13, color: colors.forest, fontStyle: 'italic', marginTop: spacing[3], lineHeight: 18 },
   genScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[8] },
