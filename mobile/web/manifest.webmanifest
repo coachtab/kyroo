@@ -1,0 +1,24 @@
+{
+  "name": "Kyroo",
+  "short_name": "Kyroo",
+  "description": "Dein KI-gestützter Fitness-Coach",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F0EDE6",
+  "theme_color": "#F0EDE6",
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/adaptive-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
