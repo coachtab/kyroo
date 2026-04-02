@@ -42,13 +42,32 @@ export default function WizardScreen() {
   }
 
   async function generate() {
-    const injuries = formData.injuries || '';
     setGenerating(true);
     setError('');
     try {
+      const equipmentMap: Record<string, string> = {
+        gym: 'full commercial gym',
+        home: 'bodyweight / minimal equipment at home',
+        both: 'gym and home',
+      };
+      const payload = {
+        programId:       prog.id,
+        level:           formData.level,
+        age:             formData.age,
+        weight:          formData.weight,
+        height:          formData.height,
+        sex:             formData.sex,
+        days_per_week:   formData.schedule,
+        session_minutes: '60',
+        equipment:       equipmentMap[formData.location] || formData.location || 'full commercial gym',
+        primary_goal:    formData.goals,
+        nutrition:       formData.nutrition,
+        biggest_challenge: formData.motivation,
+        injuries:        formData.injuries || 'None',
+      };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
-        body: JSON.stringify({ ...formData, programId: prog.id, injuries }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Generation failed.'); setGenerating(false); return; }
