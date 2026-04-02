@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  ScrollView, TextInput, FlatList, Dimensions, Animated,
+  ScrollView, TextInput,
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,6 @@ import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { PROGRAMS } from '../../src/lib/programs';
 import { apiFetch } from '../../src/lib/api';
 
-const { width: SCREEN_W } = Dimensions.get('window');
 const TOTAL_STEPS = 8;
 
 type FormData = Record<string, any>;
@@ -25,15 +24,12 @@ export default function WizardScreen() {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const flatRef = useRef<FlatList>(null);
 
   if (!prog) return null;
 
   const progress = ((step - 1) / TOTAL_STEPS) * 100;
 
   function goTo(n: number) {
-    flatRef.current?.scrollToIndex({ index: n - 1, animated: true });
     setStep(n);
     setReaction('');
     setError('');
@@ -98,6 +94,7 @@ export default function WizardScreen() {
   }
 
   const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData);
+  const activeStep = steps[step - 1];
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -117,25 +114,14 @@ export default function WizardScreen() {
         <View style={[styles.stripeFill, { width: `${progress}%` }]} />
       </View>
 
-      {/* Slides */}
-      <FlatList
-        ref={flatRef}
-        data={steps}
-        keyExtractor={(_, i) => String(i)}
-        horizontal
-        pagingEnabled
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ width: SCREEN_W }}>
-            <ScrollView contentContainerStyle={styles.stepContent} keyboardShouldPersistTaps="handled">
-              <Text style={styles.counter}>{step} / {TOTAL_STEPS}</Text>
-              {item}
-              {reaction ? <Text style={styles.reaction}>{reaction}</Text> : null}
-            </ScrollView>
-          </KeyboardAvoidingView>
-        )}
-      />
+      {/* Active step */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView contentContainerStyle={styles.stepContent} keyboardShouldPersistTaps="handled">
+          <Text style={styles.counter}>{step} / {TOTAL_STEPS}</Text>
+          {activeStep}
+          {reaction ? <Text style={styles.reaction}>{reaction}</Text> : null}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
