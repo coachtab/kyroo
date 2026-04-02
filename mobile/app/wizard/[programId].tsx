@@ -46,7 +46,7 @@ export default function WizardScreen() {
     setGenerating(true);
     setError('');
     try {
-      const res = await apiFetch('/api/generate', {
+      const res = await apiFetch('/api/program/generate', {
         method: 'POST',
         body: JSON.stringify({ ...formData, programId: prog.id, injuries }),
       });
