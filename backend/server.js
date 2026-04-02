@@ -9,7 +9,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const crypto = require('crypto');
 const Stripe = require('stripe');
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const fs = require('fs');
@@ -1229,6 +1229,7 @@ app.get('/api/usage', authRequired, async (req, res) => {
 
 // POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
 app.post('/api/stripe/create-payment-intent', authRequired, async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured on this server.' });
   const { plan } = req.body;
   if (!plan || !['monthly', 'yearly'].includes(plan)) {
     return res.status(400).json({ error: 'Invalid plan' });
@@ -1258,6 +1259,7 @@ app.post('/api/stripe/create-payment-intent', authRequired, async (req, res) => 
 
 // POST /api/stripe/confirm-payment - confirm payment and activate premium
 app.post('/api/stripe/confirm-payment', authRequired, async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured on this server.' });
   const { payment_intent_id, plan } = req.body;
 
   try {
