@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Markdown from 'react-native-markdown-display';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { PROGRAMS } from '../../src/lib/programs';
 import { apiFetch } from '../../src/lib/api';
@@ -95,18 +96,45 @@ export default function WizardScreen() {
   if (result) {
     return (
       <SafeAreaView style={styles.safe}>
-        <ScrollView contentContainerStyle={styles.resultContainer}>
-          <View style={styles.resultTop}>
-            <View style={styles.resultCheck}><Text style={styles.resultCheckIcon}>✓</Text></View>
-            <Text style={styles.resultTitle}>Your {prog.name}</Text>
-            <Text style={styles.resultSub}>Built around your goals, schedule, and preferences.</Text>
+        {/* Sticky result header */}
+        <View style={styles.resultHeader}>
+          <View style={styles.resultHeaderLeft}>
+            <Text style={styles.resultHeaderIcon}>{prog.icon}</Text>
+            <View>
+              <Text style={styles.resultHeaderEyebrow}>// YOUR PLAN</Text>
+              <Text style={styles.resultHeaderTitle}>{prog.name}</Text>
+            </View>
           </View>
-          <View style={styles.planBody}>
-            <Text style={styles.planText}>{result}</Text>
-          </View>
-          <TouchableOpacity style={styles.btn} onPress={() => router.back()}>
-            <Text style={styles.btnText}>Close</Text>
+          <TouchableOpacity style={styles.resultCloseBtn} onPress={() => router.back()}>
+            <Text style={styles.resultCloseBtnText}>✕</Text>
           </TouchableOpacity>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.resultScroll} showsVerticalScrollIndicator={false}>
+          {/* Success badge */}
+          <View style={styles.resultBadge}>
+            <View style={styles.resultBadgeDot} />
+            <Text style={styles.resultBadgeText}>Plan generated</Text>
+          </View>
+
+          {/* Markdown plan */}
+          <View style={styles.resultMarkdown}>
+            <Markdown style={markdownStyles}>{result}</Markdown>
+          </View>
+
+          {/* Bottom CTA */}
+          <View style={styles.resultActions}>
+            <TouchableOpacity style={styles.resultDoneBtn} onPress={() => router.back()}>
+              <Text style={styles.resultDoneBtnText}>Done</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.resultNewBtn} onPress={() => {
+              setResult(null);
+              setStep(1);
+              setFormData({});
+            }}>
+              <Text style={styles.resultNewBtnText}>Start over</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -418,14 +446,39 @@ const styles = StyleSheet.create({
   genIcon: { fontSize: 48, marginBottom: spacing[4] },
   genTitle: { fontFamily: font.sansBd, fontSize: 26, color: colors.ink, marginBottom: spacing[2] },
   genSub: { fontFamily: font.mono, fontSize: 13, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.4 },
-  resultContainer: { padding: spacing[5], paddingTop: spacing[8] },
-  resultTop: { alignItems: 'center', marginBottom: spacing[6] },
-  resultCheck: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.forestLight, alignItems: 'center', justifyContent: 'center', marginBottom: spacing[4] },
-  resultCheckIcon: { fontSize: 22, color: colors.forest },
-  resultTitle: { fontFamily: font.sansBd, fontSize: 26, color: colors.ink, marginBottom: spacing[2] },
-  resultSub: { fontFamily: font.sans, fontSize: 14, color: colors.ink2, textAlign: 'center' },
-  planBody: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: radius.sm, padding: spacing[4], marginBottom: spacing[6] },
-  planText: { fontFamily: font.sans, fontSize: 13, color: colors.ink, lineHeight: 20 },
-  btn: { backgroundColor: colors.forest, height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
+  // Result screen
+  resultHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.surface },
+  resultHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
+  resultHeaderIcon: { fontSize: 28 },
+  resultHeaderEyebrow: { fontFamily: font.mono, fontSize: 10, color: colors.ink3, letterSpacing: 1, textTransform: 'uppercase' },
+  resultHeaderTitle: { fontFamily: font.sansBd, fontSize: 16, color: colors.ink },
+  resultCloseBtn: { padding: spacing[2] },
+  resultCloseBtnText: { fontSize: 18, color: colors.ink3 },
+  resultScroll: { padding: spacing[5], paddingBottom: spacing[12] },
+  resultBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginBottom: spacing[5] },
+  resultBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.forest },
+  resultBadgeText: { fontFamily: font.mono, fontSize: 11, color: colors.forest, textTransform: 'uppercase', letterSpacing: 0.6 },
+  resultMarkdown: { marginBottom: spacing[8] },
+  resultActions: { gap: spacing[3] },
+  resultDoneBtn: { backgroundColor: colors.forest, height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  resultDoneBtnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
+  resultNewBtn: { height: 44, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line2 },
+  resultNewBtnText: { fontFamily: font.sans, fontSize: 14, color: colors.ink3 },
 });
+
+const markdownStyles = {
+  body:        { fontFamily: font.sans, fontSize: 14, color: colors.ink, lineHeight: 22 },
+  heading1:    { fontFamily: font.sansBd, fontSize: 22, color: colors.ink, marginTop: spacing[6], marginBottom: spacing[3], lineHeight: 28, borderBottomWidth: 2, borderBottomColor: colors.forest, paddingBottom: spacing[2] },
+  heading2:    { fontFamily: font.sansBd, fontSize: 18, color: colors.ink, marginTop: spacing[5], marginBottom: spacing[2], lineHeight: 24 },
+  heading3:    { fontFamily: font.sansBd, fontSize: 15, color: colors.forest, marginTop: spacing[4], marginBottom: spacing[2], lineHeight: 20, textTransform: 'uppercase' as const, letterSpacing: 0.4 },
+  paragraph:   { fontFamily: font.sans, fontSize: 14, color: colors.ink2, lineHeight: 22, marginBottom: spacing[3] },
+  strong:      { fontFamily: font.sansBd, color: colors.ink },
+  em:          { fontStyle: 'italic' as const, color: colors.ink2 },
+  bullet_list: { marginBottom: spacing[3] },
+  ordered_list:{ marginBottom: spacing[3] },
+  list_item:   { fontFamily: font.sans, fontSize: 14, color: colors.ink2, lineHeight: 22, marginBottom: spacing[1] },
+  code_inline: { fontFamily: font.mono, fontSize: 12, color: colors.forest, backgroundColor: colors.forestLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  fence:       { fontFamily: font.mono, fontSize: 12, color: colors.ink, backgroundColor: colors.surface, padding: spacing[3], borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line, marginBottom: spacing[3] },
+  blockquote:  { backgroundColor: colors.forestLight, borderLeftWidth: 3, borderLeftColor: colors.forest, paddingLeft: spacing[3], paddingVertical: spacing[2], marginBottom: spacing[3], borderRadius: 4 },
+  hr:          { backgroundColor: colors.line, marginVertical: spacing[4] },
+};
