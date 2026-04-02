@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +13,6 @@
     /* ── Program Hub page ──────────────────────────────────── */
     .hub { padding-top: calc(var(--nav-h) + var(--sp-16)); padding-bottom: var(--sp-24); min-height: 100svh; }
 
-    /* Hub search */
-    .hub-search { position: relative; max-width: 380px; margin: var(--sp-6) auto 0; }
-    .hub-search__input {
-      width: 100%; padding: 11px 16px 11px 42px;
-      border: 1px solid var(--line-2); border-radius: var(--r-sm);
-      background: var(--surface); font-size: var(--sz-sm); color: var(--ink);
-      outline: none; font-family: inherit;
-      transition: border-color var(--t-fast), box-shadow var(--t-fast);
-    }
-    .hub-search__input:focus { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(27,61,43,0.09); }
-    .hub-search__input::placeholder { color: var(--ink-4); }
-    .hub-search__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-4); pointer-events: none; }
 
     /* Locked view */
     .locked-view { text-align: center; padding: var(--sp-20) 0; }
@@ -193,7 +181,7 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </div>
     <h2 class="gate-card__h">Access your programs</h2>
-    <p class="gate-card__sub">Create a free account or log in to access your premium fitness dashboard and all six personalized programs.</p>
+    <p class="gate-card__sub">Create a free account or log in to access your premium fitness dashboard and all personalized programs.</p>
     <div class="gate-card__actions">
       <button type="button" class="btn btn--primary" id="gateSignupBtn">Create free account</button>
       <button type="button" class="btn btn--ghost" id="gateLoginBtn">Log in</button>
@@ -208,7 +196,7 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h2 class="gate-card__h">Upgrade to access programs</h2>
-    <p class="gate-card__sub">Your free account is active. Upgrade to Premium to unlock all six AI-personalized programs with unlimited plan generation.</p>
+    <p class="gate-card__sub">Your free account is active. Upgrade to Premium to unlock all AI-personalized programs with unlimited plan generation.</p>
     <div class="gate-card__actions">
       <button type="button" class="btn btn--primary" id="gateUpgradeBtn">Go Premium — €9/mo</button>
       <a href="/" class="btn btn--ghost">Back to home</a>
@@ -225,20 +213,25 @@
       <div class="section-eyebrow">Programs</div>
       <h1 class="hub__h1">Choose your program.</h1>
       <p class="hub__sub">Pick a program, answer a few questions, and get your personalized fitness plan — downloadable as PDF.</p>
-      <div class="hub-search">
-        <svg class="hub-search__icon" width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.75"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>
-        <input type="search" class="hub-search__input" id="hubSearch" placeholder="Search programs…" autocomplete="off">
-      </div>
     </div>
 
-    <!-- Filters -->
-    <div class="hub__filters" id="hubFilters">
-      <button type="button" class="hub__filter active" data-filter="all">All</button>
-      <button type="button" class="hub__filter" data-filter="beginner">Beginner</button>
-      <button type="button" class="hub__filter" data-filter="weight-loss">Weight Loss</button>
-      <button type="button" class="hub__filter" data-filter="muscle">Muscle</button>
-      <button type="button" class="hub__filter" data-filter="transformation">Transformation</button>
-      <button type="button" class="hub__filter" data-filter="home">Home</button>
+    <!-- Search + filter toolbar -->
+    <div class="hub__toolbar">
+      <div class="hub-search">
+        <svg class="hub-search__icon" width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" class="hub-search__input" id="hubSearch" placeholder="Search programs…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="hub__filter-wrap">
+        <select class="hub__filter-select" id="hubFilter" aria-label="Filter programs">
+          <option value="all">All programs</option>
+          <option value="beginner">Beginner</option>
+          <option value="weight-loss">Weight Loss</option>
+          <option value="muscle">Muscle</option>
+          <option value="transformation">Transformation</option>
+          <option value="home">Home</option>
+        </select>
+        <svg class="hub__filter-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5l4 4 4-4"/></svg>
+      </div>
     </div>
 
     <!-- Program list — injected by JS -->
@@ -321,6 +314,7 @@
             </div>
           </button>
         </div>
+        <p class="wiz-reaction" id="react1"></p>
         <div class="wiz-actions">
           <button type="button" class="btn btn--primary wizard__next" id="step1Next">Continue →</button>
         </div>
@@ -357,6 +351,7 @@
             </div>
           </button>
         </div>
+        <p class="wiz-reaction" id="react2"></p>
         <div class="wiz-actions wiz-actions--between">
           <button type="button" class="btn btn--ghost" id="step2Back">← Back</button>
           <button type="button" class="btn btn--primary wizard__next" id="step2Next">Continue →</button>
@@ -375,15 +370,15 @@
           <div class="wiz-row">
             <div class="wizard__field">
               <label class="wizard__field-label" for="inpAge">Age</label>
-              <input class="wizard__input" type="number" id="inpAge" placeholder="28" min="14" max="90">
+              <input class="wizard__input" type="number" id="inpAge" placeholder="28" inputmode="numeric" autocomplete="off">
             </div>
             <div class="wizard__field">
               <label class="wizard__field-label" for="inpWeight">Weight (kg)</label>
-              <input class="wizard__input" type="number" id="inpWeight" placeholder="75" min="30" max="300">
+              <input class="wizard__input" type="number" id="inpWeight" placeholder="75" inputmode="decimal" autocomplete="off">
             </div>
             <div class="wizard__field">
               <label class="wizard__field-label" for="inpHeight">Height (cm)</label>
-              <input class="wizard__input" type="number" id="inpHeight" placeholder="175" min="100" max="250">
+              <input class="wizard__input" type="number" id="inpHeight" placeholder="175" inputmode="numeric" autocomplete="off">
             </div>
           </div>
         </div>
@@ -430,6 +425,7 @@
           <button type="button" class="wizard__opt" data-value="75"><div class="wizard__opt-body"><span class="wizard__opt-label">75 min</span></div></button>
           <button type="button" class="wizard__opt" data-value="90"><div class="wizard__opt-body"><span class="wizard__opt-label">90 min</span></div></button>
         </div>
+        <p class="wiz-reaction" id="react4"></p>
         <div class="wiz-actions wiz-actions--between">
           <button type="button" class="btn btn--ghost" id="step4Back">← Back</button>
           <button type="button" class="btn btn--primary wizard__next" id="step4Next">Continue →</button>
@@ -474,6 +470,7 @@
             </div>
           </button>
         </div>
+        <p class="wiz-reaction" id="react5"></p>
         <div class="wiz-actions wiz-actions--between">
           <button type="button" class="btn btn--ghost" id="step5Back">← Back</button>
           <button type="button" class="btn btn--primary wizard__next" id="step5Next">Continue →</button>
@@ -532,6 +529,7 @@
             </div>
           </button>
         </div>
+        <p class="wiz-reaction" id="react6"></p>
         <div class="wiz-actions wiz-actions--between">
           <button type="button" class="btn btn--ghost" id="step6Back">← Back</button>
           <button type="button" class="btn btn--primary wizard__next" id="step6Next">Continue →</button>
@@ -576,6 +574,7 @@
             </div>
           </button>
         </div>
+        <p class="wiz-reaction" id="react7"></p>
         <div class="wiz-actions wiz-actions--between">
           <button type="button" class="btn btn--ghost" id="step7Back">← Back</button>
           <button type="button" class="btn btn--primary wizard__next" id="step7Next">Continue →</button>
@@ -590,6 +589,7 @@
         </div>
         <h2 class="wizard__q">Any injuries or limitations?</h2>
         <p class="wizard__hint">Your plan will work around these. Type "None" if you're injury-free.</p>
+        <p class="wiz-summary" id="wizSummary" hidden></p>
         <div class="wizard__fields">
           <textarea class="wizard__input" id="inpInjuries" placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."></textarea>
         </div>
@@ -664,15 +664,15 @@
         <div class="wiz-row">
           <div class="wizard__field">
             <label class="wizard__field-label" for="cInpAge">Age</label>
-            <input class="wizard__input" type="number" id="cInpAge" placeholder="28">
+            <input class="wizard__input" type="number" id="cInpAge" placeholder="28" inputmode="numeric" autocomplete="off">
           </div>
           <div class="wizard__field">
             <label class="wizard__field-label" for="cInpWeight">Weight (kg)</label>
-            <input class="wizard__input" type="number" id="cInpWeight" placeholder="75">
+            <input class="wizard__input" type="number" id="cInpWeight" placeholder="75" inputmode="decimal" autocomplete="off">
           </div>
           <div class="wizard__field">
             <label class="wizard__field-label" for="cInpHeight">Height (cm)</label>
-            <input class="wizard__input" type="number" id="cInpHeight" placeholder="175">
+            <input class="wizard__input" type="number" id="cInpHeight" placeholder="175" inputmode="numeric" autocomplete="off">
           </div>
         </div>
       </div>
@@ -703,11 +703,12 @@
       <div class="footer__brand">
         <div class="footer__logo">Kyroo</div>
         <p class="footer__tagline">AI-powered fitness planning. Built for people who want a clear path forward.</p>
+        <div class="footer__socials" id="footerSocials"></div>
       </div>
       <div class="footer__links" id="footerLinks"></div>
     </div>
     <div class="footer__bottom">
-      © <span id="footerYear"></span> KYROO UG · Berlin
+      © <span id="footerYear"></span> KYROO · Berlin
     </div>
   </div>
 </footer>
@@ -809,7 +810,7 @@
           <div class="pricing-card__price">€9</div>
           <div class="pricing-card__per">per month</div>
           <div class="pricing-card__features">
-            <span class="pricing-card__feature">All 6 programs</span>
+            <span class="pricing-card__feature">All programs</span>
             <span class="pricing-card__feature">Unlimited generation</span>
             <span class="pricing-card__feature">PDF downloads</span>
             <span class="pricing-card__feature">Cancel anytime</span>
@@ -820,7 +821,7 @@
           <div class="pricing-card__price">€75</div>
           <div class="pricing-card__per">per year · €6.25/mo</div>
           <div class="pricing-card__features">
-            <span class="pricing-card__feature">All 6 programs</span>
+            <span class="pricing-card__feature">All programs</span>
             <span class="pricing-card__feature">Unlimited generation</span>
             <span class="pricing-card__feature">PDF downloads</span>
             <span class="pricing-card__feature">2 months free</span>
@@ -879,12 +880,13 @@
   const API_BASE_HUB = window.location.origin;
 
   const PROGRAMS = [
-    { id: 'challenge90', type: 'summer',    free: false, icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation combining smart training and nutrition to change your body from the inside out.',  duration: '90 days',  difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',          outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'], filters: ['transformation', 'strength'] },
-    { id: 'summer',      type: 'summer',    free: false, icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',  duration: '8 weeks',  difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                  outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'],   filters: ['beginner', 'transformation'] },
-    { id: 'weightloss',  type: 'nutrition', free: false, icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',              outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'],      filters: ['weight-loss'] },
-    { id: 'muscle',      type: '12week',    free: false, icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',  duration: '16 weeks', difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                  outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'], filters: ['strength', 'muscle'] },
-    { id: 'beginner',    type: 'plateau',   free: true,  icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',  duration: '8 weeks',  difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',            outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'],  filters: ['beginner', 'transformation'] },
-    { id: 'home',        type: '12week',    free: true,  icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',  duration: '12 weeks', difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment', outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'],     filters: ['home'] },
+    { id: 'challenge90', type: 'summer',    free: false, icon: '🔥', name: '90-Day Challenge',        desc: 'A complete 12-week transformation combining smart training and nutrition to change your body from the inside out.',  duration: '90-day plan',     difficulty: 'All levels',        badge: 'Most Popular',       goal: '90-day body transformation with combined training and nutrition',          outcomes: ['Full body transformation', 'Training + nutrition plan', 'Progressive weekly structure'], filters: ['transformation', 'strength'] },
+    { id: 'summer',      type: 'summer',    free: false, icon: '☀️', name: 'Getting Fit for Summer',  desc: 'Fast-track your fitness with a time-targeted program designed for maximum visible results before summer arrives.',  duration: '8-week plan',     difficulty: 'Beginner friendly', badge: 'Trending',           goal: 'getting beach-ready for summer with fast visible results',                  outcomes: ['Visible results fast', 'Cardio + strength balance', 'Summer-ready body'],   filters: ['beginner', 'transformation'] },
+    { id: 'weightloss',  type: 'nutrition', free: false, icon: '⚡', name: 'Weight Loss Plan',         desc: 'Science-backed fat loss combining progressive training, smart cardio strategy, and personalized nutrition guidance.',  duration: '12-week plan',    difficulty: 'All levels',        badge: '',                   goal: 'sustainable fat loss with progressive training and nutrition',              outcomes: ['Sustainable fat loss', 'Calorie + macro guidance', 'Cardio strategy'],      filters: ['weight-loss'] },
+    { id: 'muscle',      type: '12week',    free: false, icon: '💪', name: 'Muscle Gain Plan',         desc: 'Progressive overload programming built to maximize muscle growth and develop real, lasting strength over 16 weeks.',  duration: '12-week plan',    difficulty: 'Intermediate+',     badge: '',                   goal: 'maximum muscle growth and strength gains',                                  outcomes: ['Hypertrophy focused', 'Progressive overload system', 'Strength milestones'], filters: ['strength', 'muscle'] },
+    { id: 'beginner',    type: 'plateau',   free: true,  icon: '🌱', name: 'Beginner Transformation',  desc: 'Your first real step into fitness. Gentle, effective, and designed to build lasting habits, confidence, and real results.',  duration: '8-week plan',     difficulty: 'Beginners',         badge: 'Best for Beginners', goal: 'beginner fitness transformation building habits and confidence',            outcomes: ['Perfect for first-timers', 'Habit-building focus', 'No experience needed'],  filters: ['beginner', 'transformation'] },
+    { id: 'home',        type: '12week',    free: true,  icon: '🏠', name: 'Home Workout Plan',        desc: 'No gym needed. A complete strength and conditioning program using bodyweight and minimal equipment — anywhere, anytime.',  duration: '12-week plan',    difficulty: 'All levels',        badge: '',                   goal: 'complete home workout transformation with bodyweight and minimal equipment', outcomes: ['Zero gym required', 'Bodyweight + minimal gear', 'Full program at home'],     filters: ['home'] },
+    { id: 'swim',        type: 'swim',      free: false, icon: '🏊', name: 'Swim Tournament Prep',     desc: 'A complete 3–6 week peak performance plan for competitive swimmers. Dryland strength, taper strategy, race-day nutrition, and mental prep — all in one.',  duration: '3–6 week plan',   difficulty: 'All levels',       badge: 'New',                goal: 'peak swimming performance for an upcoming competition',                     outcomes: ['Phased taper plan', 'Dryland + pool sessions', 'Race-day nutrition'],        filters: ['performance', 'strength'] },
   ];
 
   let selectedProgram = null;
@@ -918,7 +920,7 @@
         </div>
       </div>
       <div class="hub__card-right">
-        <span class="hub__card-time">Always free</span>
+        <span class="hub__card-time">Use anytime</span>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
       </div>
     `;
@@ -965,7 +967,7 @@
       return;
     }
     const u = window.currentUser;
-    const isPremium = u.is_admin || u.plan === 'pro' || u.plan === 'basic';
+    const isPremium = u.is_admin || u.is_premium || u.plan === 'pro' || u.plan === 'basic';
     if (!prog.free && !isPremium) {
       if (typeof showCheckoutModal === 'function') showCheckoutModal();
       return;
@@ -974,7 +976,232 @@
     formData = {};
     currentStep = 1;
 
+    // Clear any lingering reactions and summary from previous run
+    ['react1','react2','react4','react5','react6','react7'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = ''; el.classList.remove('visible'); }
+    });
+    const sumEl = document.getElementById('wizSummary');
+    if (sumEl) { sumEl.textContent = ''; sumEl.hidden = true; }
+
     document.getElementById('wizProgramLabel').textContent = prog.icon + ' ' + prog.name;
+
+    // ── Per-program wizard customisation ──────────────────
+    const step1Q        = document.querySelector('.wizard__step[data-step="1"] .wizard__q');
+    const step1Hint     = document.querySelector('.wizard__step[data-step="1"] .wizard__hint');
+    const tilesGoal     = document.getElementById('tilesGoal');
+    const step2Q        = document.querySelector('.wizard__step[data-step="2"] .wizard__q');
+    const step2Hint     = document.querySelector('.wizard__step[data-step="2"] .wizard__hint');
+    const tilesLevel    = document.getElementById('tilesLevel');
+    const step3Q        = document.querySelector('.wizard__step[data-step="3"] .wizard__q');
+    const step3Hint     = document.querySelector('.wizard__step[data-step="3"] .wizard__hint');
+    const step4Q        = document.querySelector('.wizard__step[data-step="4"] .wizard__q');
+    const step4Hint     = document.querySelector('.wizard__step[data-step="4"] .wizard__hint');
+    const step5Q        = document.querySelector('.wizard__step[data-step="5"] .wizard__q');
+    const step5Hint     = document.querySelector('.wizard__step[data-step="5"] .wizard__hint');
+    const tilesLoc      = document.getElementById('tilesLocation');
+    const step6Q        = document.querySelector('.wizard__step[data-step="6"] .wizard__q');
+    const step6Hint     = document.querySelector('.wizard__step[data-step="6"] .wizard__hint');
+    const tilesNutrition = document.getElementById('tilesNutrition');
+    const step7Q        = document.querySelector('.wizard__step[data-step="7"] .wizard__q');
+    const step7Hint     = document.querySelector('.wizard__step[data-step="7"] .wizard__hint');
+    const tilesMotivation = document.getElementById('tilesMotivation');
+    const step8Q        = document.querySelector('.wizard__step[data-step="8"] .wizard__q');
+    const step8Hint     = document.querySelector('.wizard__step[data-step="8"] .wizard__hint');
+    const inpInjuries   = document.getElementById('inpInjuries');
+
+    if (prog.id === 'beginner') {
+      // Step 1 — Why are you starting?
+      step1Q.textContent    = 'Why are you starting today?';
+      step1Hint.textContent = 'No wrong answers — this shapes your whole program.';
+      tilesGoal.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="lose weight and feel more comfortable in my body"><span class="wizard__opt-key">🔥</span><div class="wizard__opt-body"><span class="wizard__opt-label">Lose weight</span><span class="wizard__opt-desc">Feel lighter and more comfortable</span></div></button>
+        <button type="button" class="wizard__opt" data-value="get stronger and build real confidence"><span class="wizard__opt-key">💪</span><div class="wizard__opt-body"><span class="wizard__opt-label">Get stronger</span><span class="wizard__opt-desc">Build strength and self-belief</span></div></button>
+        <button type="button" class="wizard__opt" data-value="have more energy and improve my overall health"><span class="wizard__opt-key">⚡</span><div class="wizard__opt-body"><span class="wizard__opt-label">More energy</span><span class="wizard__opt-desc">Feel healthier and less tired</span></div></button>
+        <button type="button" class="wizard__opt" data-value="build a consistent fitness habit and just start moving"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Just start</span><span class="wizard__opt-desc">Build a habit from scratch</span></div></button>
+      `;
+      wireGroup('tilesGoal', 'react1', commitStep1);
+
+      // Step 2 — Where are you starting from?
+      step2Q.textContent    = 'Where are you right now?';
+      step2Hint.textContent = 'Your program will meet you exactly where you are — no judgment.';
+      tilesLevel.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="beginner" data-years="0" data-starting="not active at all — I sit most of the day and rarely move"><span class="wizard__opt-key">😴</span><div class="wizard__opt-body"><span class="wizard__opt-label">Not active at all</span><span class="wizard__opt-desc">I sit most of the day</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="beginner" data-years="0" data-starting="lightly active — I walk or do light activity but have never followed a structured program"><span class="wizard__opt-key">🚶</span><div class="wizard__opt-body"><span class="wizard__opt-label">A little active</span><span class="wizard__opt-desc">I walk, but nothing structured</span></div></button>
+        <button type="button" class="wizard__opt" data-value="beginner" data-years="0" data-starting="I have tried fitness before but always stopped — I know the basics but struggle with consistency"><span class="wizard__opt-key">🔄</span><div class="wizard__opt-body"><span class="wizard__opt-label">Tried before</span><span class="wizard__opt-desc">Started and stopped</span></div></button>
+      `;
+      wireGroup('tilesLevel', 'react2', commitStep2);
+
+      // Step 3 — Body stats (soften)
+      step3Q.textContent    = 'A few quick numbers.';
+      step3Hint.textContent = 'Helps calibrate your plan. Nothing shared, nothing judged.';
+
+      // Step 4 — Schedule (beginner encouragement)
+      step4Q.textContent    = 'How many days per week?';
+      step4Hint.textContent = '2–3 days is perfect to start. You can always add more later.';
+
+      // Step 5 — Location (add beginner-friendly descriptions)
+      step5Q.textContent    = 'Where will you train?';
+      step5Hint.textContent = 'Your program is built around what you have access to.';
+      tilesLoc.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="bodyweight and home equipment"><span class="wizard__opt-key">🏠</span><div class="wizard__opt-body"><span class="wizard__opt-label">At home</span><span class="wizard__opt-desc">No equipment needed</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="full commercial gym"><span class="wizard__opt-key">🏋️</span><div class="wizard__opt-body"><span class="wizard__opt-label">At the gym</span><span class="wizard__opt-desc">I have a gym membership</span></div></button>
+        <button type="button" class="wizard__opt" data-value="outdoor park or calisthenics setup"><span class="wizard__opt-key">🌳</span><div class="wizard__opt-body"><span class="wizard__opt-label">Outdoors</span><span class="wizard__opt-desc">Parks, fresh air</span></div></button>
+        <button type="button" class="wizard__opt" data-value="mixed home and gym"><span class="wizard__opt-key">🔄</span><div class="wizard__opt-body"><span class="wizard__opt-label">Both</span><span class="wizard__opt-desc">Mix of home and gym</span></div></button>
+      `;
+      wireGroup('tilesLocation', 'react5', commitStep5);
+
+      // Step 6 — How do you eat? (simpler language)
+      step6Q.textContent    = 'How do you eat?';
+      step6Hint.textContent = "No need to be perfect — just tell us what your eating is like.";
+      tilesNutrition.innerHTML = `
+        <button type="button" class="wizard__opt selected" data-value="balanced — moderate carbs, protein, and healthy fats"><span class="wizard__opt-key">🍽️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Pretty normally</span><span class="wizard__opt-desc">A bit of everything</span></div></button>
+        <button type="button" class="wizard__opt" data-value="high protein — prioritizing lean protein with controlled carbs"><span class="wizard__opt-key">🥩</span><div class="wizard__opt-body"><span class="wizard__opt-label">Lots of protein</span><span class="wizard__opt-desc">Meat, eggs, fish focused</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegetarian — no meat but includes eggs and dairy"><span class="wizard__opt-key">🥗</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegetarian</span><span class="wizard__opt-desc">No meat</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegan — fully plant-based nutrition"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegan</span><span class="wizard__opt-desc">No animal products</span></div></button>
+        <button type="button" class="wizard__opt" data-value="low carb or keto — minimal carbohydrates, high fat"><span class="wizard__opt-key">🥑</span><div class="wizard__opt-body"><span class="wizard__opt-label">Low carb</span><span class="wizard__opt-desc">Avoiding bread, pasta, sugar</span></div></button>
+        <button type="button" class="wizard__opt" data-value="flexible — no strict diet, open to general healthy eating advice"><span class="wizard__opt-key">🤷</span><div class="wizard__opt-body"><span class="wizard__opt-label">Not sure</span><span class="wizard__opt-desc">Just give me simple advice</span></div></button>
+      `;
+      wireGroup('tilesNutrition', 'react6', commitStep6);
+
+      // Step 7 — Biggest challenge (replaces commitment level)
+      step7Q.textContent    = "What's your biggest challenge?";
+      step7Hint.textContent = 'Your plan will specifically address this. Be honest with yourself.';
+      tilesMotivation.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="I always start strong but stop after a few weeks — staying consistent is my biggest struggle"><span class="wizard__opt-key">😰</span><div class="wizard__opt-body"><span class="wizard__opt-label">Staying consistent</span><span class="wizard__opt-desc">I always start and stop</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="I don't know where to start or what to do — I need clear, simple guidance"><span class="wizard__opt-key">🤷</span><div class="wizard__opt-body"><span class="wizard__opt-label">I don't know where to start</span><span class="wizard__opt-desc">Need simple, clear steps</span></div></button>
+        <button type="button" class="wizard__opt" data-value="I struggle to find time — I need something efficient that fits a busy life"><span class="wizard__opt-key">⏰</span><div class="wizard__opt-body"><span class="wizard__opt-label">Finding time</span><span class="wizard__opt-desc">Life is busy</span></div></button>
+        <button type="button" class="wizard__opt" data-value="I feel self-conscious or intimidated — especially at the gym or in group settings"><span class="wizard__opt-key">😓</span><div class="wizard__opt-body"><span class="wizard__opt-label">Feeling intimidated</span><span class="wizard__opt-desc">Nervous about the gym</span></div></button>
+      `;
+      wireGroup('tilesMotivation', 'react7', commitStep7);
+
+      // Step 8 — Soften injuries question
+      step8Q.textContent    = 'Anything we should work around?';
+      step8Hint.textContent = 'Any pain, old injuries, or physical limits. Type "Nothing" if you feel fine.';
+      if (inpInjuries) inpInjuries.placeholder = 'e.g. My knees hurt when running. Or: Nothing.';
+
+    } else if (prog.id === 'swim') {
+      // Step 1 — Tournament timeline
+      step1Q.textContent    = 'When is your tournament?';
+      step1Hint.textContent = 'Your plan will be phased to peak exactly on race day.';
+      tilesGoal.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="3"><span class="wizard__opt-key wizard__opt-key--mono">3</span><div class="wizard__opt-body"><span class="wizard__opt-label">3 weeks out</span><span class="wizard__opt-desc">Short prep — sharpen &amp; taper</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="4"><span class="wizard__opt-key wizard__opt-key--mono">4</span><div class="wizard__opt-body"><span class="wizard__opt-label">4 weeks out</span><span class="wizard__opt-desc">Standard competition prep</span></div></button>
+        <button type="button" class="wizard__opt" data-value="5"><span class="wizard__opt-key wizard__opt-key--mono">5</span><div class="wizard__opt-body"><span class="wizard__opt-label">5 weeks out</span><span class="wizard__opt-desc">Full build-to-peak cycle</span></div></button>
+        <button type="button" class="wizard__opt" data-value="6"><span class="wizard__opt-key wizard__opt-key--mono">6</span><div class="wizard__opt-body"><span class="wizard__opt-label">6 weeks out</span><span class="wizard__opt-desc">Extended periodization</span></div></button>
+      `;
+      wireGroup('tilesGoal', 'react1', commitStep1);
+
+      // Step 2 — Swim experience
+      step2Q.textContent    = 'Your experience level?';
+      step2Hint.textContent = 'How long have you been swimming competitively?';
+      tilesLevel.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="beginner" data-years="0"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Recreational</span><span class="wizard__opt-desc">Swim for fun, first competition</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="intermediate" data-years="2"><span class="wizard__opt-key">💫</span><div class="wizard__opt-body"><span class="wizard__opt-label">Club swimmer</span><span class="wizard__opt-desc">Regular competitor</span></div></button>
+        <button type="button" class="wizard__opt" data-value="advanced" data-years="6"><span class="wizard__opt-key">🏆</span><div class="wizard__opt-body"><span class="wizard__opt-label">Elite</span><span class="wizard__opt-desc">National / high-level</span></div></button>
+      `;
+      wireGroup('tilesLevel', 'react2', commitStep2);
+
+      // Step 3 — defaults
+      step3Q.textContent    = 'Tell us about yourself.';
+      step3Hint.textContent = 'Used to calibrate your program precisely.';
+
+      // Step 4 — Pool sessions
+      step4Q.textContent    = 'Pool sessions per week?';
+      step4Hint.textContent = 'How many times can you get in the water each week?';
+
+      // Step 5 — Training setup
+      step5Q.textContent    = 'Your training setup?';
+      step5Hint.textContent = 'Covers both your pool access and dryland strength work.';
+      tilesLoc.innerHTML = `
+        <button type="button" class="wizard__opt selected" data-value="competition_pool__gym" data-pool="indoor competition pool (25m or 50m)" data-dryland="full commercial gym"><span class="wizard__opt-key">🏊</span><div class="wizard__opt-body"><span class="wizard__opt-label">Pool + gym</span><span class="wizard__opt-desc">Competition pool &amp; full gym</span></div></button>
+        <button type="button" class="wizard__opt" data-value="competition_pool__home" data-pool="indoor competition pool (25m or 50m)" data-dryland="home setup with basic equipment"><span class="wizard__opt-key">🏠</span><div class="wizard__opt-body"><span class="wizard__opt-label">Pool + home gym</span><span class="wizard__opt-desc">Competition pool &amp; home equipment</span></div></button>
+        <button type="button" class="wizard__opt" data-value="competition_pool__none" data-pool="indoor competition pool (25m or 50m)" data-dryland="no gym — bodyweight dryland only"><span class="wizard__opt-key">💧</span><div class="wizard__opt-body"><span class="wizard__opt-label">Pool only</span><span class="wizard__opt-desc">Swim lane access, no gym</span></div></button>
+        <button type="button" class="wizard__opt" data-value="open_water__gym" data-pool="open water (lake, sea, or outdoor pool)" data-dryland="full commercial gym"><span class="wizard__opt-key">🌊</span><div class="wizard__opt-body"><span class="wizard__opt-label">Open water + gym</span><span class="wizard__opt-desc">Lake/sea training &amp; full gym</span></div></button>
+      `;
+      wireGroup('tilesLocation', 'react5', commitStep5);
+
+      // Steps 6/7/8 — reset to defaults
+      step6Q.textContent    = 'Your nutrition approach?';
+      step6Hint.textContent = 'Your guide will include a nutrition overview matched to how you eat.';
+      tilesNutrition.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="balanced — moderate carbs, protein, and healthy fats"><span class="wizard__opt-key">⚖️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Balanced</span><span class="wizard__opt-desc">Carbs + protein + fats</span></div></button>
+        <button type="button" class="wizard__opt" data-value="high protein — prioritizing lean protein with controlled carbs"><span class="wizard__opt-key">🥩</span><div class="wizard__opt-body"><span class="wizard__opt-label">High protein</span><span class="wizard__opt-desc">Lean meats, eggs, fish</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegetarian — no meat but includes eggs and dairy"><span class="wizard__opt-key">🥗</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegetarian</span><span class="wizard__opt-desc">No meat</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegan — fully plant-based nutrition"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegan</span><span class="wizard__opt-desc">Fully plant-based</span></div></button>
+        <button type="button" class="wizard__opt" data-value="low carb or keto — minimal carbohydrates, high fat"><span class="wizard__opt-key">🥑</span><div class="wizard__opt-body"><span class="wizard__opt-label">Low-carb / Keto</span><span class="wizard__opt-desc">Minimal carbs, high fat</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="flexible — no strict diet, open to general healthy eating advice"><span class="wizard__opt-key">🍽️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Flexible</span><span class="wizard__opt-desc">General healthy eating</span></div></button>
+      `;
+      wireGroup('tilesNutrition', 'react6', commitStep6);
+      step7Q.textContent    = 'How committed are you?';
+      step7Hint.textContent = 'Honest answers lead to better plans. Your guide will match your reality.';
+      tilesMotivation.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="casual — I want something light and easy to stick to"><span class="wizard__opt-key">😌</span><div class="wizard__opt-body"><span class="wizard__opt-label">Casual</span><span class="wizard__opt-desc">Light, sustainable, low pressure</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="serious — I am ready to push myself and stay consistent"><span class="wizard__opt-key">💪</span><div class="wizard__opt-body"><span class="wizard__opt-label">Serious</span><span class="wizard__opt-desc">Consistent and committed</span></div></button>
+        <button type="button" class="wizard__opt" data-value="very driven — I want an intense, challenging program"><span class="wizard__opt-key">🔥</span><div class="wizard__opt-body"><span class="wizard__opt-label">Very driven</span><span class="wizard__opt-desc">Push hard, expect results</span></div></button>
+        <button type="button" class="wizard__opt" data-value="all-in — maximum effort, I want the most demanding plan possible"><span class="wizard__opt-key">🏆</span><div class="wizard__opt-body"><span class="wizard__opt-label">All-in</span><span class="wizard__opt-desc">Maximum effort, no excuses</span></div></button>
+      `;
+      wireGroup('tilesMotivation', 'react7', commitStep7);
+      step8Q.textContent    = 'Any injuries or limitations?';
+      step8Hint.textContent = 'Your plan will work around these. Type "None" if you\'re injury-free.';
+      if (inpInjuries) inpInjuries.placeholder = 'e.g. Bad lower back, avoid heavy deadlifts. Or: None.';
+
+    } else {
+      // Default (all other programs) — restore standard tiles
+      step1Q.textContent    = "What's your main goal?";
+      step1Hint.textContent = 'This shapes everything about your program.';
+      tilesGoal.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="lose weight and reduce body fat"><span class="wizard__opt-key">🔥</span><div class="wizard__opt-body"><span class="wizard__opt-label">Lose weight</span><span class="wizard__opt-desc">Burn fat, feel lighter</span></div></button>
+        <button type="button" class="wizard__opt" data-value="build muscle and increase strength"><span class="wizard__opt-key">💪</span><div class="wizard__opt-body"><span class="wizard__opt-label">Build muscle</span><span class="wizard__opt-desc">Gain size and strength</span></div></button>
+        <button type="button" class="wizard__opt" data-value="improve overall fitness and conditioning"><span class="wizard__opt-key">⚡</span><div class="wizard__opt-body"><span class="wizard__opt-label">Get fitter</span><span class="wizard__opt-desc">Energy, endurance, health</span></div></button>
+        <button type="button" class="wizard__opt" data-value="improve health, mobility, and wellbeing"><span class="wizard__opt-key">❤️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Feel better</span><span class="wizard__opt-desc">Health and longevity</span></div></button>
+      `;
+      wireGroup('tilesGoal', 'react1', commitStep1);
+      step2Q.textContent    = 'Your experience level?';
+      step2Hint.textContent = 'How long have you been training consistently?';
+      tilesLevel.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="beginner" data-years="0"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Beginner</span><span class="wizard__opt-desc">Under 1 year</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="intermediate" data-years="2"><span class="wizard__opt-key">💫</span><div class="wizard__opt-body"><span class="wizard__opt-label">Intermediate</span><span class="wizard__opt-desc">1–4 years</span></div></button>
+        <button type="button" class="wizard__opt" data-value="advanced" data-years="6"><span class="wizard__opt-key">🏆</span><div class="wizard__opt-body"><span class="wizard__opt-label">Advanced</span><span class="wizard__opt-desc">5+ years</span></div></button>
+      `;
+      wireGroup('tilesLevel', 'react2', commitStep2);
+      step3Q.textContent    = 'Tell us about yourself.';
+      step3Hint.textContent = 'Used to calibrate your program precisely.';
+      step4Q.textContent    = 'How many days per week?';
+      step4Hint.textContent = 'Be honest — your plan will match what you can actually commit to.';
+      step5Q.textContent    = 'Where will you train?';
+      step5Hint.textContent = 'Your program adapts to your environment and equipment.';
+      tilesLoc.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="home"><span class="wizard__opt-key">🏠</span><div class="wizard__opt-body"><span class="wizard__opt-label">At home</span><span class="wizard__opt-desc">Home setup</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="full commercial gym"><span class="wizard__opt-key">🏋️</span><div class="wizard__opt-body"><span class="wizard__opt-label">At the gym</span><span class="wizard__opt-desc">Full equipment</span></div></button>
+        <button type="button" class="wizard__opt" data-value="outdoor park or calisthenics setup"><span class="wizard__opt-key">🌳</span><div class="wizard__opt-body"><span class="wizard__opt-label">Outdoors</span><span class="wizard__opt-desc">Park / bars</span></div></button>
+        <button type="button" class="wizard__opt" data-value="mixed home and gym"><span class="wizard__opt-key">🔄</span><div class="wizard__opt-body"><span class="wizard__opt-label">Mixed</span><span class="wizard__opt-desc">Home + gym</span></div></button>
+      `;
+      wireGroup('tilesLocation', 'react5', commitStep5);
+      step6Q.textContent    = 'Your nutrition approach?';
+      step6Hint.textContent = 'Your guide will include a nutrition overview matched to how you eat.';
+      tilesNutrition.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="balanced — moderate carbs, protein, and healthy fats"><span class="wizard__opt-key">⚖️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Balanced</span><span class="wizard__opt-desc">Carbs + protein + fats</span></div></button>
+        <button type="button" class="wizard__opt" data-value="high protein — prioritizing lean protein with controlled carbs"><span class="wizard__opt-key">🥩</span><div class="wizard__opt-body"><span class="wizard__opt-label">High protein</span><span class="wizard__opt-desc">Lean meats, eggs, fish</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegetarian — no meat but includes eggs and dairy"><span class="wizard__opt-key">🥗</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegetarian</span><span class="wizard__opt-desc">No meat</span></div></button>
+        <button type="button" class="wizard__opt" data-value="vegan — fully plant-based nutrition"><span class="wizard__opt-key">🌱</span><div class="wizard__opt-body"><span class="wizard__opt-label">Vegan</span><span class="wizard__opt-desc">Fully plant-based</span></div></button>
+        <button type="button" class="wizard__opt" data-value="low carb or keto — minimal carbohydrates, high fat"><span class="wizard__opt-key">🥑</span><div class="wizard__opt-body"><span class="wizard__opt-label">Low-carb / Keto</span><span class="wizard__opt-desc">Minimal carbs, high fat</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="flexible — no strict diet, open to general healthy eating advice"><span class="wizard__opt-key">🍽️</span><div class="wizard__opt-body"><span class="wizard__opt-label">Flexible</span><span class="wizard__opt-desc">General healthy eating</span></div></button>
+      `;
+      wireGroup('tilesNutrition', 'react6', commitStep6);
+      step7Q.textContent    = 'How committed are you?';
+      step7Hint.textContent = 'Honest answers lead to better plans. Your guide will match your reality.';
+      tilesMotivation.innerHTML = `
+        <button type="button" class="wizard__opt" data-value="casual — I want something light and easy to stick to"><span class="wizard__opt-key">😌</span><div class="wizard__opt-body"><span class="wizard__opt-label">Casual</span><span class="wizard__opt-desc">Light, sustainable, low pressure</span></div></button>
+        <button type="button" class="wizard__opt selected" data-value="serious — I am ready to push myself and stay consistent"><span class="wizard__opt-key">💪</span><div class="wizard__opt-body"><span class="wizard__opt-label">Serious</span><span class="wizard__opt-desc">Consistent and committed</span></div></button>
+        <button type="button" class="wizard__opt" data-value="very driven — I want an intense, challenging program"><span class="wizard__opt-key">🔥</span><div class="wizard__opt-body"><span class="wizard__opt-label">Very driven</span><span class="wizard__opt-desc">Push hard, expect results</span></div></button>
+        <button type="button" class="wizard__opt" data-value="all-in — maximum effort, I want the most demanding plan possible"><span class="wizard__opt-key">🏆</span><div class="wizard__opt-body"><span class="wizard__opt-label">All-in</span><span class="wizard__opt-desc">Maximum effort, no excuses</span></div></button>
+      `;
+      wireGroup('tilesMotivation', 'react7', commitStep7);
+      step8Q.textContent    = 'Any injuries or limitations?';
+      step8Hint.textContent = 'Your plan will work around these. Type "None" if you\'re injury-free.';
+      if (inpInjuries) inpInjuries.placeholder = 'e.g. Bad lower back, avoid heavy deadlifts. Or: None.';
+    }
 
     // Reset steps
     document.querySelectorAll('.wizard__step').forEach(s => s.classList.remove('active'));
@@ -1040,85 +1267,300 @@
     updateProgress(n);
     const errEl = document.getElementById('wizError');
     if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+    // Hide summary when navigating away from step 8
+    if (n !== 8) { const s = document.getElementById('wizSummary'); if (s) s.hidden = true; }
     document.getElementById('wizBody').scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── Wire option group (single-select) ───────────────── */
-  function wireGroup(groupId) {
+  /* ── Coach reaction copy maps ────────────────────────── */
+  const REACTIONS = {
+    // Step 1 — goal (default programs)
+    goal: {
+      'lose weight and reduce body fat':             'Smart starting point. Fat loss done right is sustainable — we build for that.',
+      'build muscle and increase strength':          'Strength is a long game. Your program will be built to compound over time.',
+      'improve overall fitness and conditioning':    'The best investment you can make. Fitness touches everything else in life.',
+      'improve health, mobility, and wellbeing':     'Often overlooked, always underrated. This shapes how you feel every single day.',
+      // beginner variants
+      'lose weight and feel more comfortable in my body': 'That clarity is everything. We build around real comfort, not just the scale.',
+      'get stronger and build real confidence':           'Strength and confidence move together. One feeds the other.',
+      'have more energy and improve my overall health':   'Energy is the foundation. Everything else gets easier when that improves.',
+      'build a consistent fitness habit and just start moving': 'Starting is the whole thing. Everything after that is just showing up.',
+      // swim variants
+      '3': 'Three weeks is tight but workable. Every session will count.',
+      '4': 'Four weeks is the classic competition window. Enough to peak properly.',
+      '5': 'Five weeks gives us a real build phase before the taper.',
+      '6': 'Six weeks is ideal — full periodization from base to race day.',
+    },
+    // Step 2 — experience level
+    level: {
+      'beginner':     'Everyone who is good at something was once exactly where you are.',
+      'intermediate': 'Intermediate is where the real gains happen. You know enough to push properly.',
+      'advanced':     "You've earned a program that doesn't hold back.",
+      // beginner wizard variants
+      'not active at all — I sit most of the day and rarely move':                                    'That changes today. Small sessions, big shifts over time.',
+      'lightly active — I walk or do light activity but have never followed a structured program':    'A walk is already a foundation. We build from here.',
+      'I have tried fitness before but always stopped — I know the basics but struggle with consistency': 'That pattern ends here. Consistency is built into this plan from day one.',
+      // swim variants
+      'recreational': 'First competition energy is unmatched. This plan will prepare you properly.',
+      'club swimmer':  'You know what race pace feels like. We sharpen that.',
+      'elite':         'At this level it is about peaking on the right day. That is exactly what we build for.',
+    },
+    // Step 4 — days per week
+    days: {
+      '2': 'Two focused days beat five half-hearted ones. Quality always wins.',
+      '3': '3 days is the sweet spot. Sustainable beats ambitious every time.',
+      '4': 'Four days gives us real structure — push and recovery in balance.',
+      '5': "Five days means we're serious. Your program will reflect that.",
+      '6': 'Six days is a commitment. Your plan will earn every one of them.',
+    },
+    // Step 5 — location
+    location: {
+      'bodyweight and home equipment':          'Home training is underestimated. Your program uses every inch of it.',
+      'full commercial gym':                    'Full equipment means nothing is off the table.',
+      'outdoor park or calisthenics setup':     'Outdoor training builds a different kind of toughness.',
+      'mixed home and gym':                     'Flexibility is a strength. Your program works both environments.',
+      // beginner variants
+      'At home':                                'Home training is underestimated. Your program uses every inch of it.',
+      'At the gym':                             'Full equipment means nothing is off the table.',
+      'Outdoors':                               'Outdoor training builds a different kind of toughness.',
+      'Both':                                   'Flexibility is a strength. Your program works both environments.',
+      // swim variants
+      'competition_pool__gym':                  'Pool plus gym is the ideal setup. Dryland and water work together.',
+      'competition_pool__home':                 'Pool sessions plus home dryland — efficient and effective.',
+      'competition_pool__none':                 'Water-only prep. We maximize every lane session.',
+      'open_water__gym':                        'Open water training has its own edge. We use the gym to back it up.',
+    },
+    // Step 6 — nutrition
+    nutrition: {
+      'balanced — moderate carbs, protein, and healthy fats':           'Balanced is sustainable. Your plan works with this, not against it.',
+      'high protein — prioritizing lean protein with controlled carbs':  'High protein is the right call for most training goals. Noted.',
+      'vegetarian — no meat but includes eggs and dairy':                'Plant-forward diets work well for fitness. Your plan accounts for it.',
+      'vegan — fully plant-based nutrition':                             'Fully plant-based and high-performing are not opposites. We make it work.',
+      'low carb or keto — minimal carbohydrates, high fat':              'Low carb changes how we time training. Your program adapts to that.',
+      'flexible — no strict diet, open to general healthy eating advice': 'No stress about food rules. Simple, practical guidance works best.',
+      // beginner variants
+      'balanced — moderate carbs, protein, and healthy fats (beginner)': 'No overthinking food. Simple balance is perfect for where you are.',
+      'Pretty normally':                                                   'No overthinking food. Simple balance is perfect for where you are.',
+      'Lots of protein':                                                   'High protein is the right call for most training goals. Noted.',
+      'Vegetarian':                                                        'Plant-forward diets work well for fitness. Your plan accounts for it.',
+      'Vegan':                                                             'Fully plant-based and high-performing are not opposites. We make it work.',
+      'Low carb':                                                          'Low carb changes how we time training. Your program adapts to that.',
+      'Not sure':                                                          'No stress about food rules. Simple, practical guidance works best.',
+    },
+    // Step 7 — commitment
+    motivation: {
+      'casual — I want something light and easy to stick to':          'Sustainable is smart. Your plan fits your life, not the other way around.',
+      'serious — I am ready to push myself and stay consistent':       'That is the mindset that gets results. Your program will match it.',
+      'very driven — I want an intense, challenging program':          'Intensity with structure. You will feel this one.',
+      'all-in — maximum effort, I want the most demanding plan possible': 'Nothing held back. Your program will demand everything you have.',
+      // beginner challenge variants
+      'I always start strong but stop after a few weeks — staying consistent is my biggest struggle': 'Consistency is designed into your plan from week one. We break the pattern.',
+      "I don't know where to start or what to do — I need clear, simple guidance":                    'Every single session is spelled out. No guessing, ever.',
+      'I struggle to find time — I need something efficient that fits a busy life':                   'Short, focused sessions. Maximum effect, minimum time.',
+      'I feel self-conscious or intimidated — especially at the gym or in group settings':            'Your first weeks are built for private, low-pressure environments.',
+    },
+  };
+
+  /* ── Show reaction line ───────────────────────────────── */
+  function showReaction(reactId, value) {
+    const el = document.getElementById(reactId);
+    if (!el) return;
+    // Try exact match first, then partial match on label text
+    const text = REACTIONS[{
+      react1: 'goal', react2: 'level', react4: 'days',
+      react5: 'location', react6: 'nutrition', react7: 'motivation',
+    }[reactId]]?.[value] || null;
+    if (!text) { el.classList.remove('visible'); return; }
+    el.classList.remove('visible');
+    el.textContent = text;
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+  }
+
+  /* ── Build personalised summary paragraph ────────────── */
+  function buildSummary() {
+    const el = document.getElementById('wizSummary');
+    if (!el || !selectedProgram) return;
+    const fd = formData;
+    const prog = selectedProgram;
+
+    let who = '';
+    if (fd.age) who += `You're ${fd.age}`;
+    if (fd.sex && fd.sex !== 'other') who += `, ${fd.sex}`;
+    who += who ? '.' : '';
+
+    let goal = '';
+    if (prog.id === 'swim') {
+      goal = `Tournament in ${fd.weeks_to_tournament || 4} weeks. ${fd.level || 'Intermediate'} level.`;
+    } else if (prog.id === 'beginner') {
+      goal = fd.goals ? `You want to ${fd.goals.toLowerCase()}.` : '';
+    } else {
+      goal = fd.goals ? `Goal: ${fd.goals}.` : '';
+    }
+
+    let schedule = '';
+    if (fd.schedule) schedule = `${fd.schedule} days a week`;
+    if (fd.session_mins) schedule += `, ${fd.session_mins} minutes a session`;
+    if (schedule) schedule += '.';
+
+    let context = '';
+    if (prog.id === 'beginner' && fd.starting_point) {
+      context = `Starting point: ${fd.starting_point.split('—')[0].trim()}.`;
+    } else if (fd.level && prog.id !== 'swim') {
+      const lvlMap = { beginner: 'Just starting out.', intermediate: 'Intermediate level.', advanced: 'Advanced.' };
+      context = lvlMap[fd.level] || '';
+    }
+
+    let challenge = '';
+    if (prog.id === 'beginner' && fd.motivation) {
+      challenge = `Main challenge: ${fd.motivation.split('—')[0].trim().toLowerCase()}.`;
+    }
+
+    const parts = [who, goal, schedule, context, challenge].filter(Boolean);
+    el.textContent = parts.join(' ') + ' This program is built specifically for you.';
+    el.hidden = false;
+  }
+
+  /* ── Wire option group (single-select) + reaction ────── */
+  function wireGroup(groupId, reactId, autoAdvanceFn) {
     const group = document.getElementById(groupId);
     if (!group) return;
     group.querySelectorAll('.wizard__opt').forEach(opt => {
       opt.addEventListener('click', () => {
         group.querySelectorAll('.wizard__opt').forEach(o => o.classList.remove('selected'));
         opt.classList.add('selected');
+        // Show reaction
+        if (reactId) {
+          const label = opt.querySelector('.wizard__opt-label')?.textContent || opt.dataset.value;
+          const val = REACTIONS[{
+            react1: 'goal', react2: 'level', react4: 'days',
+            react5: 'location', react6: 'nutrition', react7: 'motivation',
+          }[reactId]]?.[opt.dataset.value] ? opt.dataset.value : label;
+          showReaction(reactId, val);
+        }
+        // Auto-advance after reaction reads
+        if (autoAdvanceFn) {
+          setTimeout(autoAdvanceFn, 820);
+        }
       });
     });
   }
 
   /* ── Step navigation ──────────────────────────────────── */
-  document.getElementById('step1Next').addEventListener('click', () => {
+  function commitStep1() {
     const goal = getSelected('tilesGoal');
-    if (!goal) { alert('Please select a goal to continue.'); return; }
+    if (!goal) return;
     formData.goals = goal;
+    if (selectedProgram && selectedProgram.id === 'swim') {
+      formData.weeks_to_tournament = parseInt(goal);
+    }
     showStep(2);
-  });
+  }
+  document.getElementById('step1Next').addEventListener('click', commitStep1);
 
-  document.getElementById('step2Back').addEventListener('click', () => showStep(1));
-  document.getElementById('step2Next').addEventListener('click', () => {
+  function commitStep2() {
     const sel = document.getElementById('tilesLevel').querySelector('.selected');
-    if (!sel) { alert('Please select your experience level.'); return; }
+    if (!sel) return;
     formData.level = sel.dataset.value;
     formData.experience_years = parseInt(sel.dataset.years) || 1;
+    if (selectedProgram && selectedProgram.id === 'beginner' && sel.dataset.starting) {
+      formData.starting_point = sel.dataset.starting;
+    }
     showStep(3);
-  });
+  }
+  document.getElementById('step2Back').addEventListener('click', () => showStep(1));
+  document.getElementById('step2Next').addEventListener('click', commitStep2);
 
   document.getElementById('step3Back').addEventListener('click', () => showStep(2));
   document.getElementById('step3Next').addEventListener('click', () => {
-    const age    = document.getElementById('inpAge').value;
-    const weight = document.getElementById('inpWeight').value;
-    const height = document.getElementById('inpHeight').value;
-    const sex    = getSelected('tilesSex');
-    if (!age || !weight || !height) { alert('Please fill in your age, weight and height.'); return; }
-    formData.age    = parseInt(age);
-    formData.weight = parseFloat(weight);
-    formData.height = parseFloat(height);
+    const ageRaw    = document.getElementById('inpAge').value.trim();
+    const weightRaw = document.getElementById('inpWeight').value.trim();
+    const heightRaw = document.getElementById('inpHeight').value.trim();
+    const sex       = getSelected('tilesSex');
+
+    const ageVal    = Number(ageRaw);
+    const weightVal = Number(weightRaw);
+    const heightVal = Number(heightRaw);
+
+    if (!ageRaw || isNaN(ageVal) || ageVal <= 0) {
+      alert('Please enter your age.');
+      document.getElementById('inpAge').focus();
+      return;
+    }
+    if (ageVal < 10 || ageVal > 100) {
+      alert('Age must be between 10 and 100.');
+      document.getElementById('inpAge').focus();
+      return;
+    }
+    if (!weightRaw || isNaN(weightVal) || weightVal <= 0) {
+      alert('Please enter your weight.');
+      document.getElementById('inpWeight').focus();
+      return;
+    }
+    if (weightVal < 20 || weightVal > 300) {
+      alert('Weight must be between 20 and 300 kg.');
+      document.getElementById('inpWeight').focus();
+      return;
+    }
+    if (!heightRaw || isNaN(heightVal) || heightVal <= 0) {
+      alert('Please enter your height.');
+      document.getElementById('inpHeight').focus();
+      return;
+    }
+    if (heightVal < 100 || heightVal > 250) {
+      alert('Height must be between 100 and 250 cm.');
+      document.getElementById('inpHeight').focus();
+      return;
+    }
+
+    formData.age    = Math.round(ageVal);
+    formData.weight = Math.round(weightVal * 10) / 10;
+    formData.height = Math.round(heightVal);
     formData.sex    = sex || 'other';
     showStep(4);
   });
 
-  document.getElementById('step4Back').addEventListener('click', () => showStep(3));
-  document.getElementById('step4Next').addEventListener('click', () => {
+  function commitStep4() {
     const days = getSelected('tilesDays');
     const mins = getSelected('tilesMins');
-    if (!days) { alert('Please select how many days per week.'); return; }
+    if (!days) return;
     formData.schedule     = parseInt(days);
     formData.session_mins = parseInt(mins || 45);
     showStep(5);
-  });
+  }
+  document.getElementById('step4Back').addEventListener('click', () => showStep(3));
+  document.getElementById('step4Next').addEventListener('click', commitStep4);
 
-  document.getElementById('step5Back').addEventListener('click', () => showStep(4));
-  document.getElementById('step5Next').addEventListener('click', () => {
-    const loc = getSelected('tilesLocation');
-    if (!loc) { alert('Please select where you will train.'); return; }
-    formData.equipment = loc;
+  function commitStep5() {
+    const sel = document.getElementById('tilesLocation').querySelector('.wizard__opt.selected');
+    if (!sel) return;
+    formData.equipment = sel.dataset.value;
+    if (selectedProgram && selectedProgram.id === 'swim') {
+      formData.pool_access    = sel.dataset.pool    || 'indoor competition pool';
+      formData.dryland_access = sel.dataset.dryland || 'full commercial gym';
+    }
     showStep(6);
-  });
+  }
+  document.getElementById('step5Back').addEventListener('click', () => showStep(4));
+  document.getElementById('step5Next').addEventListener('click', commitStep5);
 
-  document.getElementById('step6Back').addEventListener('click', () => showStep(5));
-  document.getElementById('step6Next').addEventListener('click', () => {
+  function commitStep6() {
     const nutrition = getSelected('tilesNutrition');
-    if (!nutrition) { alert('Please select your nutrition approach.'); return; }
+    if (!nutrition) return;
     formData.nutrition = nutrition;
     showStep(7);
-  });
+  }
+  document.getElementById('step6Back').addEventListener('click', () => showStep(5));
+  document.getElementById('step6Next').addEventListener('click', commitStep6);
 
-  document.getElementById('step7Back').addEventListener('click', () => showStep(6));
-  document.getElementById('step7Next').addEventListener('click', () => {
+  function commitStep7() {
     const motivation = getSelected('tilesMotivation');
-    if (!motivation) { alert('Please select your commitment level.'); return; }
+    if (!motivation) return;
     formData.motivation = motivation;
+    buildSummary();
     showStep(8);
-  });
+  }
+  document.getElementById('step7Back').addEventListener('click', () => showStep(6));
+  document.getElementById('step7Next').addEventListener('click', commitStep7);
 
   document.getElementById('step8Back').addEventListener('click', () => showStep(7));
 
@@ -1175,9 +1617,43 @@
         motivation:       fd.motivation || 'serious',
       },
     }),
+    beginner: (fd) => ({
+      url: '/api/program/beginner',
+      body: {
+        goal:              fd.goals           || 'build a consistent fitness habit',
+        starting_point:    fd.starting_point  || 'lightly active, no structured exercise',
+        age:               fd.age             || 25,
+        weight:            fd.weight          || 75,
+        height:            fd.height          || 170,
+        sex:               fd.sex             || 'other',
+        days_per_week:     fd.schedule        || 3,
+        session_minutes:   fd.session_mins    || 45,
+        equipment:         fd.equipment       || 'full commercial gym',
+        nutrition:         fd.nutrition       || 'balanced',
+        biggest_challenge: fd.motivation      || 'not knowing where to start',
+        injuries:          fd.injuries        || 'none',
+      },
+    }),
+    swim: (fd) => ({
+      url: '/api/program/swim',
+      body: {
+        swim_level:          fd.level || 'intermediate',
+        age:                 fd.age || 22,
+        sex:                 fd.sex || 'other',
+        weight:              fd.weight || 70,
+        pool_sessions:       fd.schedule || 3,
+        session_minutes:     fd.session_mins || 60,
+        pool_access:         fd.pool_access    || 'indoor competition pool (25m or 50m)',
+        dryland_access:      fd.dryland_access || 'full commercial gym',
+        weeks_to_tournament: fd.weeks_to_tournament || 4,
+        nutrition:           fd.nutrition || 'balanced',
+        injuries:            fd.injuries || 'none',
+      },
+    }),
     generate: (fd, overrides = {}) => ({
       url: '/api/program/generate',
       body: {
+        program_id:       overrides.program_id || undefined,
         level:            overrides.level    || fd.level    || 'intermediate',
         experience_years: overrides.exp      || fd.experience_years || 2,
         weight:           fd.weight   || 75,
@@ -1202,8 +1678,9 @@
       case 'summer':     return ENDPOINTS.summer(fd);
       case 'weightloss': return ENDPOINTS.nutrition(fd);
       case 'muscle':     return ENDPOINTS.generate(fd, { primary: 'muscle gain and hypertrophy', secondary: 'strength' });
-      case 'beginner':   return ENDPOINTS.generate(fd, { level: 'beginner', exp: 0, primary: 'beginner fitness transformation and building habits', secondary: 'confidence and consistency' });
-      case 'home':       return ENDPOINTS.generate(fd, { equipment: 'bodyweight and minimal home equipment', primary: fd.goals || 'home workout fitness without a gym', secondary: 'building a sustainable routine at home' });
+      case 'swim':       return ENDPOINTS.swim(fd);
+      case 'beginner':   return ENDPOINTS.beginner(fd);
+      case 'home':       return ENDPOINTS.generate(fd, { program_id: 'home', equipment: 'bodyweight and minimal home equipment', primary: fd.goals || 'home workout fitness without a gym', secondary: 'building a sustainable routine at home' });
       default:           return ENDPOINTS.generate(fd);
     }
   }
@@ -1217,7 +1694,7 @@
     }
 
     const u = window.currentUser;
-    const isPremium = u.is_admin || u.plan === 'pro' || u.plan === 'basic';
+    const isPremium = u.is_admin || u.is_premium || u.plan === 'pro' || u.plan === 'basic';
     if (!selectedProgram.free && !isPremium) {
       closeWizard();
       if (typeof showCheckoutModal === 'function') showCheckoutModal();
@@ -1364,9 +1841,44 @@
 
   /* ── Calculator logic ─────────────────────────────────── */
   document.getElementById('calcBtn').addEventListener('click', () => {
-    const age      = parseFloat(document.getElementById('cInpAge').value)    || 28;
-    const weight   = parseFloat(document.getElementById('cInpWeight').value) || 75;
-    const height   = parseFloat(document.getElementById('cInpHeight').value) || 175;
+    const ageRaw    = document.getElementById('cInpAge').value.trim();
+    const weightRaw = document.getElementById('cInpWeight').value.trim();
+    const heightRaw = document.getElementById('cInpHeight').value.trim();
+
+    const age    = Number(ageRaw);
+    const weight = Number(weightRaw);
+    const height = Number(heightRaw);
+
+    if (!ageRaw || isNaN(age) || age <= 0) {
+      alert('Please enter your age.');
+      document.getElementById('cInpAge').focus();
+      return;
+    }
+    if (age < 10 || age > 100) {
+      alert('Age must be between 10 and 100.');
+      document.getElementById('cInpAge').focus();
+      return;
+    }
+    if (!weightRaw || isNaN(weight) || weight <= 0) {
+      alert('Please enter your weight.');
+      document.getElementById('cInpWeight').focus();
+      return;
+    }
+    if (weight < 20 || weight > 300) {
+      alert('Weight must be between 20 and 300 kg.');
+      document.getElementById('cInpWeight').focus();
+      return;
+    }
+    if (!heightRaw || isNaN(height) || height <= 0) {
+      alert('Please enter your height.');
+      document.getElementById('cInpHeight').focus();
+      return;
+    }
+    if (height < 100 || height > 250) {
+      alert('Height must be between 100 and 250 cm.');
+      document.getElementById('cInpHeight').focus();
+      return;
+    }
     const sexSel   = document.getElementById('cTilesSex').querySelector('.selected');
     const sex      = sexSel ? sexSel.dataset.value : 'male';
     const actSel   = document.getElementById('cTilesActivity').querySelector('.selected');
@@ -1419,8 +1931,59 @@
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
+  /* ── Guard numeric bio inputs (block negatives / scientific notation) ── */
+  function guardNumericInput(id, min, max, allowDecimal) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Block characters that have no place in a human biometric value
+    el.addEventListener('keydown', e => {
+      if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+        e.preventDefault();
+      }
+    });
+    // Strip anything non-numeric (except one dot for decimals) on every input event
+    el.addEventListener('input', () => {
+      let v = el.value;
+      if (allowDecimal) {
+        v = v.replace(/[^0-9.]/g, '');
+        const parts = v.split('.');
+        if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+      } else {
+        v = v.replace(/[^0-9]/g, '');
+      }
+      if (el.value !== v) el.value = v;
+    });
+    // Clamp on blur so final value is in believable range
+    el.addEventListener('blur', () => {
+      const n = allowDecimal ? parseFloat(el.value) : parseInt(el.value, 10);
+      if (!isNaN(n)) {
+        if (n < min) el.value = min;
+        else if (n > max) el.value = max;
+      }
+    });
+  }
+
+  guardNumericInput('inpAge',     10,  100, false);
+  guardNumericInput('inpWeight',  20,  300, true);
+  guardNumericInput('inpHeight', 100,  250, false);
+  guardNumericInput('cInpAge',    10,  100, false);
+  guardNumericInput('cInpWeight', 20,  300, true);
+  guardNumericInput('cInpHeight', 100, 250, false);
+
   /* ── Wire all option groups ───────────────────────────── */
-  ['tilesGoal','tilesLevel','tilesSex','tilesDays','tilesMins','tilesLocation','tilesNutrition','tilesMotivation','cTilesSex','cTilesActivity'].forEach(wireGroup);
+  wireGroup('tilesGoal',       'react1', commitStep1);
+  wireGroup('tilesLevel',      'react2', commitStep2);
+  wireGroup('tilesDays',       'react4', commitStep4);
+  wireGroup('tilesMins',       null,     null);
+  wireGroup('tilesLocation',   'react5', commitStep5);
+  wireGroup('tilesNutrition',  'react6', commitStep6);
+  wireGroup('tilesMotivation', 'react7', commitStep7);
+  wireGroup('tilesSex',        null,     null);
+  wireGroup('cTilesSex',       null,     null);
+  wireGroup('cTilesActivity',  null,     null);
+
+  /* ── Render program cards immediately (hubList is already in the DOM) ── */
+  renderHubGrid();
 
   /* ── Auth gate buttons ────────────────────────────────── */
   document.getElementById('gateSignupBtn').addEventListener('click', () => showAuthModal('signup'));
@@ -1437,18 +2000,23 @@
   document.getElementById('tabSignup2').addEventListener('click', () => showAuthModal('signup'));
 
   /* ── DOMContentLoaded init ────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => {
-    renderHubGrid();
-    // Re-wire calc groups (rendered by renderHubGrid but wired separately above via forEach)
-    ['tilesGoal','tilesLevel','tilesSex','tilesDays','tilesMins','tilesLocation','tilesNutrition','tilesMotivation','cTilesSex','cTilesActivity'].forEach(wireGroup);
-
+  document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-    // Search + filter
-    let activeFilter = 'all';
+    // Load site settings for footer legal links
+    try {
+      const siteRes = await fetch(`${API_BASE_HUB}/api/site`);
+      if (siteRes.ok) {
+        const siteData = await siteRes.json();
+        if (typeof renderSocials === 'function') renderSocials(siteData);
+        if (typeof renderFooterLinks === 'function') renderFooterLinks(siteData);
+      }
+    } catch (e) {}
 
+    // Search + filter
     function applyFilters() {
       const q = document.getElementById('hubSearch').value.trim().toLowerCase();
+      const activeFilter = document.getElementById('hubFilter').value;
       document.querySelectorAll('#hubList .hub__card').forEach(card => {
         const programId = card.dataset.program;
         const prog = PROGRAMS.find(p => p.id === programId);
@@ -1460,15 +2028,7 @@
     }
 
     document.getElementById('hubSearch').addEventListener('input', applyFilters);
-
-    document.querySelectorAll('.hub__filter').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.hub__filter').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeFilter = btn.dataset.filter;
-        applyFilters();
-      });
-    });
+    document.getElementById('hubFilter').addEventListener('change', applyFilters);
 
     // Auto-open wizard from URL hash (e.g. /program.html#challenge90)
     const hash = window.location.hash.slice(1);
@@ -1480,18 +2040,36 @@
 </script>
 
 <script>
-  /* ── Auth gate: show correct view when session resolves ─── */
-  window.addEventListener('kyroo:authready', function () {
-    document.getElementById('dashLoading').hidden = true;
-    var user = window.currentUser;
-    if (!user) {
-      document.getElementById('dashAuth').hidden = false;
-    } else {
-      // Any logged-in user sees the hub.
-      // Free users can run free programs; premium programs require upgrade (enforced in openWizard).
+  /* ── Auth gate: self-contained, no dependency on script.js timing ── */
+  (function () {
+    function resolveGate() {
+      var token = localStorage.getItem('kyroo_token');
+      document.getElementById('dashLoading').hidden = true;
+      if (!token) {
+        document.getElementById('dashAuth').hidden = false;
+        return;
+      }
+      // Optimistically show hub, then verify token with server
       document.getElementById('dashPremium').hidden = false;
+      fetch('/api/auth/me', {
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      }).then(function (r) {
+        if (!r.ok) {
+          // Token invalid — revert to auth gate
+          localStorage.removeItem('kyroo_token');
+          localStorage.removeItem('kyroo_user');
+          document.getElementById('dashPremium').hidden = true;
+          document.getElementById('dashAuth').hidden = false;
+        }
+      }).catch(function () { /* server unreachable — keep showing hub */ });
     }
-  });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', resolveGate);
+    } else {
+      resolveGate();
+    }
+  }());
 </script>
 </body>
 </html>

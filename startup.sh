@@ -45,8 +45,8 @@ else
 fi
 cd ..
 
-# -- Kill any existing process on port 3001 --
-lsof -ti:3001 2>/dev/null | xargs kill -9 2>/dev/null || true
+# -- Kill any existing process on port 3000 --
+lsof -ti:3000 2>/dev/null | xargs kill -9 2>/dev/null || true
 
 # -- Start the server --
 echo "  [3/4] Starting server..."
@@ -57,19 +57,19 @@ SERVER_PID=$!
 echo "  [4/4] Opening browser..."
 sleep 2
 if command -v xdg-open &>/dev/null; then
-    xdg-open "http://localhost:3001" &>/dev/null &
+    xdg-open "http://localhost:3000" &>/dev/null &
 elif command -v open &>/dev/null; then
-    open "http://localhost:3001"
+    open "http://localhost:3000"
 fi
 
 echo ""
 echo "  +======================================+"
-echo "  |   KYROO running at localhost:3001    |"
+echo "  |   KYROO running at localhost:3000    |"
 echo "  |   Press Ctrl+C to stop              |"
 echo "  +======================================+"
 echo ""
 echo "  Database: Docker (kyroo-db)"
-echo "  Server:   Node.js (localhost:3001)"
+echo "  Server:   Node.js (localhost:3000)"
 echo ""
 echo "  To stop everything:"
 echo "    Ctrl+C (server)"

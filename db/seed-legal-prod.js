@@ -1,10 +1,10 @@
 const { Pool } = require('pg');
 const pool = new Pool({ host: '127.0.0.1', port: 15433, database: 'kyroo', user: 'kyroo', password: 'kyroo_pass' });
 
-const privacy = `KYROO UG operates the KYROO platform. This Privacy Policy explains how we collect, use, and protect your personal data in accordance with the EU General Data Protection Regulation (GDPR/DSGVO).
+const privacy = `KYROO operates the KYROO platform. This Privacy Policy explains how we collect, use, and protect your personal data in accordance with the EU General Data Protection Regulation (GDPR/DSGVO).
 
 1. Data Controller
-KYROO UG
+KYROO
 Schoenhauser Allee 100
 10119 Berlin, Germany
 E-Mail: info@kyroo.de
@@ -65,7 +65,7 @@ Last updated: March 2026`;
 const terms = `Welcome to KYROO. By using our platform, you agree to these Terms of Service.
 
 1. About KYROO
-KYROO is operated by KYROO UG, Schoenhauser Allee 100, 10119 Berlin, Germany. KYROO is a discovery and lifestyle platform offering editorial content on trends, fitness, and lifestyle.
+KYROO is operated by KYROO, Schoenhauser Allee 100, 10119 Berlin, Germany. KYROO is a discovery and lifestyle platform offering editorial content on trends, fitness, and lifestyle.
 
 2. Accounts
 - You must be at least 16 years old to create an account
@@ -111,7 +111,7 @@ KYROO provides editorial content for informational purposes only. We are not lia
 These terms are governed by the laws of the Federal Republic of Germany. The courts of Berlin have exclusive jurisdiction.
 
 11. Contact
-KYROO UG
+KYROO
 Schoenhauser Allee 100
 10119 Berlin
 E-Mail: info@kyroo.de

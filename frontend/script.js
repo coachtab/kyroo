@@ -181,7 +181,7 @@ function renderPremium(data) {
         <ul class="pricing-card__features">
           <li class="pricing-card__feature">Everything in Free</li>
           <li class="pricing-card__feature">5 programs / month</li>
-          <li class="pricing-card__feature">All 6 programs</li>
+          <li class="pricing-card__feature">All programs</li>
           <li class="pricing-card__feature">Train Together</li>
         </ul>
         <div class="pricing-card__cta">
@@ -321,7 +321,9 @@ async function updateNewsletterUI() {
 }
 
 function renderSocials(data) {
-  document.getElementById('footerSocials').innerHTML = data.socialLinks.map(link => `
+  const el = document.getElementById('footerSocials');
+  if (!el || !data.socialLinks) return;
+  el.innerHTML = data.socialLinks.map(link => `
     <a href="${esc(link.url)}" class="footer__social" aria-label="${esc(link.platform)}">
       ${ICONS[link.icon] || ''}
     </a>
@@ -397,25 +399,19 @@ function renderArticlesHeader(data) {
 
 function showPrivacy(data) {
   const s = data.settings || {};
-  document.getElementById('privacyContent').innerHTML = `
-    <h2 class="modal__title">${esc(s.privacy_title || 'Privacy Policy')}</h2>
-    <div class="legal__body">${esc(s.privacy_body || '')}</div>
-  `;
+  document.getElementById('privacyBody').innerHTML = `<div class="legal__body">${s.privacy_body || ''}</div>`;
   showModal('privacyModal');
 }
 
 function showTerms(data) {
   const s = data.settings || {};
-  document.getElementById('termsContent').innerHTML = `
-    <h2 class="modal__title">${esc(s.terms_title || 'Terms of Service')}</h2>
-    <div class="legal__body">${esc(s.terms_body || '')}</div>
-  `;
+  document.getElementById('termsBody').innerHTML = `<div class="legal__body">${s.terms_body || ''}</div>`;
   showModal('termsModal');
 }
 
 function showImprint(data) {
   const s = data.settings || {};
-  document.getElementById('imprintContent').innerHTML = `
+  document.getElementById('imprintBody').innerHTML = `
     <h2 class="modal__title">Imprint</h2>
     <div class="imprint__content">
       <div class="imprint__block">
@@ -449,9 +445,15 @@ const _cachedUser = authToken ? (() => { try { return JSON.parse(localStorage.ge
 let currentUser = _cachedUser;
 window.currentUser = _cachedUser;
 
+// Promise that resolves once restoreSession() completes.
+// Defined at module level so program.html can await it even before DOMContentLoaded fires.
+let _authReadyResolve;
+window.__authReadyPromise = new Promise(r => { _authReadyResolve = r; });
+
 function authHeaders() {
   return authToken ? { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 }
+window.authHeaders = authHeaders;
 
 function setAuth(user, token) {
   currentUser = user;
@@ -811,27 +813,17 @@ async function showCheckoutModal() {
 }
 
 async function renderCheckout() {
-  const content = document.getElementById('checkoutContent');
-  const price = selectedPlan === 'yearly' ? '72 EUR' : '6 EUR';
+  const content = document.getElementById('checkoutFormWrap');
+  const price = selectedPlan === 'yearly' ? '€75' : '€9';
   const period = selectedPlan === 'yearly' ? '/year' : '/month';
-  const note = selectedPlan === 'yearly' ? 'Thats 6 EUR/month. Best value.' : 'Billed monthly. Switch to yearly to save.';
+
+  // Sync static plan selection cards
+  document.querySelectorAll('#pricingCards .pricing-card').forEach(card => {
+    card.classList.toggle('selected', card.dataset.plan === selectedPlan);
+    card.onclick = () => { selectedPlan = card.dataset.plan; renderCheckout(); };
+  });
 
   content.innerHTML = `
-    <h2 class="modal__title">Go Premium</h2>
-    <p class="modal__subtitle">Unlock the full KYROO experience</p>
-
-    <div class="checkout__plan">
-      <div class="checkout__plan-row">
-        <span class="checkout__plan-name">KYROO Premium</span>
-        <span class="checkout__plan-price">${price}<small>${period}</small></span>
-      </div>
-      <p class="checkout__plan-note">${note}</p>
-      <div class="checkout__plan-toggle">
-        <button type="button" class="plan-toggle-btn ${selectedPlan === 'monthly' ? 'plan-toggle-btn--active' : ''}" data-plan="monthly">Monthly - 6 EUR</button>
-        <button type="button" class="plan-toggle-btn ${selectedPlan === 'yearly' ? 'plan-toggle-btn--active' : ''}" data-plan="yearly">Yearly - 72 EUR</button>
-      </div>
-    </div>
-
     <p class="checkout__section-title">Payment</p>
     <div class="checkout__stripe-container">
       <div id="stripe-payment-element"></div>
@@ -848,14 +840,6 @@ async function renderCheckout() {
     <button type="button" class="btn btn--primary btn--full" id="checkoutPayBtn">Pay ${price}</button>
     <p class="checkout__guarantee">14-day free trial. Cancel anytime. Powered by Stripe.</p>
   `;
-
-  // Wire plan toggle
-  content.querySelectorAll('.plan-toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedPlan = btn.dataset.plan;
-      renderCheckout();
-    });
-  });
 
   // Initialize Stripe Payment Element
   if (stripeInstance) {
@@ -936,7 +920,7 @@ async function processCheckout() {
       loadArticles();
 
       // Show success
-      document.getElementById('checkoutContent').innerHTML = `
+      document.getElementById('checkoutFormWrap').innerHTML = `
         <div class="checkout__success">
           <div class="checkout__success-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -1300,8 +1284,13 @@ function initAnimations() {
 // ---- Main ----
 document.addEventListener('DOMContentLoaded', async () => {
 
-  // Render nav immediately with cached user (no network wait)
-  if (currentUser) updateAuthUI();
+  // ---- Auth resolution: must run first so program.html auth gate always resolves ----
+  await restoreSession();
+  _authReadyResolve(window.currentUser);
+  window.dispatchEvent(new CustomEvent('kyroo:authready')); // kept for any existing listeners
+
+  // Render nav with verified session (also handles cached state)
+  updateAuthUI();
 
   // Nav scroll effect
   const nav = document.getElementById('nav');
@@ -1504,9 +1493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // ---- Restore session (clear stale tokens) ----
-  await restoreSession();
-  window.dispatchEvent(new CustomEvent('kyroo:authready'));
   // Ensure modals stay closed on page load
   hideModal('authModal');
 

@@ -7,7 +7,9 @@ services:
       POSTGRES_USER: kyroo
       POSTGRES_PASSWORD: kyroo_pass
       POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_INITDB_ARGS: "--auth-host=trust"
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --encoding=UTF8 --lc-collate=de_DE.UTF-8 --lc-ctype=de_DE.UTF-8"
+      LANG: de_DE.UTF-8
+      LC_ALL: de_DE.UTF-8
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql

@@ -15,6 +15,11 @@ const multer = require('multer');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger.json');
+const Anthropic = require('@anthropic-ai/sdk');
+
+// Shared rules injected into every AI system prompt
+const KYROO_SYSTEM_RULES = `LANGUAGE RULES: Write in simple, short sentences. Use everyday English — no fancy words. Explain every term the first time. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
+BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +83,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'kyroo',
   user: process.env.DB_USER || 'kyroo',
   password: process.env.DB_PASSWORD || 'kyroo_pass',
+  client_encoding: 'UTF8',
 });
 
 async function waitForDb(retries = 15, delay = 2000) {
@@ -96,7 +102,15 @@ async function waitForDb(retries = 15, delay = 2000) {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ type: 'application/json' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Force UTF-8 charset on every JSON/text response
+app.use((_req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Accept-Charset', 'utf-8');
+  next();
+});
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -144,6 +158,9 @@ function generateToken(user) {
 // Plan limits
 const PLAN_LIMITS = { free: 0, basic: 5, pro: Infinity };
 
+// Programs accessible on the free plan
+const FREE_PROGRAM_IDS = new Set(['beginner', 'home']);
+
 async function getUserUsageThisMonth(userId) {
   const { rows } = await pool.query(
     "SELECT COUNT(*) as count FROM ai_usage WHERE user_id = $1 AND created_at >= date_trunc('month', NOW())",
@@ -166,16 +183,19 @@ async function recordUsage(userId, programType, tokensUsed) {
   );
 }
 
-async function checkProgramAccess(req, res) {
+async function checkProgramAccess(req, res, programId) {
   // Get fresh user data with plan
-  const { rows } = await pool.query('SELECT plan, is_admin FROM users WHERE id = $1', [req.user.id]);
+  const { rows } = await pool.query('SELECT plan, is_admin, is_premium FROM users WHERE id = $1', [req.user.id]);
   if (rows.length === 0) { res.status(401).json({ error: 'User not found' }); return false; }
   const user = rows[0];
 
   if (user.is_admin) return true;
 
+  // Free programs are accessible on any plan
+  if (programId && FREE_PROGRAM_IDS.has(programId)) return true;
+
   const plan = user.plan || 'free';
-  if (plan === 'free') { res.status(403).json({ error: 'Upgrade to Basic or Pro to generate programs', plan: 'free' }); return false; }
+  if (plan === 'free' && !user.is_premium) { res.status(403).json({ error: 'Upgrade to unlock all programs', plan: 'free' }); return false; }
 
   const { allowed, used, limit } = await canGenerateProgram(req.user.id, plan);
   if (!allowed) {
@@ -436,7 +456,7 @@ app.delete('/api/checkins', authRequired, async (req, res) => {
 
 // ---- 12-Week Program Generator ----
 app.post('/api/program/generate', authRequired, async (req, res) => {
-  if (!(await checkProgramAccess(req, res))) return;
+  if (!(await checkProgramAccess(req, res, req.body.program_id))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -448,12 +468,11 @@ app.post('/api/program/generate', authRequired, async (req, res) => {
   }
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programs that even complete beginners can follow without confusion.
+    const systemPrompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programs that even complete beginners can follow without confusion.\n\n${KYROO_SYSTEM_RULES}`;
 
-Your client:
+    const userPrompt = `Your client:
 - Level: ${level} with ${experience_years || 'some'} years of training
 - Body: ${weight}kg, ${height}cm, ${age} years old, ${sex}
 - Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
@@ -486,15 +505,13 @@ Include:
 Start with:
 
 # KYROO 12-WEEK TRAINING PROGRAM
-Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}
-
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English - no fancy words. Explain every term the first time. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const program = message.content[0].text;
@@ -507,7 +524,7 @@ BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFi
 
 // ---- Plateau Breaker Generator ----
 app.post('/api/program/plateau', authRequired, async (req, res) => {
-  if (!(await checkProgramAccess(req, res))) return;
+  if (!(await checkProgramAccess(req, res, req.body.program_id))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
@@ -515,12 +532,11 @@ app.post('/api/program/plateau', authRequired, async (req, res) => {
   const { weeks_stuck, squat, bench, deadlift, ohp, current_program, training_week, sleep_hours, stress_level, stress_reason, nutrition, years_lifting } = req.body;
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are a strength coach who specialises in diagnosing and fixing training plateaus in intermediate lifters. Write for someone who may not know advanced terminology - explain everything clearly.
+    const systemPrompt = `You are a strength coach who specialises in diagnosing and fixing training plateaus in intermediate lifters. Write for someone who may not know advanced terminology — explain everything clearly.\n\n${KYROO_SYSTEM_RULES}`;
 
-Client situation:
+    const userPrompt = `Client situation:
 - Stuck on lifts for ${weeks_stuck || 'several'} weeks despite consistent training
 - Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
 - Current program: ${current_program || 'Not specified'}
@@ -545,15 +561,13 @@ Then build a detailed 8-week plan specifically designed to break through each st
 
 Prioritise the most likely causes based on the information given.
 
-Start with: # KYROO PLATEAU BREAKER - 8-WEEK PLAN
-
-Write this so a beginner can understand every instruction. No unexplained jargon.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Start with: # KYROO PLATEAU BREAKER - 8-WEEK PLAN`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -579,12 +593,11 @@ app.post('/api/program/weakpoints', authRequired, async (req, res) => {
   }
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are a physique coach and movement specialist with extensive experience helping lifters identify and fix weak points. Write clearly so even beginners can follow every instruction.
+    const systemPrompt = `You are a physique coach and movement specialist with extensive experience helping lifters identify and fix weak points. Write clearly so even beginners can follow every instruction.\n\n${KYROO_SYSTEM_RULES}`;
 
-Client's weak points:
+    const userPrompt = `Client's weak points:
 
 Aesthetic weak points (underdeveloped muscle groups): ${aesthetic_weakpoints || 'Not specified'}
 
@@ -599,19 +612,15 @@ For EACH weak point listed, provide:
 4. A realistic timeline for noticeable improvement
 5. Measurable markers - numbers, movement quality standards, or visual indicators - that confirm the weak point is genuinely improving
 
-Format this as a prioritized action plan that can be started this week.
+Format this as a prioritized action plan that can be started this week. Write so someone can print this, bring it to the gym, and follow it without confusion.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".
-
-Start with: # KYROO WEAK POINT ACTION PLAN
-
-Write so someone can print this, bring it to the gym, and follow it without confusion. Explain all terminology.`;
+Start with: # KYROO WEAK POINT ACTION PLAN`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -633,12 +642,11 @@ app.post('/api/program/tracker', authRequired, async (req, res) => {
   const { program_type, duration_weeks, primary_goal, tracking_experience, current_bodyweight, key_lifts } = req.body;
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are a high-performance coach who specializes in data-driven accountability systems for lifters. Write so even someone who has never tracked anything can follow every instruction.
+    const systemPrompt = `You are a high-performance coach who specializes in data-driven accountability systems for lifters. Write so even someone who has never tracked anything can follow every instruction.\n\n${KYROO_SYSTEM_RULES}`;
 
-Client details:
+    const userPrompt = `Client details:
 - Program type: ${program_type || '12-week muscle-building program'}
 - Duration: ${duration_weeks || '12'} weeks
 - Primary goal: ${primary_goal || 'muscle growth'}
@@ -686,19 +694,15 @@ Include at least 8 specific scenarios with clear actions.
 - Warning signs you are over-tracking
 - How to stay consistent when numbers do not move
 
-Format this as a professional tracking system document. Use clear templates someone can print and fill in. Include example entries where helpful.
+Format this as a professional tracking system document. Use clear templates someone can print and fill in. Include example entries where helpful. Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.
 
-Start with: # KYROO PROGRESS TRACKING SYSTEM
-
-Make this feel like the monitoring system of a professional athlete, but written so anyone can use it from day one.
-
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Start with: # KYROO PROGRESS TRACKING SYSTEM`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -720,12 +724,11 @@ app.post('/api/program/summer', authRequired, async (req, res) => {
   const { bodyweight, body_fat_estimate, training_days, current_steps, sleep_hours, biggest_challenge, diet_preference } = req.body;
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are a no-BS body recomposition coach who specializes in 90-day summer transformations for men. Your tone is direct, motivating, and practical - like a friend who is also a coach. No jargon without explanation. Write for someone who has tried and failed before.
+    const systemPrompt = `You are a no-BS body recomposition coach who specializes in 90-day summer transformations. Your tone is direct, motivating, and practical — like a friend who is also a coach. No jargon without explanation. Write for someone who has tried and failed before.\n\n${KYROO_SYSTEM_RULES}`;
 
-Client:
+    const userPrompt = `Client:
 - Bodyweight: ${bodyweight || 'not specified'}kg
 - Body fat estimate: ${body_fat_estimate || 'not specified'}
 - Training days available: ${training_days || '4'} per week
@@ -775,17 +778,15 @@ Then add:
 - Three rules for when motivation drops
 - What to do about social events, alcohol, and eating out
 
-Start with: # KYROO 90-DAY SUMMER SHRED
-
 Write this so someone can start tomorrow morning. No fluff. Every instruction is actionable.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Start with: # KYROO 90-DAY SUMMER SHRED`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -807,12 +808,11 @@ app.post('/api/program/injury', authRequired, async (req, res) => {
   const { main_lifts, current_niggles, training_age, prehab_experience, injury_history } = req.body;
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `You are a sports physiotherapist and strength coach who specializes in keeping lifters healthy, pain-free, and training consistently for the long term. Write so anyone can follow every instruction - no medical jargon without explanation.
+    const systemPrompt = `You are a sports physiotherapist and strength coach who specializes in keeping lifters healthy, pain-free, and training consistently for the long term. Write so anyone can follow every instruction — no medical jargon without explanation.\n\n${KYROO_SYSTEM_RULES}`;
 
-Client:
+    const userPrompt = `Client:
 - Main lifts: ${main_lifts || 'squat, bench press, deadlift, overhead press, barbell rows'}
 - Current niggles or discomfort: ${current_niggles || 'none reported'}
 - Training age: ${training_age || 'not specified'}
@@ -846,17 +846,15 @@ How to come back after a short layoff due to illness or injury. Week-by-week gui
 7. TECHNIQUE ADJUSTMENTS
 For each main lift, give 2-3 technique tweaks that reduce joint stress without hurting performance. Explain why each adjustment helps.
 
-Start with: # KYROO INJURY PREVENTION PLAN
-
 Format this as a practical document someone can print and reference.
 
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Start with: # KYROO INJURY PREVENTION PLAN`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -882,12 +880,11 @@ app.post('/api/program/nutrition', authRequired, async (req, res) => {
   }
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
-    const prompt = `Act as an expert nutritionist with 30 years of experience. Tone: encouraging, straight-talking, fun - like a brilliant friend with a nutrition degree. Write so a complete beginner can follow everything.
+    const systemPrompt = `You are an expert nutritionist with 30 years of experience. Your tone is encouraging, straight-talking, and fun — like a brilliant friend with a nutrition degree. Write so a complete beginner can follow everything.\n\n${KYROO_SYSTEM_RULES}`;
 
-CLIENT PROFILE:
+    const userPrompt = `CLIENT PROFILE:
 - Age: ${age}, Sex: ${sex}, Height: ${height}cm, Weight: ${weight}kg
 - Goal weight: ${goal_weight || 'not specified'}
 - Timeline: ${timeline || 'steady and sustainable'}
@@ -931,15 +928,13 @@ Warn that online calculators are inaccurate. Set 500kcal deficit. Never below th
 
 8. SUPPLEMENTS - Only evidence-backed: whey, creatine (3-5g daily), caffeine, vitamin D, omega-3, magnesium. Dose, timing, why it matters for them specifically. Make clear supplements are the 1%.
 
-Start with: # KYROO NUTRITION PLAN
-
-LANGUAGE RULES: Write in simple, short sentences. Use everyday English. Explain every term. Use bullet points and numbered lists. A 14-year-old should understand every sentence. This is a print-ready PDF.
-BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFitnessPal, Strava, Nike Training Club, Cronometer, Garmin Connect, etc.). If you need to refer to a tracking app or tool, refer to it as "Kyroo".`;
+Start with: # KYROO NUTRITION PLAN`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }],
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
@@ -948,6 +943,276 @@ BRAND RULES: Do NOT mention any third-party apps or platforms by name (e.g. MyFi
   } catch (err) {
     console.error('Nutrition generator error:', err.message);
     res.status(500).json({ error: 'Failed to generate plan' });
+  }
+});
+
+// ---- Beginner Transformation ----
+app.post('/api/program/beginner', authRequired, async (req, res) => {
+  if (!(await checkProgramAccess(req, res, 'beginner'))) return;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { goal, starting_point, age, weight, height, sex, days_per_week, session_minutes, equipment, nutrition, biggest_challenge, injuries } = req.body;
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const systemPrompt = `You are a beginner fitness coach who has helped hundreds of first-timers start their fitness journey. Your tone is warm, supportive, and crystal clear — like a knowledgeable friend who never makes anyone feel judged or confused. You never use gym jargon without instantly explaining it. You know that the hardest part for beginners is just showing up consistently, so you design programs that are simple to follow, realistic, and build confidence week by week.\n\n${KYROO_SYSTEM_RULES}`;
+
+    const userPrompt = `Your client is a beginner starting their fitness journey for the first time (or restarting after a long break).
+
+About them:
+- Why they're starting: ${goal || 'build a consistent fitness habit and feel better'}
+- Where they are right now: ${starting_point || 'lightly active, no structured exercise'}
+- Age: ${age || 25} · ${sex || 'unspecified'} · ${weight || 75}kg · ${height || 170}cm
+- Available: ${days_per_week || 3} days per week · ${session_minutes || 45} minutes per session
+- Where they'll train: ${equipment || 'full commercial gym'}
+- How they eat: ${nutrition || 'balanced, no special diet'}
+- Biggest challenge: ${biggest_challenge || 'not knowing where to start'}
+- Physical limitations: ${injuries || 'none'}
+
+Create a complete 8-week Beginner Transformation program. This person may never have followed a structured plan before. Your job is to make this feel easy to start AND easy to stick to.
+
+---
+
+LANGUAGE RULES FOR THIS PROGRAM:
+- Write like a supportive friend who happens to be a great coach
+- SHORT sentences. One idea per sentence. No walls of text.
+- NEVER use a fitness term without explaining it immediately in plain English
+- Forbidden without explanation: RPE, periodization, hypertrophy, progressive overload, deload, 1RM, tempo notation like "3-1-1-0"
+- If you must use them, say: "progressive overload (which just means lifting a little more each week)"
+- Every exercise MUST have a "How to do it:" line — one simple sentence a 12-year-old could follow
+
+---
+
+PROGRAM STRUCTURE — 8 weeks, 4 clear phases:
+
+## PHASE 1 — WEEKS 1–2: Just Show Up
+Goal: Build the habit. Not fitness — the HABIT.
+- Very simple exercises. Light weights or bodyweight only.
+- Sessions should end with the client feeling good, not exhausted.
+- Focus: learn how each movement feels. Don't worry about weight.
+- Max 4 exercises per session.
+
+## PHASE 2 — WEEKS 3–4: Start Feeling It
+Goal: Add a little challenge. Keep it enjoyable.
+- Introduce 1–2 new exercises.
+- Slightly more weight or more reps than Phase 1.
+- Still very manageable. They should leave sessions thinking "I can do this."
+
+## PHASE 3 — WEEKS 5–6: Build Momentum
+Goal: Get stronger. Notice real changes.
+- Increase weight or reps each session.
+- Tell them EXACTLY how much to add: "Add 2.5kg to this exercise each week."
+- One "challenge set" per session — push a little harder than comfortable.
+
+## PHASE 4 — WEEKS 7–8: See the Results
+Goal: Consolidate strength and confidence.
+- Same structure as Phase 3 but heavier.
+- End each workout with a short motivational note (one sentence — specific to what they achieved that day).
+
+---
+
+FOR EVERY SINGLE WORKOUT, write out:
+
+**[Day] — [Session Name]**
+Warm-up (5 minutes):
+List 3–4 simple warm-up moves with reps (e.g. "10 arm circles each direction, 10 bodyweight squats, 30-second hip circles")
+
+Main session:
+1. [Exercise Name]
+   How to do it: [One plain-English sentence. Be specific about foot position, hand position, depth, etc.]
+   Sets × Reps: [e.g. 3 × 10]
+   Rest: [specific, e.g. "60 seconds between sets"]
+
+Cool-down (3 minutes):
+List 2–3 stretches with hold times.
+
+---
+
+WEEKLY SCHEDULE:
+Show a simple weekly plan like:
+- Monday: Session A
+- Tuesday: Rest or a 20-minute walk (optional — walking is always good)
+- Wednesday: Session B
+- Thursday: Rest
+- Friday: Session C
+- Saturday/Sunday: Rest, stretch, or walk
+
+Adapt the schedule to their ${days_per_week || 3} available days.
+
+---
+
+PROGRESSION GUIDE (keep it extremely simple):
+- When to add weight: "When you can do ALL the reps with good form and it feels easy — add 2.5kg to upper body lifts, 5kg to lower body lifts next session."
+- When to drop weight: "If you can't finish a set with good form, reduce by 20% and build back up."
+- NEVER mention percentages of a 1RM (they don't know their max lifts).
+- When to repeat a week: "If life got in the way and you missed 2+ sessions, just repeat that week. No shame — just repeat."
+
+---
+
+NUTRITION (tailored to: ${nutrition || 'no special diet'}):
+Keep this SIMPLE. Maximum 5 bullet points.
+- One clear daily protein target (grams, not percentages)
+- What to eat 1–2 hours before a workout (specific foods and portions)
+- What to eat within 30–60 minutes after a workout (specific foods and portions)
+- One simple habit to start with: just ONE thing they can do differently starting tomorrow
+- If their diet is "${nutrition}", give specific examples of good choices they already understand
+
+---
+
+ADDRESSING THEIR CHALLENGE:
+Their biggest challenge is: "${biggest_challenge || 'not knowing where to start'}"
+Give 3 very specific, practical strategies to beat this exact challenge. Not motivational quotes — real tactics.
+Example format: "When [specific situation happens], do [specific action]."
+
+---
+
+WHAT TO EXPECT WEEK BY WEEK:
+Be honest and specific. No hype.
+- Weeks 1–2: "You'll probably feel sore the day after. That's normal. Here's what to do about it."
+- Weeks 3–4: "You'll start to notice [specific physical or energy change]."
+- Weeks 5–6: "Your clothes might start to fit differently. You'll notice [specific strength milestone]."
+- Weeks 7–8: "You'll be able to [specific thing they couldn't do in Week 1]."
+
+---
+
+${injuries && injuries.toLowerCase() !== 'none' ? `WORKING AROUND THEIR LIMITATIONS (${injuries}):
+For each limitation they mentioned, provide:
+- Which exercises to avoid
+- A specific alternative exercise that achieves the same result safely` : `LISTEN TO YOUR BODY GUIDE:
+Three simple signals:
+- Stop immediately if: [2 specific warning signs]
+- Slow down if: [2 signs to ease off]
+- You're doing great if: [2 signs they're on track]`}
+
+---
+
+Start with:
+
+# KYROO BEGINNER TRANSFORMATION
+**Your 8-week plan to build the habit, gain real strength, and feel the difference.**
+
+> Goal: ${goal || 'build a consistent fitness habit'}
+> ${days_per_week || 3} days/week · ${session_minutes || 45} min sessions · ${equipment || 'gym'}`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
+  } catch (err) {
+    console.error('Beginner program generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate beginner program' });
+  }
+});
+
+// ---- Swim Tournament Prep ----
+app.post('/api/program/swim', authRequired, async (req, res) => {
+  if (!(await checkProgramAccess(req, res))) return;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
+
+  const { swim_level, age, sex, weight, pool_sessions, session_minutes, pool_access, dryland_access, weeks_to_tournament, nutrition, injuries } = req.body;
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const systemPrompt = `You are an elite swimming coach and sports performance specialist with 15+ years coaching competitive swimmers from club level to national championships. You understand periodization for aquatic sports, dryland training for swimmers, race-day tapering, and performance nutrition specific to swimming. You write plans that are detailed, practical, and immediately actionable — whether the swimmer is a recreational competitor or a seasoned athlete.\n\n${KYROO_SYSTEM_RULES}`;
+
+    const userPrompt = `Your athlete is preparing for a swim tournament in ${weeks_to_tournament || '4'} weeks.
+
+Athlete profile:
+- Swim level: ${swim_level || 'intermediate'} (beginner = recreational club swimmer; intermediate = regular competitor; advanced = national/elite level)
+- Age: ${age || 22}, ${sex || 'other'}, ${weight || 70}kg
+- Pool access: ${pool_access || 'indoor competition pool (25m or 50m)'}
+- Pool sessions: ${pool_sessions || 3} per week, ${session_minutes || 60} minutes per session
+- Dryland training: ${dryland_access || 'full commercial gym'}
+- Nutrition preference: ${nutrition || 'balanced'}
+- Physical limitations or injuries: ${injuries || 'none'}
+
+Build a complete KYROO Swim Tournament Prep Plan structured in three phases:
+
+---
+
+PHASE 1 — BUILD (weeks 1 to ${Math.max(1, Math.floor((parseInt(weeks_to_tournament) || 4) / 2))}): Volume and aerobic base
+- In-water: aerobic threshold sets, technique drills, stroke efficiency work
+- Dryland: strength base — focus on pulling power (lats, rhomboids), core stability, hip rotation
+- For each dryland exercise: one plain-English line on how to perform it
+- Nutrition: fueling for high-volume training (calorie targets, carb timing around sessions)
+- Recovery: sleep, cold exposure, active recovery swims
+
+PHASE 2 — PEAK (following weeks up to taper): Race-pace sharpening
+- In-water: race-pace intervals, lactate threshold sets, stroke-specific speed work
+- Dryland: explosive power — reduce volume by 20%, maintain intensity; plyometrics, resistance bands
+- Nutrition: shift to performance fueling — pre-session carb loading, post-session protein targets
+- Race simulation: one practice set per week at full race pace and distance
+
+PHASE 3 — TAPER (final 7–10 days before tournament): Peak freshness
+- In-water: reduce volume by 40–50%, maintain race-pace speed; 2–3 race-pace tune-up sets
+- Dryland: stop heavy lifting 5 days before race — only mobility, activation, and light band work
+- Nutrition: carbohydrate loading protocol (specific grams per kg bodyweight, 3 days out), hydration plan
+- Sleep: 9+ hours, fixed wake time, no racing dreams strategy
+- Race-day morning: warm-up pool routine, pre-race meal timing (what, when, how much)
+
+---
+
+For EACH training week, write out:
+- Every pool session (sets, distances, intervals, rest, target pace or RPE)
+  - Use standard swim notation: e.g. "4 × 100m @ 1:45 rest, race pace"
+  - Explain RPE for swimming the first time it appears
+  - Explain what "descending intervals" means if used
+- Every dryland session (exercises, sets, reps, tempo, rest)
+  - One-line how-to for each exercise
+- One recovery day protocol
+
+---
+
+NUTRITION SECTION:
+Tailored to their preference (${nutrition || 'balanced'}):
+- Daily calorie target based on training load (give a specific number)
+- Pre-session meal: what to eat, how much, how long before
+- Post-session recovery meal: protein + carbs with specific targets
+- Race-day nutrition: exact timeline from waking up to race start
+- Hydration: daily target + electrolyte strategy for race day
+- Foods to avoid in the final week before competition
+
+MENTAL PERFORMANCE SECTION:
+- A 10-minute pre-race visualization script they can use the night before
+- Warm-up pool routine: exact order and timing for race-day warm-up
+- 3 specific focus cues for their race (not generic motivation — technical cues like "high elbow catch", "drive the turn")
+- How to handle nerves: a simple breathing protocol
+
+INJURY PREVENTION:
+- 3 swimmer-specific mobility exercises to do daily (shoulder internal rotation, thoracic spine, hip flexors)
+- Warning signs to watch for during taper (taper madness, how to handle feeling "flat")
+- What to do if an old injury flares during taper week
+
+Start with:
+
+# KYROO SWIM TOURNAMENT PREP
+${swim_level || 'Intermediate'} swimmer · ${pool_sessions || 3} pool sessions/week · ${weeks_to_tournament || '4'} weeks to race day`;
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, req.path, tokens);
+    res.json({ program: message.content[0].text, tokens_used: tokens });
+  } catch (err) {
+    console.error('Swim prep generator error:', err.message);
+    res.status(500).json({ error: 'Failed to generate swim plan' });
   }
 });
 
@@ -1086,7 +1351,7 @@ app.get('/api/account/data-export', authRequired, async (req, res) => {
 
     res.json({
       export_date: new Date().toISOString(),
-      data_controller: 'KYROO UG, Schoenhauser Allee 100, 10119 Berlin',
+      data_controller: 'KYROO, Schoenhauser Allee 100, 10119 Berlin',
       contact: 'info@kyroo.de',
       user_data: user.rows[0] || null,
       payment_history: payments.rows,
@@ -1221,7 +1486,6 @@ app.post('/api/admin/generate', adminRequired, async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured. Set it as an environment variable.' });
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
 
     const systemPrompt = `You are an editorial writer for KYROO, a Berlin-based discovery and lifestyle platform. Your writing style is:

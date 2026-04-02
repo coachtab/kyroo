@@ -5,7 +5,7 @@
     "description": "The KYROO platform API. A next-generation discovery and lifestyle platform for trends, fitness, AI, and curated recommendations.\n\n## Authentication\nMost endpoints require a JWT Bearer token. Obtain one via `/api/auth/login` or `/api/auth/signup`, then pass it in the `Authorization` header as `Bearer <token>`.\n\n## Roles\n- **Public**: No auth required\n- **Authenticated**: Requires valid JWT\n- **Admin**: Requires JWT with `is_admin: true`\n\n## Base URL\n`http://localhost:3000`",
     "version": "1.0.0",
     "contact": {
-      "name": "KYROO UG",
+      "name": "KYROO",
       "email": "info@kyroo.de"
     }
   },

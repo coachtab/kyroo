@@ -26,7 +26,7 @@ async function seed() {
     articles_tag: 'READ',
     articles_title: 'Read.',
     articles_desc: '',
-    imprint_company: 'KYROO UG',
+    imprint_company: 'KYROO',
     imprint_street: 'Schoenhauser Allee 100',
     imprint_city: '10119 Berlin',
     imprint_phone: '(+49) 0151 / 55 623 461',
@@ -34,9 +34,8 @@ async function seed() {
     imprint_vat: 'DE12345566',
     imprint_founder: 'Damian Kamara',
     privacy_title: 'Privacy Policy',
-    privacy_body: `<h2>Privacy Policy</h2>
-<p><strong>Last updated: March 2026</strong></p>
-<p>KYROO UG ("Kyroo", "we", "us") operates the Kyroo platform at kyroo.de. This policy explains what personal data we collect, why, and how we protect it.</p>
+    privacy_body: `<p><strong>Last updated: March 2026</strong></p>
+<p>Kyroo operates the Kyroo platform at kyroo.de. This policy explains what personal data we collect, why, and how we protect it.</p>
 
 <h3>1. Data We Collect</h3>
 <p><strong>Account data:</strong> email address, name, and hashed password when you register.</p>
@@ -69,11 +68,10 @@ async function seed() {
 <p>All data is transmitted over HTTPS. Passwords are stored as bcrypt hashes. We apply industry-standard security practices to protect your data.</p>
 
 <h3>8. Contact</h3>
-<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
+<p>KYROO · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
     terms_title: 'Terms of Service',
-    terms_body: `<h2>Terms of Service</h2>
-<p><strong>Last updated: March 2026</strong></p>
-<p>These Terms govern your use of the Kyroo platform (kyroo.de), operated by KYROO UG, Schoenhauser Allee 100, 10119 Berlin.</p>
+    terms_body: `<p><strong>Last updated: March 2026</strong></p>
+<p>These Terms govern your use of the Kyroo platform (kyroo.de), operated by Kyroo, Schoenhauser Allee 100, 10119 Berlin.</p>
 
 <h3>1. What Kyroo Is</h3>
 <p>Kyroo is an AI-powered fitness plan generation platform. You answer a short questionnaire and receive a personalized, downloadable PDF fitness program. Kyroo is a digital tool — it does not provide medical advice, diagnose conditions, or replace professional medical or fitness guidance.</p>
@@ -94,7 +92,7 @@ async function seed() {
 <p>You agree not to: attempt to reverse-engineer the AI system, scrape or automate plan generation, upload false or misleading profile data, or use the platform for any unlawful purpose.</p>
 
 <h3>7. Intellectual Property</h3>
-<p>The Kyroo platform, brand, and underlying AI system are the property of KYROO UG. Generated PDF plans are licensed to you for personal use.</p>
+<p>The Kyroo platform, brand, and underlying AI system are the property of KYROO. Generated PDF plans are licensed to you for personal use.</p>
 
 <h3>8. Limitation of Liability</h3>
 <p>Kyroo is provided "as is." We are not liable for any injury, loss, or damage arising from following a generated fitness plan. Use good judgment and listen to your body.</p>
@@ -106,7 +104,7 @@ async function seed() {
 <p>These Terms are governed by German law. Disputes are subject to the jurisdiction of the courts of Berlin.</p>
 
 <h3>11. Contact</h3>
-<p>KYROO UG · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
+<p>KYROO · Schoenhauser Allee 100 · 10119 Berlin · <a href="mailto:info@kyroo.de">info@kyroo.de</a></p>`,
   };
 
   for (const [k, v] of Object.entries(settings)) {

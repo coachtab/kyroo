@@ -110,10 +110,27 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(150),
     is_premium BOOLEAN DEFAULT false,
+    is_admin BOOLEAN DEFAULT false,
+    plan VARCHAR(20) DEFAULT 'free',
+    email_verified BOOLEAN DEFAULT false,
+    verify_token VARCHAR(255),
+    reset_token VARCHAR(255),
+    reset_token_expires TIMESTAMP,
     premium_started_at TIMESTAMP,
     premium_expires_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ========================================
+-- AI usage tracking
+-- ========================================
+CREATE TABLE ai_usage (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    program_type VARCHAR(100),
+    tokens_used INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ========================================
