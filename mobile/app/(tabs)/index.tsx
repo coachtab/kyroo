@@ -1,12 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, SafeAreaView, ScrollView, Platform,
+  StyleSheet, SafeAreaView, ScrollView, Platform, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { PROGRAMS, FILTER_OPTIONS, Program } from '../../src/lib/programs';
 import { useAuth } from '../../src/context/AuthContext';
+import { API_BASE } from '../../src/lib/api';
+
+const WS_URL = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws';
 
 const CARD_PALETTES = [
   { bg: '#0F2318', accent: '#3D9E6A' },
@@ -22,6 +25,36 @@ export default function ProgramsScreen() {
   const { user, isPremium } = useAuth();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [liveCount, setLiveCount] = useState(0);
+  const pulse = useRef(new Animated.Value(1)).current;
+  const wsRef = useRef<WebSocket | null>(null);
+
+  // Live training WebSocket — Pro only
+  useEffect(() => {
+    if (!isPremium) return;
+    const socket = new WebSocket(WS_URL);
+    wsRef.current = socket;
+    socket.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'training-update') setLiveCount(msg.data.count ?? 0);
+      } catch {}
+    };
+    return () => { socket.close(); wsRef.current = null; };
+  }, [isPremium]);
+
+  // Pulsing dot when someone is training
+  useEffect(() => {
+    if (!isPremium || liveCount === 0) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.5, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1,   duration: 900, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [isPremium, liveCount]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -76,6 +109,20 @@ export default function ProgramsScreen() {
           <Text style={styles.headerSub}>
             Pick a program · answer a few questions · get your plan.
           </Text>
+
+          {isPremium && liveCount > 0 && (
+            <TouchableOpacity
+              style={styles.liveBanner}
+              onPress={() => router.push('/(tabs)/community')}
+              activeOpacity={0.8}
+            >
+              <Animated.View style={[styles.liveDot, { transform: [{ scale: pulse }] }]} />
+              <Text style={styles.liveBannerText}>
+                {liveCount === 1 ? '1 athlete training now' : `${liveCount} athletes training now`}
+              </Text>
+              <Text style={styles.liveBannerArrow}>→</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ── Sticky toolbar ── */}
@@ -270,4 +317,17 @@ const styles = StyleSheet.create({
   cardTagline:    { fontFamily: font.mono, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 },
   lockIcon:       { fontSize: 12 },
   arrow:          { fontSize: 28, flexShrink: 0, opacity: 0.5 },
+
+  // Live training banner
+  liveBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#0F2318', borderRadius: radius.full,
+    borderWidth: 1, borderColor: '#3D9E6A40',
+    paddingHorizontal: spacing[4], paddingVertical: 7,
+    gap: spacing[2], marginTop: spacing[3],
+    alignSelf: 'flex-start',
+  },
+  liveDot:         { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3D9E6A' },
+  liveBannerText:  { fontFamily: font.mono, fontSize: 11, color: '#6DBF8A', letterSpacing: 0.4 },
+  liveBannerArrow: { fontFamily: font.mono, fontSize: 11, color: '#3D9E6A', opacity: 0.5 },
 });
