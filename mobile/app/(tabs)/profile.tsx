@@ -93,7 +93,7 @@ export default function ProfileScreen() {
 
         {/* ── Menu items ── */}
         <View style={styles.menu}>
-          <MenuItem icon="⚡" label="My Programs" onPress={() => router.push('/')} />
+          <MenuItem icon="⚡" label="My Programs" onPress={() => router.push('/plans')} />
           <MenuItem icon="⚙️" label="Account Settings" onPress={() => router.push('/settings')} />
           <MenuItem icon="💬" label="Support" onPress={() => Linking.openURL('mailto:support@kyroo.de')} />
         </View>

@@ -72,7 +72,18 @@ export default function WizardScreen() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Generation failed.'); setGenerating(false); return; }
-      setResult(data.program || data.plan || data.content || '');
+      const planContent = data.program || data.plan || data.content || '';
+      setResult(planContent);
+      // Auto-save to user's profile (fire-and-forget)
+      apiFetch('/api/plans', {
+        method: 'POST',
+        body: JSON.stringify({
+          program_id:   prog.id,
+          program_name: prog.name,
+          program_icon: prog.icon,
+          content:      planContent,
+        }),
+      }).catch(() => {/* silent — plan still shown even if save fails */});
     } catch (err: any) {
       setError(err?.message || 'Network error. Please try again.');
     } finally {
@@ -398,9 +409,9 @@ function Actions({ onBack, onNext, nextLabel = 'Continue', nextForest = false }:
 }
 
 const stepStyles = StyleSheet.create({
-  wrap: { paddingBottom: spacing[8] },
-  q: { fontFamily: font.sansBd, fontSize: 26, color: '#F5F5F2', lineHeight: 32, marginBottom: spacing[2] },
-  hint: { fontFamily: font.sans, fontSize: 14, color: '#555', marginBottom: spacing[5] },
+  wrap: { width: '100%' },
+  q: { fontFamily: font.sansBd, fontSize: 28, color: '#F5F5F2', lineHeight: 34, marginBottom: spacing[2], textAlign: 'center' },
+  hint: { fontFamily: font.sans, fontSize: 14, color: '#555', marginBottom: spacing[6], textAlign: 'center' },
   opts: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], marginBottom: spacing[5] },
   opts3: {},
   opt: {
@@ -466,7 +477,7 @@ const styles = StyleSheet.create({
   closeText: { fontSize: 18, color: '#444' },
   stripe: { height: 3, backgroundColor: '#1C1C18' },
   stripeFill: { height: '100%', backgroundColor: '#3D9E6A' },
-  stepContent: { padding: spacing[5], paddingTop: spacing[6], minHeight: 500 },
+  stepContent: { flexGrow: 1, justifyContent: 'center', padding: spacing[5], paddingVertical: spacing[8] },
   pinnedBar: {
     borderTopWidth: 1, borderTopColor: '#1C1C18',
     backgroundColor: '#0D0D0B', padding: spacing[4], gap: spacing[2],
@@ -474,7 +485,7 @@ const styles = StyleSheet.create({
   pinnedError: { fontFamily: font.sans, fontSize: 13, color: '#C06848', textAlign: 'center' },
   pinnedBtn: { backgroundColor: '#3D9E6A', height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
   pinnedBtnText: { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2' },
-  counter: { fontFamily: font.mono, fontSize: 11, color: '#444', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing[4] },
+  counter: { fontFamily: font.mono, fontSize: 11, color: '#444', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing[4], textAlign: 'center' },
   reaction: { fontFamily: font.sans, fontSize: 13, color: '#3D9E6A', fontStyle: 'italic', marginTop: spacing[3], lineHeight: 18 },
   genScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[8], backgroundColor: '#0D0D0B' },
   genIcon: { fontSize: 48, marginBottom: spacing[4] },

@@ -402,6 +402,46 @@ app.get('/api/auth/me', authRequired, async (req, res) => {
   }
 });
 
+// ── Saved Plans ─────────────────────────────────────────────
+app.post('/api/plans', authRequired, async (req, res) => {
+  const { program_id, program_name, program_icon, content } = req.body;
+  if (!program_id || !program_name || !content) return res.status(400).json({ error: 'Missing fields.' });
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO user_plans (user_id, program_id, program_name, program_icon, content) VALUES ($1,$2,$3,$4,$5) RETURNING id, created_at',
+      [req.user.id, program_id, program_name, program_icon || '', content]
+    );
+    res.status(201).json({ id: rows[0].id, created_at: rows[0].created_at });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save plan.' });
+  }
+});
+
+app.get('/api/plans', authRequired, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, program_id, program_name, program_icon, content, created_at FROM user_plans WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    res.json({ plans: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch plans.' });
+  }
+});
+
+app.delete('/api/plans/:id', authRequired, async (req, res) => {
+  try {
+    const { rowCount } = await pool.query(
+      'DELETE FROM user_plans WHERE id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Plan not found.' });
+    res.json({ message: 'Plan deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete plan.' });
+  }
+});
+
 app.patch('/api/auth/update-profile', authRequired, async (req, res) => {
   const { name } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required.' });
