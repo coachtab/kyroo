@@ -59,7 +59,7 @@ export const PROGRAMS: Program[] = [
     id: 'swim',
     name: 'Swim Training',
     icon: '🏊',
-    tagline: 'Custom · pool sessions',
+    tagline: 'your pace · pool sessions',
     badge: 'PREMIUM',
     filters: ['sport', 'endurance'],
     description: 'Structured pool sessions with warm-ups, drills, main sets, and cool-downs. Built for your stroke and current level.',

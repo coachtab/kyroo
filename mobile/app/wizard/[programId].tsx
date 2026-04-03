@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home'].includes(progId)) return 9;
+  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home', 'swim'].includes(progId)) return 9;
   return 8;
 }
 
@@ -925,6 +925,135 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4hw, step5hw, step6hw, step7hw, step8hw, step9hw,
+    ];
+  }
+
+  // ── SWIM TRAINING — fully dedicated steps ────────────────────
+  if (isSwim) {
+    const step1sw = (
+      <StepWrap key="1" q="What's your swim goal?" hint="Your sessions, sets, and focus will all be built around this.">
+        <Opts options={[
+          { icon: '❤️', label: 'Fitness & health',  desc: 'Swim for fitness, not competition',   value: 'improve overall fitness, health, and endurance through swimming' },
+          { icon: '🎯', label: 'Technique',          desc: 'Fix my stroke, swim efficiently',      value: 'improve stroke technique, efficiency, and body position in the water' },
+          { icon: '🏁', label: 'Race prep',          desc: 'Training for a competition or event',  value: 'prepare for a swim race, triathlon, or open water event' },
+          { icon: '🌊', label: 'Open water',         desc: 'Lake, sea, or triathlon training',     value: 'open water swimming — lake, sea, or triathlon-specific training' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Every session will be built around that goal.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2sw = (
+      <StepWrap key="2" q="What's your current swim level?" hint="Sets your starting volume, rest intervals, and drill complexity.">
+        <Opts options={[
+          { icon: '🌱', label: 'Beginner',          desc: 'Can swim, but no real technique',       value: 'beginner — can swim a length but has no structured technique or training' },
+          { icon: '🏊', label: 'Recreational',      desc: 'Comfortable, casual lane swimmer',      value: 'recreational — comfortable in the pool, casual lane swimmer' },
+          { icon: '💪', label: 'Intermediate',      desc: 'Train regularly, know basic drills',    value: 'intermediate — trains regularly, familiar with sets and basic drills' },
+          { icon: '🏆', label: 'Competitive',       desc: 'Club level or racing background',       value: 'competitive — club level swimmer or has racing background' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your sessions will be calibrated for that level.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4sw = (
+      <StepWrap key="4" q="How many sessions per week?" hint="Pool sessions — each one structured with warm-up, drills, main set, and cool-down.">
+        <Opts options={[
+          { icon: '2', label: '2 sessions', desc: 'Maintenance — stay in the water', value: '2' },
+          { icon: '3', label: '3 sessions', desc: 'Progress — standard improvement',  value: '3' },
+          { icon: '4', label: '4 sessions', desc: 'Development — faster gains',       value: '4' },
+          { icon: '5', label: '5 sessions', desc: 'Performance — serious training',   value: '5' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly session structure will be built around that.', 5)} cols={2} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5sw = (
+      <StepWrap key="5" q="Which stroke do you want to focus on?" hint="Your drills and technique sets will prioritise this stroke.">
+        <Opts options={[
+          { icon: '🔵', label: 'Freestyle',          desc: 'Front crawl — fastest, most used',     value: 'freestyle (front crawl) — the primary stroke for fitness and racing' },
+          { icon: '🟢', label: 'Breaststroke',       desc: 'Most popular recreational stroke',      value: 'breaststroke — the most common recreational stroke, technique-focused' },
+          { icon: '🟡', label: 'Backstroke',         desc: 'Back position, great for posture',      value: 'backstroke — back position swimming, rhythm and rotation focus' },
+          { icon: '🌈', label: 'All strokes (IM)',   desc: 'Individual medley training',            value: 'all four strokes (IM) — individual medley with butterfly, backstroke, breaststroke, freestyle' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Your drills and technique work will focus there.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('nutrition') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6sw = (
+      <StepWrap key="6" q="Where do you swim?" hint="Your session distances, formats, and turn work depend on your pool.">
+        <Opts options={[
+          { icon: '🏊', label: '25m pool',           desc: 'Short course — standard club pool',    value: '25-metre short course pool' },
+          { icon: '🏟️', label: '50m pool',           desc: 'Long course — Olympic standard',       value: '50-metre long course pool' },
+          { icon: '🌊', label: 'Open water',         desc: 'Lake, sea, or river — no walls',       value: 'open water — lake, sea, or river (no lane or turn walls)' },
+          { icon: '🔀', label: 'Mix',                desc: 'Pool + open water sessions',           value: 'mix of pool and open water training' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Your sets and distances will be written for that environment.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('location') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7sw = (
+      <StepWrap key="7" q="What do you struggle most with in the water?" hint="Your plan will include targeted drills and sets to fix exactly this.">
+        <Opts options={[
+          { icon: '💨', label: 'Breathing',          desc: 'Out of breath, can\'t find a rhythm',  value: 'breathing — getting out of breath quickly and struggling to find a breathing rhythm' },
+          { icon: '🏃', label: 'Endurance',          desc: 'Can\'t hold my pace for long',         value: 'endurance — unable to sustain pace over longer distances' },
+          { icon: '⚡', label: 'Speed',              desc: 'Fit but slow in the water',            value: 'speed — fit enough but not fast — poor propulsion or too much drag' },
+          { icon: '🎯', label: 'Technique',          desc: 'Inefficient stroke, wasted energy',    value: 'stroke technique — inefficient movement that wastes energy and kills pace' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will target that with specific drills.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8sw = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Common swimmer issues — shoulder, neck, or knee — we'll programme around them.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Shoulder impingement — no butterfly. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9sw = (
+      <StepWrap key="9" q="How long is your training block?" hint="Your phase structure and total volume will be built around this.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',    desc: 'Short intensive block',               value: '4 weeks'  },
+          { icon: '🔥', label: '8 weeks',    desc: 'Solid development cycle',             value: '8 weeks'  },
+          { icon: '💪', label: '12 weeks',   desc: 'Full base-to-race build',             value: '12 weeks' },
+          { icon: '🏆', label: '20 weeks',   desc: 'Season-long periodised plan',         value: '20 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Your training block is set. Let\'s build your plan.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1sw, step2sw,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Sets your training zones and aerobic capacity baseline.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '28', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '75', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '178', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4sw, step5sw, step6sw, step7sw, step8sw, step9sw,
     ];
   }
 
