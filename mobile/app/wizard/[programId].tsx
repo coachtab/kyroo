@@ -11,7 +11,10 @@ import { PROGRAMS } from '../../src/lib/programs';
 import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
-const TOTAL_STEPS = 8;
+function getTotalSteps(progId: string) {
+  if (progId === 'weightloss') return 9;
+  return 8;
+}
 
 type FormData = Record<string, any>;
 
@@ -50,6 +53,7 @@ export default function WizardScreen() {
 
   if (!prog) return null;
 
+  const TOTAL_STEPS = getTotalSteps(prog.id);
   const progress = ((step - 1) / TOTAL_STEPS) * 100;
 
   function goTo(n: number) {
@@ -82,6 +86,7 @@ export default function WizardScreen() {
         nutrition:         formData.nutrition,
         biggest_challenge: formData.motivation,
         injuries:          formData.injuries || 'None',
+        timeframe:         formData.timeframe,
       };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
@@ -108,15 +113,53 @@ export default function WizardScreen() {
     }
   }
 
+  const genMessages: Record<string, { title: string; sub: string; subtle: string }> = {
+    weightloss: {
+      title: 'Crafting your weight loss plan',
+      sub:   'Calculating your calorie deficit…',
+      subtle:'Building your fat-loss training schedule…',
+    },
+    muscle: {
+      title: 'Building your muscle program',
+      sub:   'Designing your hypertrophy splits…',
+      subtle:'Programming your progressive overload…',
+    },
+    challenge90: {
+      title: 'Designing your 90-day challenge',
+      sub:   'Mapping your transformation phases…',
+      subtle:'Setting your weekly milestones…',
+    },
+    beginner: {
+      title: 'Creating your beginner program',
+      sub:   'Selecting your foundational movements…',
+      subtle:'Writing step-by-step instructions…',
+    },
+    home: {
+      title: 'Building your home workout plan',
+      sub:   'Choosing your bodyweight progressions…',
+      subtle:'Structuring your at-home sessions…',
+    },
+    swim: {
+      title: 'Writing your swim training plan',
+      sub:   'Structuring your pool sessions…',
+      subtle:'Planning your technique drills…',
+    },
+  };
+  const gm = genMessages[prog.id] ?? {
+    title: 'Crafting your plan',
+    sub:   'Analyzing your profile…',
+    subtle:'Working on your plan…',
+  };
+
   if (generating) {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.genScreen}>
           <Text style={styles.genIcon}>{prog.icon}</Text>
-          <Text style={styles.genTitle}>Crafting your plan</Text>
-          <Text style={styles.genSub}>Analyzing your profile…</Text>
+          <Text style={styles.genTitle}>{gm.title}</Text>
+          <Text style={styles.genSub}>{gm.sub}</Text>
           <ActivityIndicator color="#3D9E6A" style={{ marginTop: spacing[6] }} />
-          <Text style={styles.genSubtle}>Working on your plan…</Text>
+          <Text style={styles.genSubtle}>{gm.subtle}</Text>
         </View>
       </SafeAreaView>
     );
@@ -328,7 +371,19 @@ function buildSteps(
           value={formData.injuries || ''}
           onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
         />
-        <Actions onBack={() => goTo(7)} />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9wl = (
+      <StepWrap key="9" q="What's your target timeframe?" hint="Your plan length, phases, and pace will be built around this.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',    desc: 'Kickstart — fast results',          value: '4 weeks'  },
+          { icon: '🔥', label: '8 weeks',    desc: 'Strong foundation, visible change',  value: '8 weeks'  },
+          { icon: '💪', label: '12 weeks',   desc: 'Full transformation',                value: '12 weeks' },
+          { icon: '🏆', label: '16 weeks +', desc: 'Long-term lifestyle change',         value: '16+ weeks'},
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Perfect. Your plan will be paced exactly for that.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
       </StepWrap>
     );
 
@@ -356,7 +411,7 @@ function buildSteps(
           goTo(4);
         }} nextLabel="Continue" />
       </StepWrap>,
-      step4wl, step5wl, step6wl, step7wl, step8wl,
+      step4wl, step5wl, step6wl, step7wl, step8wl, step9wl,
     ];
   }
 

@@ -579,7 +579,7 @@ function buildProgramPrompt(programId, data) {
   const {
     level, age, weight, height, sex,
     days_per_week, session_minutes, equipment,
-    primary_goal, nutrition, biggest_challenge, injuries,
+    primary_goal, nutrition, biggest_challenge, injuries, timeframe,
   } = data;
 
   const clientBase = [
@@ -595,12 +595,21 @@ function buildProgramPrompt(programId, data) {
   switch (programId) {
 
     // ── 1. Weight Loss ──────────────────────────────────────────────────────
-    case 'weightloss':
+    case 'weightloss': {
+      const wlDuration = timeframe || '12 weeks';
+      // Build phases dynamically based on duration
+      const wlWeeks = parseInt(wlDuration) || 12;
+      const phase1End = Math.round(wlWeeks * 0.33);
+      const phase2End = Math.round(wlWeeks * 0.66);
+      const phaseBreakdown = wlWeeks <= 4
+        ? `### Phase 1 — Weeks 1–2: Foundation (Build the habit)\n### Phase 2 — Weeks 3–4: Acceleration (Push harder)`
+        : `### Phase 1 — Weeks 1–${phase1End}: Foundation (Build the habit)\n### Phase 2 — Weeks ${phase1End + 1}–${phase2End}: Acceleration (Increase intensity)\n### Phase 3 — Weeks ${phase2End + 1}–${wlWeeks}: Peak (Push to the finish)`;
       return {
         system: `You are a specialist fat-loss coach and registered dietitian with 12+ years helping clients shed body fat permanently — not just lose water weight. Every plan you write combines calorie-deficit nutrition, metabolic conditioning, and strategic cardio. You NEVER recommend crash diets, starvation, or unsustainable methods. You write so a complete beginner understands everything.\n\n${KYROO_SYSTEM_RULES}`,
-        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'lose body fat'}\n\nCreate a complete 12-WEEK WEIGHT LOSS PLAN. This plan must be ONLY about fat loss — no muscle-building programs repackaged as fat loss.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 12-WEEK WEIGHT LOSS PLAN\nDesigned for: ${level} | ${days_per_week} days/week | Goal: Sustainable fat loss\n\n## YOUR FAT-LOSS STRATEGY (plain English, 3-4 sentences)\nExplain caloric deficit, why this works, and what makes this plan different from crash diets.\n\n## DAILY CALORIE & MACRO TARGETS\n- Calculate and state their estimated TDEE\n- Recommend a deficit (state exact kcal target)\n- Protein, carbs, fat in grams with a one-line reason for each\n- Give 3 simple food swap examples\n\n## WEEKLY TRAINING STRUCTURE\nFor each of the ${days_per_week} training days per week, label as: FAT-BURN SESSION or RESISTANCE SESSION\n- FAT-BURN SESSIONS: cardio-focused (LISS, HIIT, or circuit). Explain what LISS and HIIT mean the first time. State duration, intensity (heart-rate zone or RPE), and exact format.\n- RESISTANCE SESSIONS: full-body or upper/lower. Use compound movements to preserve muscle during deficit. For every exercise include: name, one-line how-to, sets × reps, rest.\n\n## PHASE BREAKDOWN\n### Phase 1 — Weeks 1–4: Foundation (Build the habit)\n### Phase 2 — Weeks 5–8: Acceleration (Increase intensity)\n### Phase 3 — Weeks 9–12: Peak (Push to the finish)\nFor each phase: training approach, calorie adjustments if needed, what to expect on the scales.\n\n## WEEKLY CHECK-IN SYSTEM\nWhat to track each week (weight, measurements, energy levels). How to adjust if fat loss stalls.\n\n## WHAT NOT TO DO\n3 common fat-loss mistakes this client must avoid.`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'lose body fat'}\n- Target timeframe: ${wlDuration}\n\nCreate a complete ${wlDuration.toUpperCase()} WEIGHT LOSS PLAN. This plan must be ONLY about fat loss — no muscle-building programs repackaged as fat loss.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO ${wlDuration.toUpperCase()} WEIGHT LOSS PLAN\nDesigned for: ${level} | ${days_per_week} days/week | Goal: Sustainable fat loss in ${wlDuration}\n\n## YOUR FAT-LOSS STRATEGY (plain English, 3-4 sentences)\nExplain caloric deficit, why this works, and what makes this plan realistic for ${wlDuration}.\n\n## DAILY CALORIE & MACRO TARGETS\n- Calculate and state their estimated TDEE\n- Recommend a deficit (state exact kcal target)\n- Protein, carbs, fat in grams with a one-line reason for each\n- Give 3 simple food swap examples\n\n## WEEKLY TRAINING STRUCTURE\nFor each of the ${days_per_week} training days per week, label as: FAT-BURN SESSION or RESISTANCE SESSION\n- FAT-BURN SESSIONS: cardio-focused (LISS, HIIT, or circuit). Explain what LISS and HIIT mean the first time. State duration, intensity (heart-rate zone or RPE), and exact format.\n- RESISTANCE SESSIONS: full-body or upper/lower. Use compound movements to preserve muscle during deficit. For every exercise include: name, one-line how-to, sets × reps, rest.\n\n## PHASE BREAKDOWN\n${phaseBreakdown}\nFor each phase: training approach, calorie adjustments if needed, what to expect on the scales.\n\n## WEEKLY CHECK-IN SYSTEM\nWhat to track each week (weight, measurements, energy levels). How to adjust if fat loss stalls.\n\n## WHAT NOT TO DO\n3 common fat-loss mistakes this client must avoid.`,
         maxTokens: 8000,
       };
+    }
 
     // ── 2. Muscle Building ──────────────────────────────────────────────────
     case 'muscle':
