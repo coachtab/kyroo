@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (progId === 'weightloss' || progId === 'muscle') return 9;
+  if (progId === 'weightloss' || progId === 'muscle' || progId === 'challenge90') return 9;
   return 8;
 }
 
@@ -88,6 +88,7 @@ export default function WizardScreen() {
         injuries:          formData.injuries || 'None',
         timeframe:         formData.timeframe,
         muscle_focus:      formData.muscle_focus,
+        challenge_vision:  formData.challenge_vision,
       };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
@@ -289,6 +290,7 @@ function buildSteps(
   const isBeginner   = progId === 'beginner';
   const isWeightLoss = progId === 'weightloss';
   const isMuscle     = progId === 'muscle';
+  const isChallenge  = progId === 'challenge90';
 
   // ── WEIGHT LOSS — fully dedicated steps ──────────────────────
   if (isWeightLoss) {
@@ -539,6 +541,133 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4mb, step5mb, step6mb, step7mb, step8mb, step9mb,
+    ];
+  }
+
+  // ── 90-DAY CHALLENGE — fully dedicated steps ──────────────────
+  if (isChallenge) {
+    const step1ch = (
+      <StepWrap key="1" q="What transformation are you chasing?" hint="Your 90 days will be built around this. Be specific — vague goals produce vague results.">
+        <Opts options={[
+          { icon: '🪞', label: 'Body first',       desc: 'Lose fat, build muscle, look different', value: 'visible body transformation — lose fat and build lean muscle' },
+          { icon: '🏃', label: 'Performance',      desc: 'Get fitter, faster, stronger',           value: 'major fitness improvement — strength, endurance, and athletic performance' },
+          { icon: '🧠', label: 'New habits',       desc: 'Make exercise and nutrition automatic',  value: 'build unbreakable fitness and nutrition habits that last beyond 90 days' },
+          { icon: '🔥', label: 'Full overhaul',    desc: 'Body + performance + mindset',           value: 'complete transformation — body, fitness, habits, and mindset' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'That\'s your mission for the next 90 days.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2ch = (
+      <StepWrap key="2" q="Where are you starting from?" hint="Honest answer only — your Day 1 training load depends on this.">
+        <Opts options={[
+          { icon: '🛋️', label: 'Inactive',        desc: 'Little to no exercise right now',       value: 'currently inactive — little to no regular exercise' },
+          { icon: '🚶', label: 'Lightly active',  desc: 'Walk, occasional workout',               value: 'lightly active — occasional walks or workouts, no consistent routine' },
+          { icon: '🏃', label: 'Somewhat fit',    desc: 'Train 1–2× a week',                     value: 'somewhat fit — training 1-2 times per week but no structured program' },
+          { icon: '💪', label: 'Already training',desc: 'Consistent 3+ days/week',                value: 'already training consistently 3 or more days per week' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your starting intensity and volume will match that.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4ch = (
+      <StepWrap key="4" q="How many days per week can you commit?" hint="This is a challenge — minimum 4 days. More days = faster transformation.">
+        <Opts options={[
+          { icon: '4', label: '4 days', desc: 'Minimum commitment, maximum focus', value: '4' },
+          { icon: '5', label: '5 days', desc: 'Recommended — balanced intensity',  value: '5' },
+          { icon: '6', label: '6 days', desc: 'All in — maximum transformation',   value: '6' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Locked in. Your 90 days starts now.', 5)} cols={3} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5ch = (
+      <StepWrap key="5" q="Where will you train?" hint="Your sessions will be designed specifically for this setup.">
+        <Opts options={[
+          { icon: '🏋️', label: 'Gym',          desc: 'Full equipment available',             value: 'full commercial gym' },
+          { icon: '🏠', label: 'Home',          desc: 'Bodyweight or minimal equipment',      value: 'home with bodyweight and minimal equipment' },
+          { icon: '🌳', label: 'Outdoors',      desc: 'Parks, tracks, open space',            value: 'outdoors — parks, running tracks, and open spaces' },
+          { icon: '🔀', label: 'Mix',           desc: 'Gym + home + outdoor',                 value: 'mix of gym, home, and outdoor training' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Every session will be built for that environment.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6ch = (
+      <StepWrap key="6" q="How committed are you to nutrition?" hint="90-day transformations are decided in the kitchen as much as the gym.">
+        <Opts options={[
+          { icon: '📋', label: 'Strict daily plan', desc: 'Exact meals laid out per phase',       value: 'strict daily nutrition plan with phase-by-phase meal structure' },
+          { icon: '🥗', label: 'Clean eating rules', desc: 'Clear rules, no calorie counting',    value: 'clean eating rules — what to eat, what to avoid, no obsessive tracking' },
+          { icon: '📊', label: 'Track macros',       desc: 'Calories + protein targets daily',    value: 'macro tracking — daily calorie and protein targets with food flexibility' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Your 90-day nutrition strategy is set.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7ch = (
+      <StepWrap key="7" q="What's your biggest threat to finishing?" hint="Most people quit between Day 20 and Day 40. Your plan will have direct countermeasures.">
+        <Opts options={[
+          { icon: '📉', label: 'Motivation drops',    desc: 'Start strong, fade after week 2',     value: 'motivation dropping after the initial excitement wears off' },
+          { icon: '🕐', label: 'Life gets busy',      desc: 'Work, family, schedule chaos',        value: 'life getting in the way — work, family, and schedule disruptions' },
+          { icon: '🔍', label: 'Slow early results',  desc: 'Give up if nothing happens fast',     value: 'not seeing results fast enough and losing belief in the process' },
+          { icon: '🔁', label: 'Past failures',       desc: 'Started challenges before, quit',     value: 'history of starting and quitting — need to break the pattern this time' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will have a direct strategy for exactly that.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8ch = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="We'll program around anything that needs protecting.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Lower back issues — no heavy deadlifts. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9ch = (
+      <StepWrap key="9" q="What does Day 90 success look like?" hint="This becomes your challenge contract. Every session will work towards it.">
+        <Opts options={[
+          { icon: '🪞', label: 'Look different',     desc: 'Visible body change, new photos',     value: 'a visibly transformed body — new progress photos prove the change' },
+          { icon: '🏅', label: 'Hit a milestone',    desc: 'Specific performance goal achieved',  value: 'a specific performance milestone — a lift PR, run time, or fitness test' },
+          { icon: '♾️', label: 'Built for life',     desc: 'Habits that stick beyond Day 90',     value: 'permanent habits — fitness and nutrition feel natural and automatic' },
+          { icon: '🏆', label: 'I finished',         desc: 'Prove I can complete a full challenge',value: 'the proof that I can commit to and finish something hard — no excuses' },
+        ]} selected={sel('challenge_vision')} onSelect={v => selectOpt('challenge_vision', v, 'That\'s your Day 90 contract. Let\'s build your plan.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1ch, step2ch,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Sets your Day 1 baseline — we\'ll reference this to track your transformation.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '28', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '80', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '175', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4ch, step5ch, step6ch, step7ch, step8ch, step9ch,
     ];
   }
 
