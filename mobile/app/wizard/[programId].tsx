@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home', 'swim', 'hyrox', 'marathon'].includes(progId)) return 9;
+  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home', 'swim', 'hyrox', 'marathon', 'crossfit', 'hiit'].includes(progId)) return 9;
   return 8;
 }
 
@@ -156,6 +156,16 @@ export default function WizardScreen() {
       title: 'Writing your marathon plan',
       sub:   'Calculating your training paces…',
       subtle:'Scheduling your long run progression…',
+    },
+    crossfit: {
+      title: 'Building your CrossFit program',
+      sub:   'Programming your WODs…',
+      subtle:'Selecting your skill work and scaling…',
+    },
+    hiit: {
+      title: 'Designing your HIIT program',
+      sub:   'Calculating your work-to-rest ratios…',
+      subtle:'Structuring your interval formats…',
     },
   };
   const gm = genMessages[prog.id] ?? {
@@ -304,6 +314,8 @@ function buildSteps(
   const isChallenge  = progId === 'challenge90';
   const isHyrox      = progId === 'hyrox';
   const isMarathon   = progId === 'marathon';
+  const isCrossfit   = progId === 'crossfit';
+  const isHIIT       = progId === 'hiit';
 
   // ── WEIGHT LOSS — fully dedicated steps ──────────────────────
   if (isWeightLoss) {
@@ -1341,6 +1353,263 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4mr, step5mr, step6mr, step7mr, step8mr, step9mr,
+    ];
+  }
+
+  // ── CROSSFIT — fully dedicated steps ─────────────────────────
+  if (isCrossfit) {
+    const step1cf = (
+      <StepWrap key="1" q="What's your CrossFit goal?" hint="Your WOD programming, skill work, and training structure will all point towards this.">
+        <Opts options={[
+          { icon: '💪', label: 'Get fit & strong',    desc: 'Fitter, stronger, healthier overall',    value: 'improve overall fitness, strength, and conditioning through CrossFit' },
+          { icon: '🏆', label: 'Compete',             desc: 'Open, regionals, or local competition',  value: 'compete in CrossFit competitions — Open, local throwdowns, or regionals' },
+          { icon: '🎯', label: 'Master the skills',   desc: 'Pull-ups, muscle-ups, Olympic lifting',  value: 'develop CrossFit skills — gymnastics, Olympic lifting, and benchmark WODs' },
+          { icon: '🌱', label: 'Start CrossFit',      desc: 'Learn movements, build a base',          value: 'start CrossFit properly — learn the movements and build a functional base' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Your programming will be built around that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2cf = (
+      <StepWrap key="2" q="What's your CrossFit experience?" hint="Sets your exercise complexity, loading, and how much technique coaching is included.">
+        <Opts options={[
+          { icon: '🌱', label: 'Never done CF',       desc: 'First time, complete beginner',          value: 'complete beginner — never done CrossFit or functional fitness training' },
+          { icon: '📖', label: 'Tried a few classes', desc: 'Know the basics, still learning',        value: 'some CrossFit experience — attended classes but still learning movements' },
+          { icon: '💪', label: 'Regular member',      desc: 'Training 3+ months consistently',        value: 'regular CrossFit member — training consistently for several months' },
+          { icon: '🏆', label: 'Competitive athlete', desc: 'RX capable, chasing performance',        value: 'experienced CrossFit athlete — RX capable and chasing competitive performance' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your scaling, loading, and skill work will match that exactly.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4cf = (
+      <StepWrap key="4" q="How many days per week can you train?" hint="CrossFit programming works best with at least 3 days and built-in rest days.">
+        <Opts options={[
+          { icon: '3', label: '3 days', desc: 'Solid — classic 3-on, rest pattern', value: '3' },
+          { icon: '4', label: '4 days', desc: 'Strong — balanced volume',           value: '4' },
+          { icon: '5', label: '5 days', desc: 'High — serious training load',       value: '5' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly programming will be structured around that.', 5)} cols={3} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5cf = (
+      <StepWrap key="5" q="What's your training setup?" hint="Your exercise selection will use only what you actually have access to.">
+        <Opts options={[
+          { icon: '🏟️', label: 'CrossFit box',        desc: 'Full equipment — rigs, barbells, rings', value: 'full CrossFit box — rig, barbells, rings, pull-up bar, rowers, assault bike' },
+          { icon: '🏋️', label: 'Commercial gym',      desc: 'Barbells + pull-up bar, no rings/erg',   value: 'commercial gym — barbells, dumbbells, pull-up bar, no rings or rowing machine' },
+          { icon: '🔀', label: 'Mix',                 desc: 'CrossFit box occasionally + gym',        value: 'mix — CrossFit box occasionally with regular gym access' },
+          { icon: '🏠', label: 'Home / minimal kit',  desc: 'Dumbbells, bar, bodyweight only',        value: 'home or minimal equipment — dumbbells, a barbell, and bodyweight movements' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Every WOD will be built for your setup.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6cf = (
+      <StepWrap key="6" q="What's your weakest CrossFit domain?" hint="Your program will include targeted skill work and accessory training to fix this.">
+        <Opts options={[
+          { icon: '🏋️', label: 'Olympic lifting',     desc: 'Snatch, clean & jerk — technique',       value: 'Olympic lifting — snatch and clean & jerk technique and efficiency' },
+          { icon: '🤸', label: 'Gymnastics skills',   desc: 'Pull-ups, muscle-ups, handstands',        value: 'gymnastics — pull-ups, muscle-ups, handstand push-ups, and ring work' },
+          { icon: '🔥', label: 'Conditioning',        desc: 'MetCons blow me up early',               value: 'conditioning — MetCons and high-rep work drain me too fast' },
+          { icon: '💪', label: 'Strength',            desc: 'Squat, deadlift, press — need more load', value: 'strength — squat, deadlift, and press numbers need to be higher' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'That domain gets targeted skill work every week.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7cf = (
+      <StepWrap key="7" q="What's your biggest CrossFit challenge?" hint="Your plan will have direct strategies and programming to overcome this.">
+        <Opts options={[
+          { icon: '📉', label: 'Intensity fades',     desc: 'Start hard, fall apart mid-WOD',         value: 'losing intensity mid-WOD — start too fast and break down badly' },
+          { icon: '🎯', label: 'Skill gaps',          desc: 'Specific movements hold me back',        value: 'skill gaps — specific movements I can\'t do yet limit my WOD performance' },
+          { icon: '😴', label: 'Recovery',            desc: 'Too sore, too tired between sessions',   value: 'recovery — too sore or fatigued to train at full intensity session to session' },
+          { icon: '📋', label: 'No structure',        desc: 'Random WODs, no progression',            value: 'no structured progression — random WODs without a clear improvement plan' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your program will address that directly.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8cf = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Common CrossFit issues: shoulders, wrists, lower back — we'll programme around them.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Shoulder impingement — no overhead pressing. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9cf = (
+      <StepWrap key="9" q="How long do you want this program to run?" hint="Your skill progressions, strength cycles, and WOD difficulty are all scaled to this.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',    desc: 'Intensive skill + conditioning block',  value: '4 weeks'  },
+          { icon: '🔥', label: '8 weeks',    desc: 'Solid CrossFit development cycle',      value: '8 weeks'  },
+          { icon: '💪', label: '12 weeks',   desc: 'Full strength + skill + metcon build',  value: '12 weeks' },
+          { icon: '🏆', label: '16 weeks',   desc: 'Complete CrossFit periodisation',       value: '16 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Your program is set. Let\'s build it.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1cf, step2cf,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to set your barbell loading targets and WOD scaling.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '28', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '78', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '178', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4cf, step5cf, step6cf, step7cf, step8cf, step9cf,
+    ];
+  }
+
+  // ── HIIT — fully dedicated steps ─────────────────────────────
+  if (isHIIT) {
+    const step1hi = (
+      <StepWrap key="1" q="What do you want from HIIT?" hint="Your interval format, exercise selection, and intensity will all be built around this.">
+        <Opts options={[
+          { icon: '🔥', label: 'Burn fat',           desc: 'Maximum calorie burn, lean out',          value: 'burn fat and lose weight through high-intensity interval training' },
+          { icon: '❤️', label: 'Cardio fitness',      desc: 'Improve VO2max, endurance, stamina',      value: 'improve cardiovascular fitness, VO2max, and aerobic capacity' },
+          { icon: '💪', label: 'Full body conditioning', desc: 'Strength + cardio combined',           value: 'full body conditioning — strength and cardio combined in every session' },
+          { icon: '⚡', label: 'Athletic performance', desc: 'Speed, power, explosive fitness',        value: 'athletic performance — speed, explosive power, and sport-specific conditioning' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Every interval will drive towards that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2hi = (
+      <StepWrap key="2" q="What's your current fitness level?" hint="Sets your starting work-to-rest ratios, exercise intensity, and session volume.">
+        <Opts options={[
+          { icon: '🌱', label: 'Beginner',            desc: 'New to intense training',                value: 'beginner — new to high-intensity training, get out of breath quickly' },
+          { icon: '🏃', label: 'Some fitness',        desc: 'Occasional workouts, getting started',   value: 'some fitness — exercise occasionally but not consistently' },
+          { icon: '💪', label: 'Moderately fit',      desc: 'Train regularly, handle intensity',      value: 'moderately fit — train regularly and can handle hard intervals' },
+          { icon: '🔥', label: 'Very fit',            desc: 'High capacity, need real challenge',     value: 'very fit — high aerobic capacity, need genuinely challenging intervals' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Your intervals will be calibrated for exactly that level.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4hi = (
+      <StepWrap key="4" q="How many HIIT sessions per week?" hint="HIIT is high-stress — recovery matters as much as the sessions.">
+        <Opts options={[
+          { icon: '2', label: '2 sessions', desc: 'Ideal for beginners — recover well',  value: '2' },
+          { icon: '3', label: '3 sessions', desc: 'Sweet spot — proven results',         value: '3' },
+          { icon: '4', label: '4 sessions', desc: 'High frequency — need good recovery', value: '4' },
+          { icon: '5', label: '5 sessions', desc: 'Maximum — only for the very fit',     value: '5' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly schedule will be structured around that.', 5)} cols={2} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5hi = (
+      <StepWrap key="5" q="Where will you train?" hint="Your exercises will use only what you have available.">
+        <Opts options={[
+          { icon: '🏋️', label: 'Gym',                 desc: 'Machines, weights, cardio equipment',    value: 'commercial gym with weights, machines, and cardio equipment' },
+          { icon: '🏠', label: 'Home',                 desc: 'Bodyweight or minimal equipment',        value: 'home with bodyweight or minimal equipment' },
+          { icon: '🌳', label: 'Outdoors',             desc: 'Parks, tracks, open space',              value: 'outdoors — parks, running tracks, and open spaces' },
+          { icon: '🔀', label: 'Anywhere',             desc: 'No fixed location — keep it flexible',   value: 'anywhere — flexible location, no fixed equipment' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Every session will be designed for that environment.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6hi = (
+      <StepWrap key="6" q="How long should each session be?" hint="Your intervals, rounds, and rest periods will all be designed to fit this window.">
+        <Opts options={[
+          { icon: '⚡', label: '20 minutes',   desc: 'No excuses — maximum efficiency',      value: '20 minutes' },
+          { icon: '🔥', label: '30 minutes',   desc: 'Sweet spot — complete and effective',  value: '30 minutes' },
+          { icon: '💪', label: '45 minutes',   desc: 'Full session — warm-up to cool-down',  value: '45 minutes' },
+          { icon: '🏆', label: '60 minutes',   desc: 'Extended — strength + HIIT combined',  value: '60 minutes' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Every session will fit exactly within that.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7hi = (
+      <StepWrap key="7" q="What's your biggest HIIT challenge?" hint="Your plan will include direct strategies and programming to overcome this.">
+        <Opts options={[
+          { icon: '😮‍💨', label: 'Intensity drops',   desc: 'Can\'t maintain effort through rounds',  value: 'losing intensity — effort drops badly in later rounds' },
+          { icon: '🔁', label: 'Consistency',         desc: 'Miss sessions, lose momentum',           value: 'consistency — missing sessions and losing momentum between workouts' },
+          { icon: '😴', label: 'Recovery',            desc: 'Too sore or tired for the next session', value: 'recovery — too sore or fatigued to perform well in the next session' },
+          { icon: '📋', label: 'No structure',        desc: 'Random workouts, no clear progress',     value: 'no structure — doing random workouts without a clear progression plan' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that directly.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8hi = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="We'll choose exercises and formats that protect anything that needs it.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Knee pain — no jumping. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9hi = (
+      <StepWrap key="9" q="How long do you want the program to run?" hint="Your interval progressions and session formats will be scaled to fit.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',    desc: 'Intensive conditioning block',          value: '4 weeks'  },
+          { icon: '🔥', label: '6 weeks',    desc: 'Solid HIIT development cycle',          value: '6 weeks'  },
+          { icon: '💪', label: '8 weeks',    desc: 'Full progressive HIIT program',         value: '8 weeks'  },
+          { icon: '🏆', label: '12 weeks',   desc: 'Complete periodised HIIT plan',         value: '12 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Perfect. Your program will be paced exactly for that.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1hi, step2hi,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to set your starting intensity and recovery needs.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '28', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '72', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '170', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4hi, step5hi, step6hi, step7hi, step8hi, step9hi,
     ];
   }
 

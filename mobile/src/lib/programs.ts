@@ -82,6 +82,24 @@ export const PROGRAMS: Program[] = [
     filters: ['sport', 'endurance'],
     description: 'Half marathon or full 42.2km — long run progression, tempo work, and a structured taper. Every run has a purpose, paced to your race distance and target time.',
   },
+  {
+    id: 'crossfit',
+    name: 'CrossFit Program',
+    icon: '🏋️',
+    tagline: 'your pace · functional fitness',
+    badge: 'PREMIUM',
+    filters: ['sport', 'gym', 'muscle'],
+    description: 'Strength, gymnastics, and MetCons — programmed as real CrossFit. WODs written in full notation with Rx weights and two scaling options every session.',
+  },
+  {
+    id: 'hiit',
+    name: 'HIIT Program',
+    icon: '⚡',
+    tagline: 'your pace · high intensity',
+    badge: 'PREMIUM',
+    filters: ['fat-loss', 'home', 'gym'],
+    description: 'Tabata, AMRAP, EMOM, and circuits — every session a different format, all designed to fit your session length. Maximum results in minimum time.',
+  },
 ];
 
 export const FILTER_OPTIONS = [
