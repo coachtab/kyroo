@@ -14,7 +14,7 @@ export const PROGRAMS: Program[] = [
     id: 'weightloss',
     name: 'Weight Loss Plan',
     icon: '⚡',
-    tagline: '12-week · fat loss',
+    tagline: 'your pace · fat loss',
     badge: 'PREMIUM',
     filters: ['fat-loss', 'gym', 'home'],
     description: 'Calorie-deficit nutrition, metabolic conditioning, and strategic cardio — nothing else. Built to burn fat and keep it off.',
