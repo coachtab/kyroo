@@ -72,9 +72,9 @@ export default function WizardScreen() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Generation failed.'); setGenerating(false); return; }
-      setResult(data.plan || data.content || JSON.stringify(data));
-    } catch {
-      setError('Network error. Please try again.');
+      setResult(data.program || data.plan || data.content || '');
+    } catch (err: any) {
+      setError(err?.message || 'Network error. Please try again.');
     } finally {
       setGenerating(false);
     }
