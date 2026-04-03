@@ -68,6 +68,12 @@ function LoginView({ onSignup, onForgot }: { onSignup: () => void; onForgot: () 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <CloseBtn />
+
+      {/* Brand mark */}
+      <View style={styles.brandMark}>
+        <Text style={styles.brandMarkText}>K</Text>
+      </View>
+
       <Text style={styles.eyebrow}>// SIGN IN</Text>
       <Text style={styles.title}>Welcome back.</Text>
       <Text style={styles.sub}>Sign in to access your programs and fitness plans.</Text>
@@ -79,7 +85,7 @@ function LoginView({ onSignup, onForgot }: { onSignup: () => void; onForgot: () 
             value={email}
             onChangeText={v => { setEmail(v); setError(''); }}
             placeholder="you@example.com"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -96,7 +102,7 @@ function LoginView({ onSignup, onForgot }: { onSignup: () => void; onForgot: () 
             value={password}
             onChangeText={v => { setPassword(v); setError(''); }}
             placeholder="••••••••"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             secureTextEntry
             autoComplete="current-password"
             returnKeyType="done"
@@ -161,6 +167,12 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <CloseBtn />
+
+      {/* Brand mark */}
+      <View style={styles.brandMark}>
+        <Text style={styles.brandMarkText}>K</Text>
+      </View>
+
       <Text style={styles.eyebrow}>// CREATE ACCOUNT</Text>
       <Text style={styles.title}>Start your journey.</Text>
       <Text style={styles.sub}>Create your free account. No credit card required.</Text>
@@ -172,7 +184,7 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
             value={name}
             onChangeText={v => { setName(v); setError(''); }}
             placeholder="Your full name"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             autoCapitalize="words"
             autoComplete="name"
             returnKeyType="next"
@@ -187,7 +199,7 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
             value={email}
             onChangeText={v => { setEmail(v); setError(''); }}
             placeholder="you@example.com"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -204,7 +216,7 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
             value={password}
             onChangeText={v => { setPassword(v); setError(''); }}
             placeholder="Min. 6 characters"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             secureTextEntry
             autoComplete="new-password"
             returnKeyType="next"
@@ -219,7 +231,7 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
             value={confirm}
             onChangeText={v => { setConfirm(v); setError(''); }}
             placeholder="Repeat your password"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             secureTextEntry
             autoComplete="new-password"
             returnKeyType="done"
@@ -250,11 +262,10 @@ function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: 
   );
 }
 
-// ─── FORGOT PASSWORD ─────────────────────────────────────────
 // ─── SIGNUP SENT ─────────────────────────────────────────────
 function SignupSentView({ email, onLogin }: { email: string; onLogin: () => void }) {
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={[styles.container, styles.centeredContainer]} keyboardShouldPersistTaps="handled">
       <View style={styles.sentIcon}><Text style={styles.sentIconText}>✉️</Text></View>
       <Text style={styles.eyebrow}>// CHECK YOUR EMAIL</Text>
       <Text style={styles.title}>One more step.</Text>
@@ -316,7 +327,7 @@ function ForgotView({ onBack, onSent }: { onBack: () => void; onSent: () => void
             value={email}
             onChangeText={v => { setEmail(v); setError(''); }}
             placeholder="you@example.com"
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
@@ -383,7 +394,7 @@ function PasswordStrength({ password }: { password: string }) {
     : password.length >= 8 && /[A-Z0-9]/.test(password) ? 2
     : password.length >= 6 ? 1 : 0;
   const labels = ['Too short', 'Weak', 'Fair', 'Strong'];
-  const barColors = [colors.error, '#E67E22', colors.amber, colors.forest];
+  const barColors = ['#C06848', '#E67E22', '#C8873A', '#3D9E6A'];
   return (
     <View style={strengthStyles.wrap}>
       <View style={strengthStyles.bars}>
@@ -398,71 +409,80 @@ function PasswordStrength({ password }: { password: string }) {
 
 // ─── Styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.parchment },
+  safe: { flex: 1, backgroundColor: '#0D0D0B' },
   container: { padding: spacing[5], paddingTop: spacing[6], paddingBottom: spacing[10] },
   centeredContainer: { alignItems: 'center', paddingTop: spacing[16] },
 
-  closeBtn: { alignSelf: 'flex-end', padding: spacing[2], marginBottom: spacing[5] },
-  closeBtnText: { fontSize: 18, color: colors.ink3 },
-  backBtn: { marginBottom: spacing[6] },
-  backBtnText: { fontFamily: font.mono, fontSize: 13, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.5 },
+  brandMark: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: '#3D9E6A',
+    alignItems: 'center', justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: spacing[8], marginBottom: spacing[6],
+  },
+  brandMarkText: { fontFamily: font.sansBd, fontSize: 28, color: '#FFFFFF' },
 
-  eyebrow: { fontFamily: font.mono, fontSize: 11, color: colors.ink3, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: spacing[3] },
-  title: { fontFamily: font.sansBd, fontSize: 32, color: colors.ink, lineHeight: 38, marginBottom: spacing[3] },
-  sub: { fontFamily: font.sans, fontSize: 15, color: colors.ink2, lineHeight: 22, marginBottom: spacing[2] },
+  closeBtn: { alignSelf: 'flex-end', padding: spacing[2], marginBottom: spacing[5] },
+  closeBtnText: { fontSize: 18, color: '#444' },
+  backBtn: { marginBottom: spacing[6] },
+  backBtnText: { fontFamily: font.mono, fontSize: 13, color: '#3D9E6A', textTransform: 'uppercase', letterSpacing: 0.5 },
+
+  eyebrow: { fontFamily: font.mono, fontSize: 11, color: '#555', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: spacing[3] },
+  title: { fontFamily: font.sansBd, fontSize: 32, color: '#F5F5F2', lineHeight: 38, marginBottom: spacing[3] },
+  sub: { fontFamily: font.sans, fontSize: 15, color: '#888', lineHeight: 22, marginBottom: spacing[2] },
 
   form: { marginTop: spacing[6], gap: spacing[1] },
 
   input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.line2,
+    backgroundColor: '#181816',
+    borderWidth: 1, borderColor: '#252520',
     borderRadius: radius.sm,
-    height: 50, paddingHorizontal: spacing[4],
-    fontFamily: font.sans, fontSize: 15, color: colors.ink,
+    height: 52, paddingHorizontal: spacing[4],
+    fontFamily: font.sans, fontSize: 15, color: '#F5F5F2',
   },
-  inputError: { borderColor: colors.error },
+  inputError: { borderColor: '#C06848' },
 
   forgotLink: { alignSelf: 'flex-end', marginTop: spacing[2], marginBottom: spacing[1] },
-  forgotLinkText: { fontFamily: font.sans, fontSize: 13, color: colors.forest },
+  forgotLinkText: { fontFamily: font.sans, fontSize: 13, color: '#3D9E6A' },
 
   btn: {
     marginTop: spacing[4],
-    backgroundColor: colors.forest,
+    backgroundColor: '#3D9E6A',
     height: 52, borderRadius: radius.sm,
     alignItems: 'center', justifyContent: 'center',
   },
   btnDisabled: { opacity: 0.55 },
-  btnText: { fontFamily: font.sansBd, fontSize: 16, color: colors.white },
+  btnText: { fontFamily: font.sansBd, fontSize: 16, color: '#FFFFFF' },
 
-  legalNote: { fontFamily: font.sans, fontSize: 12, color: colors.ink4, lineHeight: 17, textAlign: 'center', marginTop: spacing[4] },
+  legalNote: { fontFamily: font.sans, fontSize: 12, color: '#555', lineHeight: 17, textAlign: 'center', marginTop: spacing[4] },
 
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing[7] },
-  switchText: { fontFamily: font.sans, fontSize: 14, color: colors.ink3 },
-  switchLink: { fontFamily: font.sansBd, fontSize: 14, color: colors.forest },
+  switchText: { fontFamily: font.sans, fontSize: 14, color: '#555' },
+  switchLink: { fontFamily: font.sansBd, fontSize: 14, color: '#3D9E6A' },
 
   sentIcon: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: colors.forestLight,
+    backgroundColor: '#0F2318',
     alignItems: 'center', justifyContent: 'center',
     marginBottom: spacing[6],
   },
-  sentIconText: { fontSize: 32, color: colors.forest },
-  sentEmail: { fontFamily: font.sansBd, color: colors.ink },
+  sentIconText: { fontSize: 32, color: '#3D9E6A' },
+  sentEmail: { fontFamily: font.sansBd, color: '#F5F5F2' },
 });
 
 const fieldStyles = StyleSheet.create({
   wrap: { marginBottom: spacing[4] },
-  label: { fontFamily: font.mono, fontSize: 11, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[2] },
+  label: { fontFamily: font.mono, fontSize: 11, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[2] },
 });
 
 const errorStyles = StyleSheet.create({
-  box: { backgroundColor: '#FDECEA', borderWidth: 1, borderColor: '#F5C6C2', borderRadius: radius.sm, padding: spacing[3], marginTop: spacing[2] },
-  text: { fontFamily: font.sans, fontSize: 13, color: colors.error, lineHeight: 18 },
+  box: { backgroundColor: '#2A1510', borderWidth: 1, borderColor: '#5A2510', borderRadius: radius.sm, padding: spacing[3], marginTop: spacing[2] },
+  text: { fontFamily: font.sans, fontSize: 13, color: '#C06848', lineHeight: 18 },
 });
 
 const strengthStyles = StyleSheet.create({
   wrap: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginTop: spacing[2], marginBottom: spacing[2] },
   bars: { flex: 1, flexDirection: 'row', gap: 4 },
-  bar: { flex: 1, height: 3, borderRadius: 2, backgroundColor: colors.line2 },
+  bar: { flex: 1, height: 3, borderRadius: 2, backgroundColor: '#252520' },
   label: { fontFamily: font.mono, fontSize: 11, letterSpacing: 0.3 },
 });

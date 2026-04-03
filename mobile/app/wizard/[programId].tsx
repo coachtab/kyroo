@@ -87,7 +87,8 @@ export default function WizardScreen() {
           <Text style={styles.genIcon}>{prog.icon}</Text>
           <Text style={styles.genTitle}>Crafting your plan</Text>
           <Text style={styles.genSub}>Analyzing your profile…</Text>
-          <ActivityIndicator color={colors.forest} style={{ marginTop: spacing[6] }} />
+          <ActivityIndicator color="#3D9E6A" style={{ marginTop: spacing[6] }} />
+          <Text style={styles.genSubtle}>Working on your plan…</Text>
         </View>
       </SafeAreaView>
     );
@@ -288,7 +289,7 @@ function buildSteps(
         multiline
         numberOfLines={3}
         placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."
-        placeholderTextColor={colors.ink4}
+        placeholderTextColor="#555"
         value={formData.injuries || ''}
         onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
       />
@@ -314,18 +315,25 @@ function Opts({ options, selected, onSelect, cols = 2, monoKey = false }: {
 }) {
   return (
     <View style={[stepStyles.opts, cols === 3 && stepStyles.opts3]}>
-      {options.map(o => (
-        <TouchableOpacity
-          key={o.value}
-          style={[stepStyles.opt, selected === o.value && stepStyles.optActive]}
-          onPress={() => onSelect(o.value)}
-          activeOpacity={0.75}
-        >
-          <Text style={[stepStyles.optKey, monoKey && stepStyles.optKeyMono]}>{o.icon}</Text>
-          <Text style={[stepStyles.optLabel, selected === o.value && stepStyles.optLabelActive]}>{o.label}</Text>
-          <Text style={stepStyles.optDesc}>{o.desc}</Text>
-        </TouchableOpacity>
-      ))}
+      {options.map(o => {
+        const isActive = selected === o.value;
+        return (
+          <TouchableOpacity
+            key={o.value}
+            style={[stepStyles.opt, isActive && stepStyles.optActive]}
+            onPress={() => onSelect(o.value)}
+            activeOpacity={0.75}
+          >
+            <Text style={[
+              stepStyles.optKey,
+              monoKey && stepStyles.optKeyMono,
+              monoKey && (isActive ? stepStyles.optKeyMonoActive : stepStyles.optKeyMonoInactive),
+            ]}>{o.icon}</Text>
+            <Text style={[stepStyles.optLabel, isActive && stepStyles.optLabelActive]}>{o.label}</Text>
+            <Text style={stepStyles.optDesc}>{o.desc}</Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
@@ -361,7 +369,7 @@ function NumericRow({ fields, formData, setFormData }: {
             }}
             keyboardType={f.decimal ? 'decimal-pad' : 'number-pad'}
             placeholder={f.placeholder}
-            placeholderTextColor={colors.ink4}
+            placeholderTextColor="#555"
             maxLength={f.decimal ? 6 : 3}
           />
         </View>
@@ -391,94 +399,126 @@ function Actions({ onBack, onNext, nextLabel = 'Continue', nextForest = false }:
 
 const stepStyles = StyleSheet.create({
   wrap: { paddingBottom: spacing[8] },
-  q: { fontFamily: font.sansBd, fontSize: 26, color: colors.ink, lineHeight: 32, marginBottom: spacing[2] },
-  hint: { fontFamily: font.sans, fontSize: 14, color: colors.ink3, marginBottom: spacing[5] },
+  q: { fontFamily: font.sansBd, fontSize: 26, color: '#F5F5F2', lineHeight: 32, marginBottom: spacing[2] },
+  hint: { fontFamily: font.sans, fontSize: 14, color: '#555', marginBottom: spacing[5] },
   opts: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], marginBottom: spacing[5] },
   opts3: {},
   opt: {
-    flex: 1, minWidth: '45%', padding: spacing[3], borderRadius: radius.sm,
-    borderWidth: 1, borderColor: colors.line2, backgroundColor: colors.surface,
+    flex: 1, minWidth: '45%', padding: spacing[3], borderRadius: radius.md,
+    borderWidth: 1, borderColor: '#252520', backgroundColor: '#181816',
     alignItems: 'flex-start',
   },
-  optActive: { borderColor: colors.forest, backgroundColor: colors.forestLight },
+  optActive: { borderColor: '#3D9E6A', backgroundColor: '#0F2318' },
   optKey: { fontSize: 22, marginBottom: spacing[1] },
-  optKeyMono: { fontFamily: font.mono, fontSize: 20, color: colors.ink },
-  optLabel: { fontFamily: font.sansMd, fontSize: 14, color: colors.ink, marginBottom: 2 },
-  optLabelActive: { color: colors.forest },
-  optDesc: { fontFamily: font.sans, fontSize: 12, color: colors.ink3 },
+  optKeyMono: { fontSize: 20, marginBottom: spacing[1] },
+  optKeyMonoActive: { fontFamily: font.mono, color: '#3D9E6A' },
+  optKeyMonoInactive: { fontFamily: font.mono, color: '#555' },
+  optLabel: { fontFamily: font.sansBd, fontSize: 14, color: '#888', marginBottom: 2 },
+  optLabelActive: { color: '#F5F5F2' },
+  optDesc: { fontFamily: font.mono, fontSize: 11, color: '#444' },
   sexRow: { flexDirection: 'row', gap: spacing[2], marginTop: spacing[3], marginBottom: spacing[5] },
-  sexBtn: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line2, backgroundColor: colors.surface, alignItems: 'center' },
-  sexBtnActive: { backgroundColor: colors.forest, borderColor: colors.forest },
-  sexText: { fontFamily: font.mono, fontSize: 12, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.4 },
-  sexTextActive: { color: colors.white },
+  sexBtn: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.sm, borderWidth: 1, borderColor: '#252520', backgroundColor: '#181816', alignItems: 'center' },
+  sexBtnActive: { backgroundColor: '#3D9E6A', borderColor: '#3D9E6A' },
+  sexText: { fontFamily: font.mono, fontSize: 12, color: '#555', textTransform: 'uppercase', letterSpacing: 0.4 },
+  sexTextActive: { color: '#F5F5F2' },
   numRow: { flexDirection: 'row', gap: spacing[3], marginBottom: spacing[4] },
   numField: { flex: 1 },
-  numLabel: { fontFamily: font.mono, fontSize: 11, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[2] },
-  numInput: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line2, borderRadius: radius.sm, height: 44, paddingHorizontal: spacing[3], fontFamily: font.sans, fontSize: 15, color: colors.ink },
-  textarea: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line2, borderRadius: radius.sm, padding: spacing[3], fontFamily: font.sans, fontSize: 14, color: colors.ink, minHeight: 100, textAlignVertical: 'top', marginBottom: spacing[4] },
-  error: { fontFamily: font.sans, fontSize: 13, color: colors.error, marginBottom: spacing[3] },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: spacing[3], paddingTop: spacing[5], borderTopWidth: 1, borderTopColor: colors.line, marginTop: spacing[4] },
+  numLabel: { fontFamily: font.mono, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[2] },
+  numInput: {
+    backgroundColor: '#181816', borderWidth: 1, borderColor: '#252520',
+    borderRadius: radius.sm, height: 48,
+    fontFamily: font.sans, fontSize: 15, color: '#F5F5F2',
+    textAlign: 'center',
+  },
+  textarea: {
+    backgroundColor: '#181816', borderWidth: 1, borderColor: '#252520',
+    borderRadius: radius.sm, padding: spacing[3],
+    fontFamily: font.sans, fontSize: 14, color: '#F5F5F2',
+    minHeight: 100, textAlignVertical: 'top', marginBottom: spacing[4],
+  },
+  error: { fontFamily: font.sans, fontSize: 13, color: '#C06848', marginBottom: spacing[3] },
+  actions: {
+    flexDirection: 'row', justifyContent: 'flex-end', gap: spacing[3],
+    paddingTop: spacing[5], borderTopWidth: 1, borderTopColor: '#1C1C18', marginTop: spacing[4],
+  },
   backAction: { paddingVertical: 12, paddingHorizontal: spacing[3] },
-  backActionText: { fontFamily: font.sans, fontSize: 14, color: colors.ink3 },
-  nextBtn: { paddingVertical: 12, paddingHorizontal: spacing[5], borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line2, backgroundColor: colors.surface },
-  nextBtnForest: { backgroundColor: colors.forest, borderColor: colors.forest },
-  nextBtnText: { fontFamily: font.sansBd, fontSize: 14, color: colors.forest },
+  backActionText: { fontFamily: font.sans, fontSize: 14, color: '#555' },
+  nextBtn: {
+    paddingVertical: 12, paddingHorizontal: spacing[5],
+    borderRadius: radius.sm, borderWidth: 1, borderColor: '#252520', backgroundColor: '#181816',
+  },
+  nextBtnForest: { backgroundColor: '#3D9E6A', borderColor: '#3D9E6A' },
+  nextBtnText: { fontFamily: font.sansBd, fontSize: 14, color: '#3D9E6A' },
 });
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.parchment },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.surface },
+  safe: { flex: 1, backgroundColor: '#0D0D0B' },
+  header: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: spacing[4], paddingVertical: spacing[3],
+    borderBottomWidth: 1, borderBottomColor: '#1C1C18',
+    backgroundColor: '#0D0D0B',
+  },
   backBtn: { flex: 1 },
-  backText: { fontFamily: font.mono, fontSize: 12, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.4 },
-  progLabel: { fontFamily: font.sansMd, fontSize: 14, color: colors.ink },
+  backText: { fontFamily: font.mono, fontSize: 12, color: '#3D9E6A', textTransform: 'uppercase', letterSpacing: 0.4 },
+  progLabel: { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2' },
   closeBtn: { flex: 1, alignItems: 'flex-end' },
-  closeText: { fontSize: 18, color: colors.ink3 },
-  stripe: { height: 3, backgroundColor: colors.line },
-  stripeFill: { height: '100%', backgroundColor: colors.forest },
+  closeText: { fontSize: 18, color: '#444' },
+  stripe: { height: 3, backgroundColor: '#1C1C18' },
+  stripeFill: { height: '100%', backgroundColor: '#3D9E6A' },
   stepContent: { padding: spacing[5], paddingTop: spacing[6], minHeight: 500 },
-  pinnedBar: { borderTopWidth: 1, borderTopColor: colors.line, backgroundColor: colors.parchment, padding: spacing[4], gap: spacing[2] },
-  pinnedError: { fontFamily: font.sans, fontSize: 13, color: colors.error, textAlign: 'center' },
-  pinnedBtn: { backgroundColor: colors.forest, height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
-  pinnedBtnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
-  counter: { fontFamily: font.mono, fontSize: 11, color: colors.ink4, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing[4] },
-  reaction: { fontFamily: font.sans, fontSize: 13, color: colors.forest, fontStyle: 'italic', marginTop: spacing[3], lineHeight: 18 },
-  genScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[8] },
+  pinnedBar: {
+    borderTopWidth: 1, borderTopColor: '#1C1C18',
+    backgroundColor: '#0D0D0B', padding: spacing[4], gap: spacing[2],
+  },
+  pinnedError: { fontFamily: font.sans, fontSize: 13, color: '#C06848', textAlign: 'center' },
+  pinnedBtn: { backgroundColor: '#3D9E6A', height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  pinnedBtnText: { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2' },
+  counter: { fontFamily: font.mono, fontSize: 11, color: '#444', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: spacing[4] },
+  reaction: { fontFamily: font.sans, fontSize: 13, color: '#3D9E6A', fontStyle: 'italic', marginTop: spacing[3], lineHeight: 18 },
+  genScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[8], backgroundColor: '#0D0D0B' },
   genIcon: { fontSize: 48, marginBottom: spacing[4] },
-  genTitle: { fontFamily: font.sansBd, fontSize: 26, color: colors.ink, marginBottom: spacing[2] },
-  genSub: { fontFamily: font.mono, fontSize: 13, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.4 },
+  genTitle: { fontFamily: font.sansBd, fontSize: 26, color: '#F5F5F2', marginBottom: spacing[2] },
+  genSub: { fontFamily: font.mono, fontSize: 13, color: '#555', textTransform: 'uppercase', letterSpacing: 0.4 },
+  genSubtle: { fontFamily: font.mono, fontSize: 12, color: '#333', marginTop: spacing[3], letterSpacing: 0.3 },
   // Result screen
-  resultHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.line, backgroundColor: colors.surface },
+  resultHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: spacing[4], paddingVertical: spacing[3],
+    borderBottomWidth: 1, borderBottomColor: '#1C1C18',
+    backgroundColor: '#0D0D0B',
+  },
   resultHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
   resultHeaderIcon: { fontSize: 28 },
-  resultHeaderEyebrow: { fontFamily: font.mono, fontSize: 10, color: colors.ink3, letterSpacing: 1, textTransform: 'uppercase' },
-  resultHeaderTitle: { fontFamily: font.sansBd, fontSize: 16, color: colors.ink },
+  resultHeaderEyebrow: { fontFamily: font.mono, fontSize: 10, color: '#444', letterSpacing: 1, textTransform: 'uppercase' },
+  resultHeaderTitle: { fontFamily: font.sansBd, fontSize: 16, color: '#F5F5F2' },
   resultCloseBtn: { padding: spacing[2] },
-  resultCloseBtnText: { fontSize: 18, color: colors.ink3 },
+  resultCloseBtnText: { fontSize: 18, color: '#444' },
   resultScroll: { padding: spacing[5], paddingBottom: spacing[12] },
   resultBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginBottom: spacing[5] },
-  resultBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.forest },
-  resultBadgeText: { fontFamily: font.mono, fontSize: 11, color: colors.forest, textTransform: 'uppercase', letterSpacing: 0.6 },
+  resultBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3D9E6A' },
+  resultBadgeText: { fontFamily: font.mono, fontSize: 11, color: '#3D9E6A', textTransform: 'uppercase', letterSpacing: 0.6 },
   resultMarkdown: { marginBottom: spacing[8] },
   resultActions: { gap: spacing[3] },
-  resultDoneBtn: { backgroundColor: colors.forest, height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
-  resultDoneBtnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
-  resultNewBtn: { height: 44, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.line2 },
-  resultNewBtnText: { fontFamily: font.sans, fontSize: 14, color: colors.ink3 },
+  resultDoneBtn: { backgroundColor: '#3D9E6A', height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  resultDoneBtnText: { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2' },
+  resultNewBtn: { height: 44, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#252520' },
+  resultNewBtnText: { fontFamily: font.sans, fontSize: 14, color: '#555' },
 });
 
 const markdownStyles = {
-  body:        { fontFamily: font.sans, fontSize: 14, color: colors.ink, lineHeight: 22 },
-  heading1:    { fontFamily: font.sansBd, fontSize: 22, color: colors.ink, marginTop: spacing[6], marginBottom: spacing[3], lineHeight: 28, borderBottomWidth: 2, borderBottomColor: colors.forest, paddingBottom: spacing[2] },
-  heading2:    { fontFamily: font.sansBd, fontSize: 18, color: colors.ink, marginTop: spacing[5], marginBottom: spacing[2], lineHeight: 24 },
-  heading3:    { fontFamily: font.sansBd, fontSize: 15, color: colors.forest, marginTop: spacing[4], marginBottom: spacing[2], lineHeight: 20, textTransform: 'uppercase' as const, letterSpacing: 0.4 },
-  paragraph:   { fontFamily: font.sans, fontSize: 14, color: colors.ink2, lineHeight: 22, marginBottom: spacing[3] },
-  strong:      { fontFamily: font.sansBd, color: colors.ink },
-  em:          { fontStyle: 'italic' as const, color: colors.ink2 },
+  body:        { fontFamily: font.sans, fontSize: 14, color: '#CCCCC8', lineHeight: 22 },
+  heading1:    { fontFamily: font.sansBd, fontSize: 22, color: '#F5F5F2', marginTop: spacing[6], marginBottom: spacing[3], lineHeight: 28, borderBottomWidth: 2, borderBottomColor: '#3D9E6A', paddingBottom: spacing[2] },
+  heading2:    { fontFamily: font.sansBd, fontSize: 18, color: '#F5F5F2', marginTop: spacing[5], marginBottom: spacing[2], lineHeight: 24 },
+  heading3:    { fontFamily: font.sansBd, fontSize: 15, color: '#3D9E6A', marginTop: spacing[4], marginBottom: spacing[2], lineHeight: 20, textTransform: 'uppercase' as const, letterSpacing: 0.4 },
+  paragraph:   { fontFamily: font.sans, fontSize: 14, color: '#888', lineHeight: 22, marginBottom: spacing[3] },
+  strong:      { fontFamily: font.sansBd, color: '#F5F5F2' },
+  em:          { fontStyle: 'italic' as const, color: '#888' },
   bullet_list: { marginBottom: spacing[3] },
   ordered_list:{ marginBottom: spacing[3] },
-  list_item:   { fontFamily: font.sans, fontSize: 14, color: colors.ink2, lineHeight: 22, marginBottom: spacing[1] },
-  code_inline: { fontFamily: font.mono, fontSize: 12, color: colors.forest, backgroundColor: colors.forestLight, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  fence:       { fontFamily: font.mono, fontSize: 12, color: colors.ink, backgroundColor: colors.surface, padding: spacing[3], borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line, marginBottom: spacing[3] },
-  blockquote:  { backgroundColor: colors.forestLight, borderLeftWidth: 3, borderLeftColor: colors.forest, paddingLeft: spacing[3], paddingVertical: spacing[2], marginBottom: spacing[3], borderRadius: 4 },
-  hr:          { backgroundColor: colors.line, marginVertical: spacing[4] },
+  list_item:   { fontFamily: font.sans, fontSize: 14, color: '#888', lineHeight: 22, marginBottom: spacing[1] },
+  code_inline: { fontFamily: font.mono, fontSize: 12, color: '#3D9E6A', backgroundColor: '#0F2318', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  fence:       { fontFamily: font.mono, fontSize: 12, color: '#CCCCC8', backgroundColor: '#181816', padding: spacing[3], borderRadius: radius.sm, borderWidth: 1, borderColor: '#252520', marginBottom: spacing[3] },
+  blockquote:  { backgroundColor: '#0F2318', borderLeftWidth: 3, borderLeftColor: '#3D9E6A', paddingLeft: spacing[3], paddingVertical: spacing[2], marginBottom: spacing[3], borderRadius: 4 },
+  hr:          { backgroundColor: '#1C1C18', marginVertical: spacing[4] },
 };
