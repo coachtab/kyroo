@@ -77,10 +77,10 @@ export const PROGRAMS: Program[] = [
     id: 'marathon',
     name: 'Marathon Plan',
     icon: '🏃',
-    tagline: 'your pace · 42.2km',
+    tagline: 'your pace · half or full',
     badge: 'PREMIUM',
     filters: ['sport', 'endurance'],
-    description: 'Long run progression, tempo work, and a structured taper — every run has a purpose. Built around your target time and race date.',
+    description: 'Half marathon or full 42.2km — long run progression, tempo work, and a structured taper. Every run has a purpose, paced to your race distance and target time.',
   },
 ];
 

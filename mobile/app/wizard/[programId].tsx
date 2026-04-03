@@ -1199,44 +1199,47 @@ function buildSteps(
 
   // ── MARATHON — fully dedicated steps ─────────────────────────
   if (isMarathon) {
+    // Detect chosen race distance to drive adaptive steps 6 + 9
+    const isHalf = (sel('goals') || '').toLowerCase().includes('half');
+
     const step1mr = (
-      <StepWrap key="1" q="What's your marathon goal?" hint="Every long run, tempo, and interval session will be paced around this.">
+      <StepWrap key="1" q="Which race are you training for?" hint="Your long run distances, training paces, and race strategy all depend on this.">
         <Opts options={[
-          { icon: '🏅', label: 'Finish my first',   desc: 'Cross the line — that\'s the win',      value: 'complete my first marathon and finish the race' },
-          { icon: '⏱️', label: 'Target time',        desc: 'I have a specific finish time in mind', value: 'finish the marathon in a specific target time' },
-          { icon: '📉', label: 'Beat my PB',         desc: 'I have a previous time to beat',        value: 'run a personal best — beat my previous marathon time' },
-          { icon: '🌍', label: 'The experience',     desc: 'Run a bucket-list marathon event',      value: 'complete a bucket-list marathon event and enjoy the full experience' },
-        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Your training paces and targets are locked to that.', 2)} />
+          { icon: '🥈', label: 'Half — first finish', desc: 'Complete 21.1km for the first time',  value: 'complete my first half marathon (21.1km)' },
+          { icon: '🥈', label: 'Half — time goal',    desc: 'Hit a specific time over 21.1km',     value: 'run a half marathon in a target time (21.1km)' },
+          { icon: '🥇', label: 'Full — first finish', desc: 'Complete 42.2km for the first time',  value: 'complete my first full marathon (42.2km)' },
+          { icon: '🥇', label: 'Full — time goal',    desc: 'Hit a specific time over 42.2km',     value: 'run a full marathon in a target time (42.2km)' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Your training distances and paces are locked to that race.', 2)} />
         <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
       </StepWrap>
     );
 
     const step2mr = (
-      <StepWrap key="2" q="What's your running background?" hint="Sets your training volume, long run starting distance, and weekly mileage build rate.">
+      <StepWrap key="2" q="What's your running background?" hint="Sets your starting mileage, long run distance, and volume build rate.">
         <Opts options={[
-          { icon: '🌱', label: 'New to distance',   desc: 'Run occasionally, no race history',     value: 'new to distance running — run occasionally but have no race history' },
-          { icon: '🏃', label: '5k–Half marathon',  desc: 'Race experience up to 21km',            value: 'have completed 5k, 10k, or half marathon races' },
-          { icon: '✅', label: 'Finished a marathon',desc: 'One or two previous marathons',         value: 'completed one or two marathons — looking to improve' },
-          { icon: '🏆', label: 'Regular racer',     desc: 'Multiple marathons, consistent training',value: 'experienced marathon runner — multiple finishes, structured training background' },
+          { icon: '🌱', label: 'New to running',    desc: 'Run occasionally, no race history',      value: 'new to distance running — run occasionally but have no race history' },
+          { icon: '🏃', label: '5k–10k racer',     desc: 'Short race experience, building up',     value: 'completed 5k and 10k races — now stepping up to longer distances' },
+          { icon: '✅', label: 'Half/full done',    desc: 'Completed a longer race before',         value: 'have completed a half or full marathon — looking to improve' },
+          { icon: '🏆', label: 'Regular racer',    desc: 'Consistent mileage, structured training', value: 'experienced distance runner with structured training background' },
         ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Your program will match that base exactly.', 3)} />
         <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
       </StepWrap>
     );
 
     const step4mr = (
-      <StepWrap key="4" q="How many days per week can you run?" hint="Marathon training works best with at least 4 days — one must be a long run day.">
+      <StepWrap key="4" q="How many days per week can you run?" hint={isHalf ? 'Half marathon training works well on 3-5 days — one must be a long run day.' : 'Full marathon training works best with at least 4 days — one must be a long run day.'}>
         <Opts options={[
-          { icon: '3', label: '3 days', desc: 'Minimum — one long, two quality runs', value: '3' },
-          { icon: '4', label: '4 days', desc: 'Standard — proven marathon base',      value: '4' },
-          { icon: '5', label: '5 days', desc: 'Higher volume — faster improvement',   value: '5' },
-          { icon: '6', label: '6 days', desc: 'Competitive — full training load',     value: '6' },
+          { icon: '3', label: '3 days', desc: 'Minimum — one long, two quality',    value: '3' },
+          { icon: '4', label: '4 days', desc: 'Standard — proven race base',        value: '4' },
+          { icon: '5', label: '5 days', desc: 'Higher volume — faster improvement', value: '5' },
+          { icon: '6', label: '6 days', desc: 'Competitive — full training load',   value: '6' },
         ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly run structure will be built around that.', 5)} cols={2} monoKey />
         <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
       </StepWrap>
     );
 
     const step5mr = (
-      <StepWrap key="5" q="How much are you running per week right now?" hint="This is your starting point — your long run and weekly mileage will build from here.">
+      <StepWrap key="5" q="How much are you running per week right now?" hint="Your starting long run and total weekly volume are built from this.">
         <Opts options={[
           { icon: '🐢', label: 'Under 20km',  desc: 'Early base — building from scratch',   value: 'currently running under 20km per week' },
           { icon: '🏃', label: '20–40km',     desc: 'Solid base — ready to build on',       value: 'currently running 20-40km per week' },
@@ -1248,20 +1251,30 @@ function buildSteps(
     );
 
     const step6mr = (
-      <StepWrap key="6" q="What's your target finish time?" hint="Your long run paces, tempo runs, and interval targets will all be calculated from this.">
-        <Opts options={[
-          { icon: '🏅', label: 'Just finish',   desc: 'Any time — crossing the line wins',   value: 'just finish — no time goal, completion is the priority' },
-          { icon: '5️⃣', label: 'Sub-5 hours',   desc: '~7:05 min/km pace',                  value: 'sub-5 hours (approx 7:05 per km pace)' },
-          { icon: '4️⃣', label: 'Sub-4 hours',   desc: '~5:41 min/km pace',                  value: 'sub-4 hours (approx 5:41 per km pace)' },
-          { icon: '3️⃣', label: 'Sub-3:30',      desc: '~4:58 min/km pace',                  value: 'sub-3:30 (approx 4:58 per km pace)' },
+      <StepWrap key="6" q="What's your target finish time?" hint="Every training pace — easy, tempo, intervals — will be calculated from this.">
+        <Opts options={isHalf ? [
+          { icon: '🏅', label: 'Just finish',  desc: 'Crossing the line is the win',       value: 'just finish — no time goal, completion is the priority' },
+          { icon: '🕑', label: 'Sub-2:30',     desc: '~7:05 min/km pace',                  value: 'sub-2:30 half marathon (approx 7:05 per km)' },
+          { icon: '🕐', label: 'Sub-2:00',     desc: '~5:41 min/km pace',                  value: 'sub-2:00 half marathon (approx 5:41 per km)' },
+          { icon: '⚡', label: 'Sub-1:45',     desc: '~4:58 min/km pace',                  value: 'sub-1:45 half marathon (approx 4:58 per km)' },
+        ] : [
+          { icon: '🏅', label: 'Just finish',  desc: 'Crossing the line is the win',       value: 'just finish — no time goal, completion is the priority' },
+          { icon: '5️⃣', label: 'Sub-5 hours',  desc: '~7:05 min/km pace',                  value: 'sub-5 hours full marathon (approx 7:05 per km)' },
+          { icon: '4️⃣', label: 'Sub-4 hours',  desc: '~5:41 min/km pace',                  value: 'sub-4 hours full marathon (approx 5:41 per km)' },
+          { icon: '3️⃣', label: 'Sub-3:30',     desc: '~4:58 min/km pace',                  value: 'sub-3:30 full marathon (approx 4:58 per km)' },
         ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'All your training paces will be calculated around that.', 7)} />
         <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
       </StepWrap>
     );
 
     const step7mr = (
-      <StepWrap key="7" q="What's your biggest marathon challenge?" hint="Your plan will include specific strategies, workouts, and guidance to address this directly.">
-        <Opts options={[
+      <StepWrap key="7" q="What's your biggest race challenge?" hint="Your plan will include specific workouts and strategies to tackle this directly.">
+        <Opts options={isHalf ? [
+          { icon: '⏱️', label: 'Pacing',           desc: 'Going out too fast, dying late',         value: 'pacing — starting too fast and suffering badly in the second half' },
+          { icon: '🏃', label: 'Holding pace',     desc: 'Can\'t maintain goal pace late on',      value: 'holding race pace — struggling to maintain target pace in the final 5km' },
+          { icon: '🍌', label: 'Race nutrition',   desc: 'Stomach issues or energy crashes',       value: 'race day nutrition — timing gels and hydration correctly during a half marathon' },
+          { icon: '🦵', label: 'Injury risk',      desc: 'Knees, IT band, shins flare up',        value: 'injury risk — knee pain, IT band, or shin splints flaring up during training' },
+        ] : [
           { icon: '🧱', label: 'The wall',         desc: 'Hitting the wall at km 30–35',          value: 'hitting the wall — glycogen depletion and collapse after km 30' },
           { icon: '⏱️', label: 'Pacing',           desc: 'Going out too fast, dying late',         value: 'pacing — starting too fast and suffering badly in the second half' },
           { icon: '🍌', label: 'Race nutrition',   desc: 'Stomach issues or energy crashes',       value: 'race day nutrition — GI issues, gels, and energy management during the race' },
@@ -1272,7 +1285,7 @@ function buildSteps(
     );
 
     const step8mr = (
-      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Runner injuries: knees, IT band, shins, plantar fasciitis — we'll programme around them.">
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Knees, IT band, shins, plantar fasciitis — we'll programme around them.">
         <TextInput
           style={stepStyles.textarea}
           multiline
@@ -1287,9 +1300,14 @@ function buildSteps(
     );
 
     const step9mr = (
-      <StepWrap key="9" q="How many weeks until your marathon?" hint="Your long run progression, taper, and race-week plan are all built from this date.">
-        <Opts options={[
-          { icon: '🔥', label: '12 weeks',   desc: 'Standard marathon block',              value: '12 weeks' },
+      <StepWrap key="9" q="How many weeks until your race?" hint="Your long run progression, taper, and race-week plan are all built from this.">
+        <Opts options={isHalf ? [
+          { icon: '⚡', label: '8 weeks',    desc: 'Focused half marathon block',          value: '8 weeks'  },
+          { icon: '🔥', label: '10 weeks',   desc: 'Standard half marathon build',         value: '10 weeks' },
+          { icon: '💪', label: '12 weeks',   desc: 'Full base-to-race preparation',        value: '12 weeks' },
+          { icon: '🏆', label: '16 weeks',   desc: 'Extended build with strong base',      value: '16 weeks' },
+        ] : [
+          { icon: '🔥', label: '12 weeks',   desc: 'Standard full marathon block',         value: '12 weeks' },
           { icon: '💪', label: '16 weeks',   desc: 'Full build — most popular',            value: '16 weeks' },
           { icon: '🏆', label: '20 weeks',   desc: 'Extended base + full race build',      value: '20 weeks' },
           { icon: '🗓️', label: '24 weeks',   desc: 'Complete periodised marathon cycle',   value: '24 weeks' },
