@@ -14,8 +14,8 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.line,
+          backgroundColor: '#0D0D0B',
+          borderTopColor: '#1C1C18',
           borderTopWidth: 1,
           height: 64,
           paddingBottom: 8,
@@ -26,8 +26,8 @@ export default function TabLayout() {
           textTransform: 'uppercase',
           letterSpacing: 0.6,
         },
-        tabBarActiveTintColor: colors.forest,
-        tabBarInactiveTintColor: colors.ink3,
+        tabBarActiveTintColor: '#3D9E6A',
+        tabBarInactiveTintColor: '#444',
       }}
     >
       <Tabs.Screen

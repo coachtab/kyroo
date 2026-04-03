@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { useAuth } from '../../src/context/AuthContext';
@@ -12,14 +12,19 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.center}>
-          <Text style={styles.title}>Your profile.</Text>
-          <Text style={styles.sub}>Sign in to access your programs and track your progress.</Text>
-          <TouchableOpacity style={styles.btn} onPress={() => router.push('/auth')}>
-            <Text style={styles.btnText}>Sign in</Text>
+        <View style={styles.guestContainer}>
+          <View style={styles.guestIcon}>
+            <Text style={styles.guestIconText}>K</Text>
+          </View>
+          <Text style={styles.guestTitle}>Welcome to Kyroo</Text>
+          <Text style={styles.guestSub}>
+            Sign in to access your programs, track progress, and build your plan.
+          </Text>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push('/auth')}>
+            <Text style={styles.primaryBtnText}>Sign in</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnGhost} onPress={() => router.push('/auth?tab=signup')}>
-            <Text style={styles.btnGhostText}>Create account</Text>
+          <TouchableOpacity style={styles.ghostBtn} onPress={() => router.push('/auth?tab=signup')}>
+            <Text style={styles.ghostBtnText}>Create account — it's free</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -37,61 +42,207 @@ export default function ProfileScreen() {
     }
   }
 
+  const initials = user.name
+    .split(' ')
+    .map((n: string) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        <Text style={styles.eyebrow}>// PROFILE</Text>
-        <Text style={styles.title}>Hi, {user.name.split(' ')[0]}.</Text>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-        <View style={styles.card}>
-          <Row label="Email" value={user.email} />
-          <Row label="Plan" value={isPremium ? 'Premium ✓' : 'Free'} valueColor={isPremium ? colors.forest : colors.ink3} />
-          {user.is_admin && <Row label="Role" value="Admin" valueColor={colors.amber} />}
+        {/* ── Avatar + name ── */}
+        <View style={styles.heroSection}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
+          <Text style={styles.heroName}>{user.name}</Text>
+          <Text style={styles.heroEmail}>{user.email}</Text>
+          {isPremium ? (
+            <View style={styles.premiumBadge}>
+              <Text style={styles.premiumBadgeText}>✦ PRO MEMBER</Text>
+            </View>
+          ) : (
+            <View style={styles.freeBadge}>
+              <Text style={styles.freeBadgeText}>FREE PLAN</Text>
+            </View>
+          )}
         </View>
 
+        {/* ── Stats row ── */}
+        <View style={styles.statsRow}>
+          <StatCard label="Plan" value={isPremium ? 'Pro' : 'Free'} accent={isPremium ? '#3D9E6A' : '#666'} />
+          <StatCard label="Access" value={isPremium ? 'Unlimited' : 'Limited'} accent={isPremium ? '#3D9E6A' : '#666'} />
+          {user.is_admin && <StatCard label="Role" value="Admin" accent="#D4923F" />}
+        </View>
+
+        {/* ── Upgrade banner ── */}
         {!isPremium && (
-          <TouchableOpacity style={styles.upgradeBtn} onPress={() => router.push('/upgrade')}>
-            <Text style={styles.upgradeBtnText}>Upgrade to Premium</Text>
+          <TouchableOpacity style={styles.upgradeBanner} onPress={() => router.push('/upgrade')} activeOpacity={0.85}>
+            <View>
+              <Text style={styles.upgradeBannerTitle}>Unlock Pro</Text>
+              <Text style={styles.upgradeBannerSub}>All programs · Unlimited plans · Priority AI</Text>
+            </View>
+            <View style={styles.upgradeBannerBtn}>
+              <Text style={styles.upgradeBannerBtnText}>Upgrade ›</Text>
+            </View>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Sign out</Text>
+        {/* ── Menu items ── */}
+        <View style={styles.menu}>
+          <MenuItem icon="⚡" label="My Programs" onPress={() => {}} />
+          <MenuItem icon="⚙️" label="Account Settings" onPress={() => {}} />
+          <MenuItem icon="💬" label="Support" onPress={() => {}} />
+        </View>
+
+        {/* ── Sign out ── */}
+        <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout}>
+          <Text style={styles.signOutText}>Sign out</Text>
         </TouchableOpacity>
-      </View>
+
+        <Text style={styles.version}>Kyroo · v1.0</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Row({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+function StatCard({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <View style={rowStyles.row}>
-      <Text style={rowStyles.label}>{label}</Text>
-      <Text style={[rowStyles.value, valueColor ? { color: valueColor } : null]}>{value}</Text>
+    <View style={statStyles.card}>
+      <Text style={[statStyles.value, { color: accent }]}>{value}</Text>
+      <Text style={statStyles.label}>{label}</Text>
     </View>
   );
 }
 
-const rowStyles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing[3] },
-  label: { fontFamily: font.mono, fontSize: 12, color: colors.ink3, textTransform: 'uppercase', letterSpacing: 0.5 },
-  value: { fontFamily: font.sans, fontSize: 14, color: colors.ink },
+function MenuItem({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={menuStyles.item} onPress={onPress} activeOpacity={0.7}>
+      <View style={menuStyles.iconWrap}>
+        <Text style={menuStyles.icon}>{icon}</Text>
+      </View>
+      <Text style={menuStyles.label}>{label}</Text>
+      <Text style={menuStyles.arrow}>›</Text>
+    </TouchableOpacity>
+  );
+}
+
+const statStyles = StyleSheet.create({
+  card: {
+    flex: 1, backgroundColor: '#181816',
+    borderRadius: radius.md, padding: spacing[4],
+    alignItems: 'center', gap: 4,
+    borderWidth: 1, borderColor: '#252520',
+  },
+  value: { fontFamily: font.sansBd, fontSize: 16 },
+  label: { fontFamily: font.mono, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 },
+});
+
+const menuStyles = StyleSheet.create({
+  item: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: spacing[4], gap: spacing[3],
+    borderBottomWidth: 1, borderBottomColor: '#1C1C18',
+  },
+  iconWrap: {
+    width: 36, height: 36, borderRadius: radius.sm,
+    backgroundColor: '#181816', alignItems: 'center', justifyContent: 'center',
+  },
+  icon:  { fontSize: 16 },
+  label: { flex: 1, fontFamily: font.sans, fontSize: 15, color: '#CCCCC8' },
+  arrow: { fontSize: 20, color: '#444' },
 });
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.parchment },
-  container: { flex: 1, padding: spacing[5], paddingTop: spacing[8] },
-  center: { flex: 1, padding: spacing[5], paddingTop: spacing[16], alignItems: 'center' },
-  eyebrow: { fontFamily: font.mono, fontSize: 11, color: colors.ink3, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: spacing[3] },
-  title: { fontFamily: font.sansBd, fontSize: 34, color: colors.ink, marginBottom: spacing[3] },
-  sub: { fontFamily: font.sans, fontSize: 15, color: colors.ink2, lineHeight: 22, textAlign: 'center', marginBottom: spacing[8] },
-  card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, borderRadius: radius.sm, paddingHorizontal: spacing[4], marginTop: spacing[6] },
-  btn: { backgroundColor: colors.forest, paddingVertical: spacing[3], paddingHorizontal: spacing[8], borderRadius: radius.sm, marginBottom: spacing[3], width: '100%', alignItems: 'center' },
-  btnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
-  btnGhost: { borderWidth: 1, borderColor: colors.line2, paddingVertical: spacing[3], paddingHorizontal: spacing[8], borderRadius: radius.sm, width: '100%', alignItems: 'center' },
-  btnGhostText: { fontFamily: font.sans, fontSize: 15, color: colors.ink },
-  upgradeBtn: { marginTop: spacing[5], backgroundColor: colors.amber, paddingVertical: spacing[3], borderRadius: radius.sm, alignItems: 'center' },
-  upgradeBtnText: { fontFamily: font.sansBd, fontSize: 15, color: colors.white },
-  logoutBtn: { marginTop: 'auto', paddingVertical: spacing[3], alignItems: 'center' },
-  logoutText: { fontFamily: font.sans, fontSize: 14, color: colors.ink3 },
+  safe: { flex: 1, backgroundColor: '#0D0D0B' },
+
+  // Guest
+  guestContainer: {
+    flex: 1, alignItems: 'center',
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[16],
+  },
+  guestIcon: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: colors.forest,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: spacing[5],
+  },
+  guestIconText: { fontFamily: font.sansBd, fontSize: 36, color: '#F5F5F2' },
+  guestTitle:    { fontFamily: font.sansBd, fontSize: 26, color: '#F5F5F2', marginBottom: spacing[3], textAlign: 'center' },
+  guestSub:      { fontFamily: font.sans, fontSize: 15, color: '#666', lineHeight: 22, textAlign: 'center', marginBottom: spacing[8] },
+  primaryBtn: {
+    backgroundColor: colors.forest, height: 50,
+    borderRadius: radius.full, width: '100%',
+    alignItems: 'center', justifyContent: 'center', marginBottom: spacing[3],
+  },
+  primaryBtnText: { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2' },
+  ghostBtn: {
+    height: 50, borderRadius: radius.full, width: '100%',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: '#252520',
+  },
+  ghostBtnText: { fontFamily: font.sans, fontSize: 15, color: '#888' },
+
+  // Logged in
+  container: { padding: spacing[5], paddingBottom: spacing[12] },
+
+  heroSection: { alignItems: 'center', paddingVertical: spacing[8] },
+  avatar: {
+    width: 88, height: 88, borderRadius: 44,
+    backgroundColor: colors.forest,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: spacing[4],
+  },
+  avatarText:  { fontFamily: font.sansBd, fontSize: 32, color: '#F5F5F2' },
+  heroName:    { fontFamily: font.sansBd, fontSize: 24, color: '#F5F5F2', marginBottom: 4 },
+  heroEmail:   { fontFamily: font.sans, fontSize: 14, color: '#555', marginBottom: spacing[4] },
+  premiumBadge: {
+    paddingHorizontal: spacing[4], paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: colors.forest + '30',
+    borderWidth: 1, borderColor: colors.forest + '50',
+  },
+  premiumBadgeText: { fontFamily: font.mono, fontSize: 11, color: '#6DBF8A', letterSpacing: 1 },
+  freeBadge: {
+    paddingHorizontal: spacing[4], paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: '#1C1C18',
+    borderWidth: 1, borderColor: '#252520',
+  },
+  freeBadgeText: { fontFamily: font.mono, fontSize: 11, color: '#555', letterSpacing: 1 },
+
+  statsRow: { flexDirection: 'row', gap: spacing[3], marginBottom: spacing[5] },
+
+  upgradeBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: colors.forest,
+    borderRadius: radius.lg, padding: spacing[4],
+    marginBottom: spacing[5],
+  },
+  upgradeBannerTitle: { fontFamily: font.sansBd, fontSize: 16, color: '#F5F5F2', marginBottom: 2 },
+  upgradeBannerSub:   { fontFamily: font.sans, fontSize: 12, color: '#A8D4B8' },
+  upgradeBannerBtn: {
+    backgroundColor: '#F5F5F2', borderRadius: radius.full,
+    paddingHorizontal: spacing[4], paddingVertical: 8,
+  },
+  upgradeBannerBtnText: { fontFamily: font.sansBd, fontSize: 13, color: colors.forest },
+
+  menu: { backgroundColor: '#0D0D0B', marginBottom: spacing[6] },
+
+  signOutBtn: {
+    borderWidth: 1, borderColor: '#252520',
+    borderRadius: radius.full, height: 48,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: spacing[5],
+  },
+  signOutText: { fontFamily: font.sans, fontSize: 15, color: '#555' },
+
+  version: {
+    fontFamily: font.mono, fontSize: 11, color: '#333',
+    textAlign: 'center', textTransform: 'uppercase', letterSpacing: 0.5,
+  },
 });
