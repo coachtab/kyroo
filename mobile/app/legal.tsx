@@ -60,12 +60,13 @@ function Imprint() {
 
       <Section title="Operator">
         <Row label="Company" value="Kyroo" />
+        <Row label="Founder" value="Damian Kamara" />
         <Row label="Email" value="legal@kyroo.de" onPress={() => Linking.openURL('mailto:legal@kyroo.de')} />
         <Row label="Website" value="app.kyroo.de" />
       </Section>
 
       <Section title="Responsible for Content">
-        <P>Responsible for editorial content pursuant to § 55 para. 2 RStV (German Interstate Broadcasting Agreement): The operator of Kyroo as listed above.</P>
+        <P>Responsible for editorial content pursuant to § 55 para. 2 RStV (German Interstate Broadcasting Agreement): Damian Kamara</P>
       </Section>
 
       <Section title="Dispute Resolution">
