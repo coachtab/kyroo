@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform, ScrollView, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { useAuth } from '../../src/context/AuthContext';
@@ -93,9 +93,9 @@ export default function ProfileScreen() {
 
         {/* ── Menu items ── */}
         <View style={styles.menu}>
-          <MenuItem icon="⚡" label="My Programs" onPress={() => {}} />
-          <MenuItem icon="⚙️" label="Account Settings" onPress={() => {}} />
-          <MenuItem icon="💬" label="Support" onPress={() => {}} />
+          <MenuItem icon="⚡" label="My Programs" onPress={() => router.push('/')} />
+          <MenuItem icon="⚙️" label="Account Settings" onPress={() => router.push('/settings')} />
+          <MenuItem icon="💬" label="Support" onPress={() => Linking.openURL('mailto:support@kyroo.de')} />
         </View>
 
         {/* ── Sign out ── */}
