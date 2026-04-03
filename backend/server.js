@@ -1505,6 +1505,7 @@ app.delete('/api/account', authRequired, async (req, res) => {
 
     // Delete in order (foreign key constraints)
     await pool.query('DELETE FROM payments WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM user_plans WHERE user_id = $1', [userId]);
     await pool.query('DELETE FROM subscribers WHERE email = $1', [email]);
     await pool.query('DELETE FROM users WHERE id = $1', [userId]);
 

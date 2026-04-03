@@ -12,10 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type Payment = { id: number; amount: number; currency: string; description: string; status: string; created_at: string };
 
 export default function SettingsScreen() {
-  const { user, isPremium, refresh } = useAuth();
+  const { user, isPremium, refresh, logout } = useAuth();
   const router = useRouter();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useFocusEffect(useCallback(() => {
     apiFetch('/api/payments').then(r => r.json()).then(d => setPayments(d.payments || [])).catch(() => {});
@@ -44,6 +45,38 @@ export default function SettingsScreen() {
         { text: 'Keep Pro', style: 'cancel' },
         { text: 'Cancel subscription', style: 'destructive', onPress: doCancel },
       ]);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    const doDelete = async () => {
+      setDeleteLoading(true);
+      try {
+        const res = await apiFetch('/api/account', { method: 'DELETE' });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Deletion failed.');
+        }
+        await logout();
+        router.replace('/(tabs)/profile');
+      } catch (err: any) {
+        Alert.alert('Error', err.message || 'Could not delete account. Please try again.');
+      } finally {
+        setDeleteLoading(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Permanently delete your account? This cannot be undone. All your data, plans, and subscription will be erased.')) doDelete();
+    } else {
+      Alert.alert(
+        'Delete account',
+        'This will permanently erase your account, all saved plans, and cancel any active subscription. This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete my account', style: 'destructive', onPress: doDelete },
+        ]
+      );
     }
   }
 
@@ -207,6 +240,22 @@ export default function SettingsScreen() {
           </View>
         )}
 
+        {/* ── Danger zone ── */}
+        <View style={s.dangerSection}>
+          <Text style={s.dangerTitle}>Danger zone</Text>
+          <Text style={s.dangerSub}>
+            Permanently deletes your account, all saved plans, and cancels any active subscription. This action cannot be undone.
+          </Text>
+          <TouchableOpacity
+            style={[s.deleteBtn, deleteLoading && s.btnDisabled]}
+            onPress={handleDeleteAccount}
+            disabled={deleteLoading}
+            activeOpacity={0.8}
+          >
+            <Text style={s.deleteBtnText}>{deleteLoading ? 'Deleting…' : 'Delete my account'}</Text>
+          </TouchableOpacity>
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -265,6 +314,16 @@ const s = StyleSheet.create({
   cancelBtnText: { fontFamily: font.sans, fontSize: 14, color: '#C06848' },
   upgradeBtn:  { backgroundColor: '#3D9E6A', height: 48, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
   upgradeBtnText: { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2' },
+
+  // Danger zone
+  dangerSection: {
+    borderRadius: radius.lg, borderWidth: 1, borderColor: '#5A2510',
+    backgroundColor: '#110A08', padding: spacing[5], marginBottom: spacing[4],
+  },
+  dangerTitle:   { fontFamily: font.sansBd, fontSize: 16, color: '#C06848', marginBottom: spacing[2] },
+  dangerSub:     { fontFamily: font.sans, fontSize: 13, color: '#7A4030', lineHeight: 20, marginBottom: spacing[5] },
+  deleteBtn:     { borderWidth: 1, borderColor: '#C06848', borderRadius: radius.sm, height: 48, alignItems: 'center', justifyContent: 'center' },
+  deleteBtnText: { fontFamily: font.sansBd, fontSize: 14, color: '#C06848' },
 
   // Payments
   payRow:       { paddingVertical: spacing[3], flexDirection: 'row', alignItems: 'center' },
