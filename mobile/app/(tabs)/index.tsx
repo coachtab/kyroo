@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#252520',
   },
   chipActive:      { backgroundColor: colors.forest, borderColor: colors.forest },
-  chipText:        { fontFamily: font.mono, fontSize: 11, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 },
+  chipText:        { fontFamily: font.mono, fontSize: 11, color: '#555', letterSpacing: 0.4 },
   chipTextActive:  { color: '#F5F5F2' },
 
   // List
