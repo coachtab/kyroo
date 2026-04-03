@@ -91,6 +91,37 @@ export default function SettingsScreen() {
   const [nameErr, setNameErr]       = useState('');
   const [pwErr, setPwErr]           = useState('');
 
+  // Body stats
+  const [bAge,    setBAge]    = useState(user?.body_age    ? String(user.body_age)    : '');
+  const [bWeight, setBWeight] = useState(user?.body_weight ? String(user.body_weight) : '');
+  const [bHeight, setBHeight] = useState(user?.body_height ? String(user.body_height) : '');
+  const [bSex,    setBSex]    = useState<string>(user?.body_sex ?? 'male');
+  const [bSaving, setBSaving] = useState(false);
+  const [bMsg,    setBMsg]    = useState('');
+  const [bErr,    setBErr]    = useState('');
+
+  async function saveBodyStats() {
+    const a = parseInt(bAge, 10), w = parseFloat(bWeight), h = parseFloat(bHeight);
+    if (!a || a < 10 || a > 100) { setBErr('Enter a valid age (10–100).'); return; }
+    if (!w || w < 20 || w > 300) { setBErr('Enter a valid weight (20–300 kg).'); return; }
+    if (!h || h < 100 || h > 250) { setBErr('Enter a valid height (100–250 cm).'); return; }
+    setBSaving(true); setBMsg(''); setBErr('');
+    try {
+      const res = await apiFetch('/api/auth/body-stats', {
+        method: 'PATCH',
+        body: JSON.stringify({ age: bAge, weight: bWeight, height: bHeight, sex: bSex }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setBErr(data.error || 'Failed to save.'); return; }
+      await refresh();
+      setBMsg('Body stats saved. All future plans will use these values.');
+    } catch {
+      setBErr('Network error.');
+    } finally {
+      setBSaving(false);
+    }
+  }
+
   async function saveName() {
     if (!name.trim() || name.trim() === user?.name) return;
     setSaving(true); setNameMsg(''); setNameErr('');
@@ -169,6 +200,78 @@ export default function SettingsScreen() {
             <Text style={s.readOnlyText}>{user?.email}</Text>
             <Text style={s.readOnlyNote}>Cannot be changed</Text>
           </View>
+        </View>
+
+        {/* ── Body Stats ── */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Body Stats</Text>
+          <Text style={s.sectionSub}>Used to personalise every plan you generate. Enter once, always remembered.</Text>
+
+          <View style={s.statsRow}>
+            <View style={s.statField}>
+              <Text style={s.fieldLabel}>Age</Text>
+              <TextInput
+                style={s.input}
+                value={bAge}
+                onChangeText={v => { setBAge(v.replace(/[^0-9]/g, '')); setBErr(''); setBMsg(''); }}
+                keyboardType="number-pad"
+                placeholder="28"
+                placeholderTextColor="#333"
+                maxLength={3}
+              />
+            </View>
+            <View style={s.statField}>
+              <Text style={s.fieldLabel}>Weight (kg)</Text>
+              <TextInput
+                style={s.input}
+                value={bWeight}
+                onChangeText={v => { setBWeight(v.replace(/[^0-9.]/g, '')); setBErr(''); setBMsg(''); }}
+                keyboardType="decimal-pad"
+                placeholder="75"
+                placeholderTextColor="#333"
+                maxLength={6}
+              />
+            </View>
+            <View style={s.statField}>
+              <Text style={s.fieldLabel}>Height (cm)</Text>
+              <TextInput
+                style={s.input}
+                value={bHeight}
+                onChangeText={v => { setBHeight(v.replace(/[^0-9]/g, '')); setBErr(''); setBMsg(''); }}
+                keyboardType="number-pad"
+                placeholder="175"
+                placeholderTextColor="#333"
+                maxLength={3}
+              />
+            </View>
+          </View>
+
+          <Text style={[s.fieldLabel, { marginTop: spacing[4] }]}>Biological sex</Text>
+          <View style={s.sexRow}>
+            {(['male', 'female', 'other'] as const).map(opt => (
+              <TouchableOpacity
+                key={opt}
+                style={[s.sexBtn, bSex === opt && s.sexBtnActive]}
+                onPress={() => { setBSex(opt); setBMsg(''); setBErr(''); }}
+                activeOpacity={0.75}
+              >
+                <Text style={[s.sexBtnText, bSex === opt && s.sexBtnTextActive]}>
+                  {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {!!bErr && <Text style={s.errText}>{bErr}</Text>}
+          {!!bMsg && <Text style={s.okText}>{bMsg}</Text>}
+          <TouchableOpacity
+            style={[s.btn, bSaving && s.btnDisabled]}
+            onPress={saveBodyStats}
+            disabled={bSaving}
+            activeOpacity={0.85}
+          >
+            <Text style={s.btnText}>{bSaving ? 'Saving…' : 'Save body stats'}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* ── Password ── */}
@@ -275,7 +378,17 @@ const s = StyleSheet.create({
     padding: spacing[5],
     marginBottom: spacing[4],
   },
-  sectionTitle: { fontFamily: font.sansBd, fontSize: 16, color: '#F5F5F2', marginBottom: spacing[5] },
+  sectionTitle: { fontFamily: font.sansBd, fontSize: 16, color: '#F5F5F2', marginBottom: spacing[2] },
+  sectionSub:   { fontFamily: font.sans, fontSize: 13, color: '#555', lineHeight: 18, marginBottom: spacing[5] },
+
+  statsRow:  { flexDirection: 'row', gap: spacing[3] },
+  statField: { flex: 1 },
+
+  sexRow:         { flexDirection: 'row', gap: spacing[2], marginBottom: spacing[4] },
+  sexBtn:         { flex: 1, height: 44, borderRadius: radius.sm, borderWidth: 1, borderColor: '#252520', backgroundColor: '#0D0D0B', alignItems: 'center', justifyContent: 'center' },
+  sexBtnActive:   { backgroundColor: '#3D9E6A', borderColor: '#3D9E6A' },
+  sexBtnText:     { fontFamily: font.mono, fontSize: 12, color: '#555', textTransform: 'uppercase', letterSpacing: 0.4 },
+  sexBtnTextActive: { color: '#F5F5F2' },
 
   fieldLabel: { fontFamily: font.mono, fontSize: 10, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[2] },
   input: {
