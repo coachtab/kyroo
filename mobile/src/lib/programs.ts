@@ -50,7 +50,7 @@ export const PROGRAMS: Program[] = [
     id: 'home',
     name: 'Home Workout Plan',
     icon: '🏠',
-    tagline: '10-week · no gym needed',
+    tagline: 'your pace · no gym needed',
     badge: 'PREMIUM',
     filters: ['home', 'fat-loss', 'muscle'],
     description: 'Pure bodyweight training with progressive difficulty. No equipment, no commute — just results from your living room.',

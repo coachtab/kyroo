@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (['weightloss', 'muscle', 'challenge90', 'beginner'].includes(progId)) return 9;
+  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home'].includes(progId)) return 9;
   return 8;
 }
 
@@ -797,6 +797,134 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4bg, step5bg, step6bg, step7bg, step8bg, step9bg,
+    ];
+  }
+
+  // ── HOME WORKOUT PLAN — fully dedicated steps ─────────────────
+  if (isHome) {
+    const step1hw = (
+      <StepWrap key="1" q="Why are you training at home?" hint="This shapes your program's tone, structure, and daily session length.">
+        <Opts options={[
+          { icon: '🏠', label: 'Pure convenience',  desc: 'No commute, train any time',           value: 'training at home for maximum convenience — no commute, total flexibility' },
+          { icon: '💰', label: 'No gym fees',       desc: 'Zero membership, same results',        value: 'avoiding gym costs — want real results with no equipment spend' },
+          { icon: '⏰', label: 'Time is tight',     desc: 'Busy schedule, need efficiency',       value: 'very busy schedule — need short, efficient sessions that fit around life' },
+          { icon: '😌', label: 'Prefer privacy',    desc: 'Train alone, no judgement',            value: 'prefer training alone at home — no gym environment or social pressure' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Got it. Your plan will be built for exactly that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2hw = (
+      <StepWrap key="2" q="What equipment do you have?" hint="Your exercises will use only what you actually have — nothing else.">
+        <Opts options={[
+          { icon: '🤸', label: 'Nothing',           desc: 'Pure bodyweight only',                 value: 'bodyweight only — no equipment at all' },
+          { icon: '🎗️', label: 'Resistance bands',  desc: 'Bands and bodyweight',                 value: 'resistance bands and bodyweight' },
+          { icon: '🏋️', label: 'Dumbbells',         desc: 'Fixed or adjustable dumbbells',        value: 'dumbbells (fixed or adjustable) and bodyweight' },
+          { icon: '💪', label: 'Well equipped',     desc: 'Dumbbells + bands + pull-up bar',      value: 'dumbbells, resistance bands, and a pull-up bar' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Perfect. Every exercise will suit your setup exactly.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('location') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4hw = (
+      <StepWrap key="4" q="How many days per week can you train?" hint="Home sessions are shorter — you can afford more frequency.">
+        <Opts options={[
+          { icon: '3', label: '3 days', desc: 'Solid foundation',           value: '3' },
+          { icon: '4', label: '4 days', desc: 'Great for faster progress',  value: '4' },
+          { icon: '5', label: '5 days', desc: 'Maximum home results',       value: '5' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly plan will be built around that.', 5)} cols={3} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5hw = (
+      <StepWrap key="5" q="What's your main goal?" hint="Your sessions will be designed around this — every exercise earns its place.">
+        <Opts options={[
+          { icon: '🔥', label: 'Burn fat',          desc: 'Lose weight, leaner body',             value: 'burn fat and lose weight through home cardio and circuit training' },
+          { icon: '💪', label: 'Build muscle',      desc: 'Stronger, more defined at home',       value: 'build muscle and strength using bodyweight progressions' },
+          { icon: '🏃', label: 'Get fit',           desc: 'Cardio + strength combined',           value: 'improve overall fitness — cardio endurance and functional strength' },
+          { icon: '🧘', label: 'Move better',       desc: 'Posture, energy, daily mobility',      value: 'improve daily movement, posture, flexibility, and energy levels' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Your sessions will drive exactly that.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('nutrition') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6hw = (
+      <StepWrap key="6" q="How experienced are you with bodyweight training?" hint="Sets your starting exercises, rep ranges, and progression speed.">
+        <Opts options={[
+          { icon: '🌱', label: 'Never done it',     desc: 'Starting from zero',                   value: 'complete beginner — never followed a bodyweight training program' },
+          { icon: '📖', label: 'Know the basics',   desc: 'Push-ups, squats, lunges',             value: 'familiar with basics — can do push-ups, squats, and lunges with decent form' },
+          { icon: '💪', label: 'Comfortable',       desc: 'Multiple sets, controlled form',       value: 'comfortable — can complete multiple sets with good control and form' },
+          { icon: '🏆', label: 'Experienced',       desc: 'Want harder progressions',             value: 'experienced — looking for challenging progressions like pistol squats and pike push-ups' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Understood. Your program will match exactly that level.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('level') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7hw = (
+      <StepWrap key="7" q="What's your biggest challenge training at home?" hint="Your plan will have specific strategies to beat this.">
+        <Opts options={[
+          { icon: '😴', label: 'Motivation drops',  desc: 'Easy to skip without a gym routine',   value: 'lacking motivation at home — too easy to skip without a gym environment' },
+          { icon: '📺', label: 'Distractions',      desc: 'TV, phone, family, the couch',         value: 'too many distractions at home — hard to focus and stay in training mode' },
+          { icon: '📉', label: 'Can\'t progress',  desc: 'No way to get harder without weights',  value: 'not knowing how to progress — feels impossible to get harder without adding weight' },
+          { icon: '📋', label: 'No structure',      desc: 'Wing it, waste time, quit early',      value: 'no clear plan — winging sessions leads to wasted time and quitting early' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that directly.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8hw = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Your exercises will be chosen and modified around anything that needs protecting.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Shoulder injury — no overhead pressing. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9hw = (
+      <StepWrap key="9" q="How long do you want the program to run?" hint="Your phases and exercise progressions will be scaled to fit.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',   desc: 'Quick intensive block',               value: '4 weeks'  },
+          { icon: '🔥', label: '8 weeks',   desc: 'Solid transformation',                value: '8 weeks'  },
+          { icon: '💪', label: '10 weeks',  desc: 'Three full phases of progression',    value: '10 weeks' },
+          { icon: '🏆', label: '16 weeks',  desc: 'Deep bodyweight mastery',             value: '16 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Perfect. Your program will be phased exactly for that.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1hw, step2hw,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to calibrate your bodyweight progressions and session intensity.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '28', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '75', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '175', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4hw, step5hw, step6hw, step7hw, step8hw, step9hw,
     ];
   }
 
