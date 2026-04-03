@@ -172,8 +172,8 @@ function generateToken(user) {
   );
 }
 
-// Plan limits
-const PLAN_LIMITS = { free: 0, basic: 5, pro: Infinity };
+// Plan limits — free users get 5 generations/month, Pro is unlimited
+const PLAN_LIMITS = { free: 5, basic: 5, pro: Infinity };
 
 // Programs accessible on the free plan
 const FREE_PROGRAM_IDS = new Set(['beginner', 'home']);
@@ -201,25 +201,33 @@ async function recordUsage(userId, programType, tokensUsed) {
 }
 
 async function checkProgramAccess(req, res, programId) {
-  // Get fresh user data with plan
   const { rows } = await pool.query('SELECT plan, is_admin, is_premium FROM users WHERE id = $1', [req.user.id]);
   if (rows.length === 0) { res.status(401).json({ error: 'User not found' }); return false; }
   const user = rows[0];
 
+  // Admins: unlimited, unrestricted
   if (user.is_admin) return true;
 
-  // Free programs are accessible on any plan
-  if (programId && FREE_PROGRAM_IDS.has(programId)) return true;
-
   const plan = user.plan || 'free';
-  if (plan === 'free' && !user.is_premium) { res.status(403).json({ error: 'Upgrade to unlock all programs', plan: 'free' }); return false; }
+  const isPro = user.is_premium || plan === 'pro';
 
-  // Premium flag always grants unlimited access regardless of plan column
-  if (user.is_premium) return true;
+  // Block free users from premium programs (they can still use beginner & home)
+  const isFreeProgram = !programId || FREE_PROGRAM_IDS.has(programId);
+  if (!isPro && !isFreeProgram) {
+    res.status(403).json({ error: 'Upgrade to Pro to unlock all programs.', plan });
+    return false;
+  }
 
+  // Pro users: unlimited
+  if (isPro) return true;
+
+  // Free / basic users: enforce monthly generation limit
   const { allowed, used, limit } = await canGenerateProgram(req.user.id, plan);
   if (!allowed) {
-    res.status(429).json({ error: `You have used all ${limit} programs this month. Upgrade to Pro for unlimited.`, used, limit, plan });
+    res.status(429).json({
+      error: `You've used all ${limit} plans this month. Upgrade to Pro for unlimited.`,
+      used, limit, plan,
+    });
     return false;
   }
   return true;
@@ -666,6 +674,9 @@ app.post('/api/program/generate', authRequired, async (req, res) => {
       system,
       messages: [{ role: 'user', content: user }],
     });
+
+    const tokens = message.usage ? (message.usage.input_tokens + message.usage.output_tokens) : 0;
+    await recordUsage(req.user.id, programId || 'unknown', tokens);
 
     res.json({ program: message.content[0].text });
   } catch (err) {

@@ -93,6 +93,37 @@ export default function ProgramsScreen() {
             Pick a program · answer a few questions · get your plan.
           </Text>
 
+          {/* Usage counter — free users only */}
+          {user && !isPremium && (() => {
+            const used      = user.usage?.used      ?? 0;
+            const limit     = user.usage?.limit     ?? 5;
+            const remaining = user.usage?.remaining ?? limit;
+            const pct       = Math.min((used / limit) * 100, 100);
+            const warn      = remaining <= 1;
+            return (
+              <TouchableOpacity
+                style={styles.usageBanner}
+                onPress={() => router.push('/upgrade')}
+                activeOpacity={0.85}
+              >
+                <View style={{ flex: 1, gap: 6 }}>
+                  <View style={styles.usageTopRow}>
+                    <Text style={[styles.usageLabel, warn && styles.usageLabelWarn]}>
+                      {remaining === 0
+                        ? 'No plans left this month'
+                        : `${remaining} of ${limit} plans remaining`}
+                    </Text>
+                    <Text style={styles.usageReset}>resets monthly</Text>
+                  </View>
+                  <View style={styles.usageBar}>
+                    <View style={[styles.usageBarFill, { width: `${pct}%` as any }, warn && styles.usageBarWarn]} />
+                  </View>
+                </View>
+                <Text style={styles.usageUpgrade}>Upgrade →</Text>
+              </TouchableOpacity>
+            );
+          })()}
+
           {isPremium && liveCount > 0 && (
             <TouchableOpacity
               style={styles.liveBanner}
@@ -300,6 +331,23 @@ const styles = StyleSheet.create({
   cardTagline:    { fontFamily: font.mono, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 },
   lockIcon:       { fontSize: 12 },
   arrow:          { fontSize: 28, flexShrink: 0, opacity: 0.5 },
+
+  // Usage counter banner
+  usageBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#181816', borderRadius: radius.md,
+    borderWidth: 1, borderColor: '#252520',
+    paddingHorizontal: spacing[4], paddingVertical: spacing[3],
+    gap: spacing[3], marginTop: spacing[3],
+  },
+  usageTopRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  usageLabel:       { fontFamily: font.mono, fontSize: 11, color: '#888', letterSpacing: 0.3 },
+  usageLabelWarn:   { color: '#C06848' },
+  usageReset:       { fontFamily: font.mono, fontSize: 10, color: '#333', letterSpacing: 0.3 },
+  usageBar:         { height: 3, backgroundColor: '#252520', borderRadius: 2, overflow: 'hidden' },
+  usageBarFill:     { height: '100%', backgroundColor: '#3D9E6A', borderRadius: 2 },
+  usageBarWarn:     { backgroundColor: '#C06848' },
+  usageUpgrade:     { fontFamily: font.mono, fontSize: 11, color: '#3D9E6A', letterSpacing: 0.3, flexShrink: 0 },
 
   // Live training banner
   liveBanner: {

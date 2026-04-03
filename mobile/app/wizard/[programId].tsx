@@ -18,7 +18,7 @@ type FormData = Record<string, any>;
 export default function WizardScreen() {
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const router = useRouter();
-  const { user, refresh } = useAuth();
+  const { user, isPremium, refresh } = useAuth();
   const prog = PROGRAMS.find(p => p.id === programId);
 
   // Pre-fill body stats from saved profile
@@ -193,6 +193,20 @@ export default function WizardScreen() {
         {/* Pinned Generate button on last step so it's always visible */}
         {step === TOTAL_STEPS && (
           <View style={styles.pinnedBar}>
+            {!isPremium && (() => {
+              const remaining = user?.usage?.remaining ?? (user?.usage ? 0 : 5);
+              const limit     = user?.usage?.limit ?? 5;
+              const warn      = remaining <= 1;
+              return (
+                <View style={styles.pinnedUsage}>
+                  <Text style={[styles.pinnedUsageText, warn && styles.pinnedUsageWarn]}>
+                    {remaining === 0
+                      ? '⚠ No plans left this month — upgrade for unlimited'
+                      : `${remaining} of ${limit} plans remaining this month`}
+                  </Text>
+                </View>
+              );
+            })()}
             {!!error && <Text style={styles.pinnedError}>{error}</Text>}
             <TouchableOpacity style={styles.pinnedBtn} onPress={generate}>
               <Text style={styles.pinnedBtnText}>Generate my plan →</Text>
@@ -614,6 +628,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#1C1C18',
     backgroundColor: '#0D0D0B', padding: spacing[4], gap: spacing[2],
   },
+  pinnedUsage:     { backgroundColor: '#181816', borderRadius: radius.sm, paddingVertical: spacing[2], paddingHorizontal: spacing[3] },
+  pinnedUsageText: { fontFamily: font.mono, fontSize: 11, color: '#555', textAlign: 'center', letterSpacing: 0.3 },
+  pinnedUsageWarn: { color: '#C06848' },
   pinnedError: { fontFamily: font.sans, fontSize: 13, color: '#C06848', textAlign: 'center' },
   pinnedBtn: { backgroundColor: '#3D9E6A', height: 50, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
   pinnedBtnText: { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2' },

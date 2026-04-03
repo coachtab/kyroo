@@ -13,6 +13,7 @@ export type User = {
   body_weight?: number | null;
   body_height?: number | null;
   body_sex?: string | null;
+  usage?: { used: number; limit: number; remaining: number };
 };
 
 type AuthContextType = {
