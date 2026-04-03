@@ -579,7 +579,7 @@ function buildProgramPrompt(programId, data) {
   const {
     level, age, weight, height, sex,
     days_per_week, session_minutes, equipment,
-    primary_goal, nutrition, biggest_challenge, injuries, timeframe,
+    primary_goal, nutrition, biggest_challenge, injuries, timeframe, muscle_focus,
   } = data;
 
   const clientBase = [
@@ -612,12 +612,24 @@ function buildProgramPrompt(programId, data) {
     }
 
     // ── 2. Muscle Building ──────────────────────────────────────────────────
-    case 'muscle':
+    case 'muscle': {
+      const mbDuration = timeframe || '16 weeks';
+      const mbWeeks = parseInt(mbDuration) || 16;
+      // Build phase breakdown scaled to duration
+      let mbPhases;
+      if (mbWeeks <= 8) {
+        mbPhases = `## PHASE 1 — WEEKS 1–4: FOUNDATION\n- Goal: Establish baseline loads, master technique\n- For each session: exercise name, one-line how-to, sets × reps, tempo, rest\n- Weekly progression rule: how much weight to add and when\n\n## PHASE 2 — WEEKS 5–${mbWeeks}: VOLUME BLOCK\n- Goal: Increase sets per muscle group to drive hypertrophy\n- Show total weekly sets per muscle group\n- Week ${mbWeeks}: Active deload — explain what to change and why`;
+      } else if (mbWeeks <= 12) {
+        mbPhases = `## PHASE 1 — WEEKS 1–4: FOUNDATION\n- Goal: Master technique, establish baseline loads\n- For each session: exercise name, one-line how-to, sets × reps, tempo, rest\n- Weekly progression rule\n\n## PHASE 2 — WEEKS 5–8: VOLUME BLOCK\n- Goal: Increase weekly sets to drive hypertrophy\n- Show total weekly sets per muscle group\n\n## PHASE 3 — WEEKS 9–${mbWeeks}: INTENSITY & PEAK\n- Goal: Higher loads, lower reps, mechanical tension\n- Week ${mbWeeks}: Active deload — explain what deload means and why it accelerates gains`;
+      } else {
+        mbPhases = `## PHASE 1 — WEEKS 1–4: FOUNDATION\n- Goal: Master technique, establish baseline loads\n- For each session: exercise name, one-line how-to, sets × reps, tempo (explain tempo notation once), rest\n- Weekly progression rule: how much weight to add and when\n\n## PHASE 2 — WEEKS 5–8: VOLUME BLOCK\n- Goal: Increase weekly sets to drive hypertrophy\n- New exercises introduced, volume increased per muscle group\n- Show total weekly sets per muscle group\n\n## PHASE 3 — WEEKS 9–12: INTENSITY BLOCK\n- Goal: Higher loads, lower reps, more mechanical tension\n- Explain the shift from volume to intensity and why it matters\n\n## PHASE 4 — WEEKS 13–${mbWeeks}: PEAK & DELOAD\n- Weeks 13–${mbWeeks - 1}: Peak performance — hardest sessions of the program\n- Week ${mbWeeks}: Full deload — explain what deload means, what to change, why it boosts long-term gains`;
+      }
       return {
         system: `You are an elite hypertrophy coach with a decade of experience programming for natural athletes. You specialise in progressive overload, optimal training volume, and evidence-based muscle-building protocols. You write programs that maximise muscle growth within the time and equipment available. You never write generic fitness advice — every recommendation is specific and actionable.\n\n${KYROO_SYSTEM_RULES}`,
-        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'build muscle mass'}\n\nCreate a complete 16-WEEK MUSCLE BUILDING PROGRAM. This is PURELY a hypertrophy program — no cardio-heavy fat-loss content.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 16-WEEK MUSCLE BUILDING PROGRAM\nDesigned for: ${level} | ${days_per_week} days/week | Goal: Maximum hypertrophy\n\n## THE SCIENCE OF YOUR PROGRAM (3-4 sentences, plain English)\nExplain progressive overload, muscle protein synthesis, and why this 16-week structure works.\n\n## YOUR TRAINING SPLIT\nLabel every training day (e.g. Push / Pull / Legs or Upper / Lower). Explain why this split was chosen for this client.\n\n## PHASE 1 — WEEKS 1–4: FOUNDATION\n- Goal: Master technique, establish baseline loads\n- For each session: exercise name, one-line how-to, sets × reps, tempo (explain tempo notation once), rest\n- Weekly progression rule: how much weight to add and when\n\n## PHASE 2 — WEEKS 5–8: VOLUME BLOCK\n- Goal: Increase weekly sets to drive hypertrophy\n- New exercises introduced, volume increased per muscle group\n- Show total weekly sets per muscle group\n\n## PHASE 3 — WEEKS 9–12: INTENSITY BLOCK\n- Goal: Higher loads, lower reps, more mechanical tension\n- Explain the shift from volume to intensity and why it matters\n\n## PHASE 4 — WEEKS 13–16: PEAK & DELOAD\n- Weeks 13–15: Peak performance\n- Week 16: Full deload — explain what deload means, what to change, why it boosts long-term gains\n\n## NUTRITION FOR MUSCLE GROWTH\n- Calorie surplus recommendation (state exact kcal target above maintenance)\n- Protein target in grams/kg bodyweight — explain why\n- Meal timing around training (pre/post workout)\n- ${nutrition}\n\n## RECOVERY PROTOCOL\nSleep, rest days, how to know if you're overtraining.`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'build muscle mass'}\n- Muscle priority: ${muscle_focus || 'full body balanced development'}\n- Target timeframe: ${mbDuration}\n\nCreate a complete ${mbDuration.toUpperCase()} MUSCLE BUILDING PROGRAM. This is PURELY a hypertrophy program — no cardio-heavy fat-loss content.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO ${mbDuration.toUpperCase()} MUSCLE BUILDING PROGRAM\nDesigned for: ${level} | ${days_per_week} days/week | Goal: ${primary_goal || 'Maximum hypertrophy'}\nMuscle priority: ${muscle_focus || 'full body balanced'}\n\n## THE SCIENCE OF YOUR PROGRAM (3-4 sentences, plain English)\nExplain progressive overload, muscle protein synthesis, and why this ${mbDuration} structure works for this client's goal.\n\n## YOUR TRAINING SPLIT\nRecommend the best split for ${days_per_week} days/week (e.g. Push/Pull/Legs, Upper/Lower, Full Body). Explain why this split was chosen and how it targets ${muscle_focus || 'all muscle groups'} effectively.\n\n${mbPhases}\n\n## NUTRITION FOR MUSCLE GROWTH\n- Calorie surplus recommendation (state exact kcal target above their estimated TDEE)\n- Protein target in grams per kg of bodyweight — explain why\n- Meal timing around training (pre/post workout windows)\n- ${nutrition}\n\n## RECOVERY PROTOCOL\nSleep targets, rest day activity, how to recognise overtraining vs normal fatigue.\n\n## WHAT NOT TO DO\n3 muscle-building mistakes this client — given their level and goal — must avoid.`,
         maxTokens: 8000,
       };
+    }
 
     // ── 3. 90-Day Challenge ─────────────────────────────────────────────────
     case 'challenge90':

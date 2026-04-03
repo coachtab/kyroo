@@ -23,7 +23,7 @@ export const PROGRAMS: Program[] = [
     id: 'muscle',
     name: 'Muscle Building',
     icon: '💪',
-    tagline: '16-week · hypertrophy',
+    tagline: 'your pace · hypertrophy',
     badge: 'PREMIUM',
     filters: ['muscle', 'gym'],
     description: '16 weeks of pure progressive overload. Volume phases, intensity blocks, and a deload — everything your muscles need to grow.',

@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (progId === 'weightloss') return 9;
+  if (progId === 'weightloss' || progId === 'muscle') return 9;
   return 8;
 }
 
@@ -87,6 +87,7 @@ export default function WizardScreen() {
         biggest_challenge: formData.motivation,
         injuries:          formData.injuries || 'None',
         timeframe:         formData.timeframe,
+        muscle_focus:      formData.muscle_focus,
       };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
@@ -287,6 +288,7 @@ function buildSteps(
   const isHome       = progId === 'home';
   const isBeginner   = progId === 'beginner';
   const isWeightLoss = progId === 'weightloss';
+  const isMuscle     = progId === 'muscle';
 
   // ── WEIGHT LOSS — fully dedicated steps ──────────────────────
   if (isWeightLoss) {
@@ -412,6 +414,131 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4wl, step5wl, step6wl, step7wl, step8wl, step9wl,
+    ];
+  }
+
+  // ── MUSCLE BUILDING — fully dedicated steps ───────────────────
+  if (isMuscle) {
+    const step1mb = (
+      <StepWrap key="1" q="What's your muscle building goal?" hint="Everything — your split, volume, and nutrition — will be built around this.">
+        <Opts options={[
+          { icon: '🪞', label: 'Size & aesthetics', desc: 'Look bigger, more defined', value: 'build visible muscle mass and improve body composition' },
+          { icon: '🏋️', label: 'Raw strength',      desc: 'Move heavier weight',        value: 'increase strength and lift heavier across all compound movements' },
+          { icon: '⚽',  label: 'Athletic muscle',   desc: 'Functional power for sport', value: 'build functional muscle mass to improve athletic performance' },
+          { icon: '🔄',  label: 'Recomposition',    desc: 'Build muscle, lose fat',     value: 'body recomposition — build muscle while reducing body fat simultaneously' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Locked in. Every session will be built around that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2mb = (
+      <StepWrap key="2" q="How long have you been lifting seriously?" hint="This sets your starting volume, exercise complexity, and progression speed.">
+        <Opts options={[
+          { icon: '🌱', label: 'Never lifted',    desc: 'First time in the gym',           value: 'complete beginner — never followed a structured lifting program' },
+          { icon: '📖', label: 'Under 1 year',   desc: 'Know the basics, building habits', value: 'beginner — less than 1 year of consistent training' },
+          { icon: '💪', label: '1–3 years',      desc: 'Consistent, past newbie gains',    value: 'intermediate — 1 to 3 years of serious training' },
+          { icon: '🏆', label: '3+ years',       desc: 'Chasing advanced gains',           value: 'advanced — 3 or more years of structured training' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your program will match your experience exactly.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4mb = (
+      <StepWrap key="4" q="How many days can you train per week?" hint="More days = more volume per muscle group = more growth.">
+        <Opts options={[
+          { icon: '3', label: '3 days', desc: 'Full body — high frequency',   value: '3' },
+          { icon: '4', label: '4 days', desc: 'Upper / lower split',          value: '4' },
+          { icon: '5', label: '5 days', desc: 'Push / pull / legs',           value: '5' },
+          { icon: '6', label: '6 days', desc: 'High frequency, max volume',   value: '6' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Perfect. Your split will be designed around that.', 5)} cols={2} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5mb = (
+      <StepWrap key="5" q="Where do you train?" hint="This determines your exercises — barbells, machines, cables, or bodyweight.">
+        <Opts options={[
+          { icon: '🏋️', label: 'Full gym',      desc: 'Barbells, cables, machines',       value: 'full commercial gym with barbells, cables, and machines' },
+          { icon: '🤖', label: 'Machines only', desc: 'No free weights or barbells',       value: 'gym with machines and dumbbells only — no barbells' },
+          { icon: '🏠', label: 'Home + dumbbells', desc: 'Dumbbells and a pull-up bar',    value: 'home gym with dumbbells and pull-up bar' },
+          { icon: '🤸', label: 'Bodyweight',    desc: 'No equipment, calisthenics focus',  value: 'bodyweight only — no equipment' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Noted. Every exercise will fit your setup.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6mb = (
+      <StepWrap key="6" q="Any muscle groups to prioritise?" hint="Your program will still train everything — but these get extra volume.">
+        <Opts options={[
+          { icon: '⚖️', label: 'Full body balance', desc: 'Even development everywhere',  value: 'full body — balanced development across all muscle groups' },
+          { icon: '💪', label: 'Chest & arms',      desc: 'Pecs, biceps, triceps',        value: 'chest, biceps, and triceps — upper body push emphasis' },
+          { icon: '🔙', label: 'Back & shoulders',  desc: 'Width, thickness, delts',      value: 'back, shoulders, and rear delts — pulling and width emphasis' },
+          { icon: '🦵', label: 'Legs & glutes',     desc: 'Quads, hamstrings, glutes',    value: 'legs and glutes — lower body strength and mass' },
+        ]} selected={sel('muscle_focus')} onSelect={v => selectOpt('muscle_focus', v, 'Extra volume goes there. The rest stays balanced.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('muscle_focus') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7mb = (
+      <StepWrap key="7" q="How do you want nutrition handled?" hint="Muscle is built in the kitchen. Choose how detailed your guidance should be.">
+        <Opts options={[
+          { icon: '📊', label: 'Full surplus plan', desc: 'Exact kcal, protein, carbs, fat', value: 'full calorie surplus with exact macro targets and meal timing' },
+          { icon: '🍗', label: 'High-protein meals', desc: 'Real meals, no calorie counting', value: 'high-protein meal examples and food swaps — no macro counting' },
+          { icon: '📋', label: 'Simple rules',       desc: '5 muscle-gain rules, nothing else', value: 'simple muscle-building nutrition rules only' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Your plan will include exactly that level of detail.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('nutrition') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8mb = (
+      <StepWrap key="8" q="What's your biggest muscle building obstacle?" hint="Your plan will include direct strategies to overcome this.">
+        <Opts options={[
+          { icon: '📉', label: 'Hitting plateaus',   desc: 'Progress stalls, gains stop',        value: 'hitting strength and size plateaus — progress has stalled' },
+          { icon: '🍽️', label: 'Eating enough',      desc: 'Hard to eat in a surplus',           value: 'struggling to eat enough calories to support muscle growth' },
+          { icon: '😴', label: 'Poor recovery',      desc: 'Always sore, never fresh',           value: 'poor recovery — always sore and fatigued between sessions' },
+          { icon: '❓', label: 'No clear direction', desc: 'Unsure what exercises actually work', value: 'no structured plan — unsure which exercises and rep ranges to use' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that head on.', 9)} />
+        <Actions onBack={() => goTo(7)} onNext={() => sel('motivation') && goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9mb = (
+      <StepWrap key="9" q="What's your target timeframe?" hint="Your phases, volume progression, and deload weeks will be scaled to this.">
+        <Opts options={[
+          { icon: '🔥', label: '8 weeks',    desc: 'Intensive block, fast strength gains', value: '8 weeks'   },
+          { icon: '💪', label: '12 weeks',   desc: 'Volume + intensity phases',            value: '12 weeks'  },
+          { icon: '🏆', label: '16 weeks',   desc: 'Full hypertrophy cycle with deload',   value: '16 weeks'  },
+          { icon: '🗓️', label: '6 months+',  desc: 'Long-term periodised program',         value: '6 months+' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Perfect. Your program will be phased exactly for that.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1mb, step2mb,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to calculate your calorie surplus and daily protein target.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '25', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '75', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '178', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4mb, step5mb, step6mb, step7mb, step8mb, step9mb,
     ];
   }
 
