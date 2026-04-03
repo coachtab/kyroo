@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiFetch('/api/auth/me');
       if (res.ok) {
         const data = await res.json();
-        setUser(data.user ?? null);
+        setUser(data ?? null);
       } else {
         await AsyncStorage.removeItem('kyroo_token');
         setUser(null);
