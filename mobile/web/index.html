@@ -1,27 +1,78 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="theme-color" content="#F0EDE6" />
-    <meta name="description" content="Kyroo — Dein KI-gestützter Fitness-Coach" />
 
-    <!-- PWA -->
+    <!-- Viewport: cover extends content under iPhone notch & home indicator -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+
+    <!-- PWA install behaviour -->
     <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- iOS PWA: full-screen, no browser chrome -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- black-translucent = transparent status bar, content goes edge-to-edge -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Kyroo" />
-    <link rel="apple-touch-icon" href="/assets/icon.png" />
+
+    <!-- Home screen icon (iOS needs 180×180) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon.png" />
+    <link rel="icon" type="image/png" href="/assets/favicon.png" />
+
+    <!-- iOS splash screens — shown while JS loads (portrait iPhones) -->
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
+      href="/assets/splash-icon.png" />
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)"
+      href="/assets/splash-icon.png" />
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+      href="/assets/splash-icon.png" />
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
+      href="/assets/splash-icon.png" />
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
+      href="/assets/splash-icon.png" />
+
+    <!-- Theme colour (Android status bar + browser tab) -->
+    <meta name="theme-color" content="#0D0D0B" />
+
+    <meta name="description" content="Kyroo — Your AI-powered fitness coach. Personalised training plans, live community, and expert nutrition guidance." />
 
     <title>Kyroo</title>
 
     <style>
-      /* Prevent flash of unstyled content */
-      html, body, #root { height: 100%; margin: 0; padding: 0; background: #F0EDE6; }
+      /* Dark background immediately on load — no white flash */
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #0D0D0B;
+        overscroll-behavior: none;       /* disable pull-to-refresh in PWA */
+        -webkit-tap-highlight-color: transparent; /* remove grey tap flash on links */
+        -webkit-touch-callout: none;     /* disable callout on long-press */
+      }
+
+      /* Safe area padding so content doesn't hide behind notch / home indicator */
+      #root {
+        padding-top:    env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left:   env(safe-area-inset-left);
+        padding-right:  env(safe-area-inset-right);
+      }
     </style>
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Register service worker for offline support and PWA install prompt
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>

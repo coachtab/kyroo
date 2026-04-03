@@ -1,18 +1,25 @@
 {
-  "name": "Kyroo",
+  "name": "Kyroo — AI Fitness Coach",
   "short_name": "Kyroo",
-  "description": "Dein KI-gestützter Fitness-Coach",
+  "description": "Personalised AI training plans, live community, and expert nutrition guidance.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F0EDE6",
-  "theme_color": "#F0EDE6",
+  "background_color": "#0D0D0B",
+  "theme_color": "#0D0D0B",
+  "lang": "en",
+  "categories": ["health", "fitness", "sports"],
   "icons": [
+    {
+      "src": "/assets/favicon.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
     {
       "src": "/assets/icon.png",
       "sizes": "1024x1024",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/assets/adaptive-icon.png",
