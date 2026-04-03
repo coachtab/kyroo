@@ -12,7 +12,7 @@ import { apiFetch } from '../../src/lib/api';
 import { useAuth } from '../../src/context/AuthContext';
 
 function getTotalSteps(progId: string) {
-  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home', 'swim'].includes(progId)) return 9;
+  if (['weightloss', 'muscle', 'challenge90', 'beginner', 'home', 'swim', 'hyrox', 'marathon'].includes(progId)) return 9;
   return 8;
 }
 
@@ -146,6 +146,16 @@ export default function WizardScreen() {
       title: 'Writing your swim training plan',
       sub:   'Structuring your pool sessions…',
       subtle:'Planning your technique drills…',
+    },
+    hyrox: {
+      title: 'Building your Hyrox race plan',
+      sub:   'Mapping your station training…',
+      subtle:'Calculating your run-station splits…',
+    },
+    marathon: {
+      title: 'Writing your marathon plan',
+      sub:   'Calculating your training paces…',
+      subtle:'Scheduling your long run progression…',
     },
   };
   const gm = genMessages[prog.id] ?? {
@@ -292,6 +302,8 @@ function buildSteps(
   const isWeightLoss = progId === 'weightloss';
   const isMuscle     = progId === 'muscle';
   const isChallenge  = progId === 'challenge90';
+  const isHyrox      = progId === 'hyrox';
+  const isMarathon   = progId === 'marathon';
 
   // ── WEIGHT LOSS — fully dedicated steps ──────────────────────
   if (isWeightLoss) {
@@ -1054,6 +1066,263 @@ function buildSteps(
         }} nextLabel="Continue" />
       </StepWrap>,
       step4sw, step5sw, step6sw, step7sw, step8sw, step9sw,
+    ];
+  }
+
+  // ── HYROX — fully dedicated steps ────────────────────────────
+  if (isHyrox) {
+    const step1hx = (
+      <StepWrap key="1" q="What's your Hyrox goal?" hint="Your training structure and race simulation work will be built around this.">
+        <Opts options={[
+          { icon: '🏁', label: 'Finish my first',   desc: 'Just cross that finish line',           value: 'complete my first Hyrox race and finish strong' },
+          { icon: '⏱️', label: 'Beat my time',       desc: 'Improve on a previous result',          value: 'improve my Hyrox race time — I have a previous result to beat' },
+          { icon: '🏆', label: 'Compete seriously',  desc: 'Podium, age group, or elite wave',      value: 'compete at a high level — targeting age group podium or elite wave' },
+          { icon: '🔥', label: 'Hyrox fitness',      desc: 'No race planned — get race ready',      value: 'build Hyrox-level fitness without a specific race target' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Your entire plan is built towards that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2hx = (
+      <StepWrap key="2" q="Have you done a Hyrox race before?" hint="Sets your starting volume, station technique focus, and run-station transitions.">
+        <Opts options={[
+          { icon: '🌱', label: 'Never done one',     desc: 'First race — excited and nervous',      value: 'complete beginner — never done a Hyrox race' },
+          { icon: '✅', label: 'One race',           desc: 'Done it once, know what to expect',     value: 'one Hyrox race completed — know what to expect' },
+          { icon: '💪', label: 'A few races',        desc: 'Some experience, improving each time',  value: 'completed several Hyrox races, improving with each one' },
+          { icon: '🏆', label: 'Competitive racer',  desc: 'Regular, targeting serious times',      value: 'competitive Hyrox racer — regularly competing and chasing fast times' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your training load and focus will match that.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4hx = (
+      <StepWrap key="4" q="How many days per week can you train?" hint="Hyrox needs a mix of running and functional work — more days = better event-specific preparation.">
+        <Opts options={[
+          { icon: '3', label: '3 days', desc: 'Minimum — cover the essentials',    value: '3' },
+          { icon: '4', label: '4 days', desc: 'Recommended — balanced build',      value: '4' },
+          { icon: '5', label: '5 days', desc: 'Serious — race-ready conditioning', value: '5' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly structure will be built around that.', 5)} cols={3} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5hx = (
+      <StepWrap key="5" q="What does your training setup look like?" hint="Your station exercises will match exactly what you have access to.">
+        <Opts options={[
+          { icon: '🏟️', label: 'Full Hyrox gym',    desc: 'SkiErg, sleds, rowers, sandbags',      value: 'full Hyrox-equipped gym — SkiErg, sled push/pull, rowers, sandbags, wall balls' },
+          { icon: '🏋️', label: 'Standard gym',      desc: 'No sleds — using substitutes',          value: 'standard commercial gym — no sleds or SkiErg, using exercise substitutes' },
+          { icon: '🔀', label: 'Mix of both',       desc: 'Occasional Hyrox gym access',           value: 'mix — regular gym plus occasional Hyrox facility access' },
+          { icon: '🏠', label: 'Home + outdoors',   desc: 'Minimal kit, running outside',          value: 'home and outdoor training with minimal equipment' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Every station exercise will use only what you have.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6hx = (
+      <StepWrap key="6" q="What's your weakest area in a Hyrox race?" hint="Your training will overweight this zone to fix it before race day.">
+        <Opts options={[
+          { icon: '🏃', label: 'The running',        desc: '8km of 1km splits destroy me',          value: 'the running — maintaining pace across 8 × 1km splits between stations' },
+          { icon: '🏋️', label: 'The stations',       desc: 'Specific exercises blow me up',         value: 'the functional stations — specific exercises like wall balls or sled push drain me' },
+          { icon: '💪', label: 'Strength endurance', desc: 'Legs and lungs fail together',          value: 'strength endurance — legs and lungs failing when running after heavy stations' },
+          { icon: '🧠', label: 'Race pacing',        desc: 'Go too hard early, die later',          value: 'race pacing — going out too fast and falling apart in the second half' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'That zone will get specific attention in your program.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7hx = (
+      <StepWrap key="7" q="What worries you most about race day?" hint="Your plan will have specific preparation and strategies for this.">
+        <Opts options={[
+          { icon: '🔋', label: 'Running out of gas', desc: 'Fading badly in the back half',         value: 'running out of energy — fading badly in stations 5-8 and the final runs' },
+          { icon: '🎯', label: 'Station technique',  desc: 'Wasting energy on poor form',           value: 'poor station technique — wasting energy on inefficient movement patterns' },
+          { icon: '🤕', label: 'Injury on race day', desc: 'Something going wrong under pressure',  value: 'picking up an injury under race pressure — overexertion or poor movement' },
+          { icon: '🕐', label: 'Missing my time',    desc: 'Not hitting my target result',          value: 'not hitting my target time — underperforming on race day despite good training' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that head on.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8hx = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Common Hyrox injuries: lower back, knees, shoulders — we'll programme around them.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. Lower back — avoid heavy sled load. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9hx = (
+      <StepWrap key="9" q="How many weeks until your race?" hint="Your periodisation, taper, and race simulation timing are all built from this.">
+        <Opts options={[
+          { icon: '⚡', label: '4 weeks',    desc: 'Last-minute race prep',                value: '4 weeks'  },
+          { icon: '🔥', label: '8 weeks',    desc: 'Standard race build',                  value: '8 weeks'  },
+          { icon: '💪', label: '12 weeks',   desc: 'Full build with base + peak phases',   value: '12 weeks' },
+          { icon: '🏆', label: '16 weeks',   desc: 'Complete Hyrox periodisation cycle',   value: '16 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Race day is locked in. Let\'s build your plan.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1hx, step2hx,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to calculate your running paces and station loading targets.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '30', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '78', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '178', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4hx, step5hx, step6hx, step7hx, step8hx, step9hx,
+    ];
+  }
+
+  // ── MARATHON — fully dedicated steps ─────────────────────────
+  if (isMarathon) {
+    const step1mr = (
+      <StepWrap key="1" q="What's your marathon goal?" hint="Every long run, tempo, and interval session will be paced around this.">
+        <Opts options={[
+          { icon: '🏅', label: 'Finish my first',   desc: 'Cross the line — that\'s the win',      value: 'complete my first marathon and finish the race' },
+          { icon: '⏱️', label: 'Target time',        desc: 'I have a specific finish time in mind', value: 'finish the marathon in a specific target time' },
+          { icon: '📉', label: 'Beat my PB',         desc: 'I have a previous time to beat',        value: 'run a personal best — beat my previous marathon time' },
+          { icon: '🌍', label: 'The experience',     desc: 'Run a bucket-list marathon event',      value: 'complete a bucket-list marathon event and enjoy the full experience' },
+        ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Your training paces and targets are locked to that.', 2)} />
+        <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step2mr = (
+      <StepWrap key="2" q="What's your running background?" hint="Sets your training volume, long run starting distance, and weekly mileage build rate.">
+        <Opts options={[
+          { icon: '🌱', label: 'New to distance',   desc: 'Run occasionally, no race history',     value: 'new to distance running — run occasionally but have no race history' },
+          { icon: '🏃', label: '5k–Half marathon',  desc: 'Race experience up to 21km',            value: 'have completed 5k, 10k, or half marathon races' },
+          { icon: '✅', label: 'Finished a marathon',desc: 'One or two previous marathons',         value: 'completed one or two marathons — looking to improve' },
+          { icon: '🏆', label: 'Regular racer',     desc: 'Multiple marathons, consistent training',value: 'experienced marathon runner — multiple finishes, structured training background' },
+        ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Your program will match that base exactly.', 3)} />
+        <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step4mr = (
+      <StepWrap key="4" q="How many days per week can you run?" hint="Marathon training works best with at least 4 days — one must be a long run day.">
+        <Opts options={[
+          { icon: '3', label: '3 days', desc: 'Minimum — one long, two quality runs', value: '3' },
+          { icon: '4', label: '4 days', desc: 'Standard — proven marathon base',      value: '4' },
+          { icon: '5', label: '5 days', desc: 'Higher volume — faster improvement',   value: '5' },
+          { icon: '6', label: '6 days', desc: 'Competitive — full training load',     value: '6' },
+        ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Your weekly run structure will be built around that.', 5)} cols={2} monoKey />
+        <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step5mr = (
+      <StepWrap key="5" q="How much are you running per week right now?" hint="This is your starting point — your long run and weekly mileage will build from here.">
+        <Opts options={[
+          { icon: '🐢', label: 'Under 20km',  desc: 'Early base — building from scratch',   value: 'currently running under 20km per week' },
+          { icon: '🏃', label: '20–40km',     desc: 'Solid base — ready to build on',       value: 'currently running 20-40km per week' },
+          { icon: '💪', label: '40–60km',     desc: 'Strong base — ready for real volume',  value: 'currently running 40-60km per week' },
+          { icon: '🔥', label: '60km+',       desc: 'High mileage — already race-fit',      value: 'currently running 60km or more per week' },
+        ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Your long run and total volume will build from that base.', 6)} />
+        <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step6mr = (
+      <StepWrap key="6" q="What's your target finish time?" hint="Your long run paces, tempo runs, and interval targets will all be calculated from this.">
+        <Opts options={[
+          { icon: '🏅', label: 'Just finish',   desc: 'Any time — crossing the line wins',   value: 'just finish — no time goal, completion is the priority' },
+          { icon: '5️⃣', label: 'Sub-5 hours',   desc: '~7:05 min/km pace',                  value: 'sub-5 hours (approx 7:05 per km pace)' },
+          { icon: '4️⃣', label: 'Sub-4 hours',   desc: '~5:41 min/km pace',                  value: 'sub-4 hours (approx 5:41 per km pace)' },
+          { icon: '3️⃣', label: 'Sub-3:30',      desc: '~4:58 min/km pace',                  value: 'sub-3:30 (approx 4:58 per km pace)' },
+        ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'All your training paces will be calculated around that.', 7)} />
+        <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step7mr = (
+      <StepWrap key="7" q="What's your biggest marathon challenge?" hint="Your plan will include specific strategies, workouts, and guidance to address this directly.">
+        <Opts options={[
+          { icon: '🧱', label: 'The wall',         desc: 'Hitting the wall at km 30–35',          value: 'hitting the wall — glycogen depletion and collapse after km 30' },
+          { icon: '⏱️', label: 'Pacing',           desc: 'Going out too fast, dying late',         value: 'pacing — starting too fast and suffering badly in the second half' },
+          { icon: '🍌', label: 'Race nutrition',   desc: 'Stomach issues or energy crashes',       value: 'race day nutrition — GI issues, gels, and energy management during the race' },
+          { icon: '🦵', label: 'Injury risk',      desc: 'Knees, IT band, shins, or fatigue',     value: 'injury risk — knee pain, IT band, shin splints, or overtraining during build' },
+        ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that directly.', 8)} />
+        <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step8mr = (
+      <StepWrap key="8" q="Any injuries or physical limitations?" hint="Runner injuries: knees, IT band, shins, plantar fasciitis — we'll programme around them.">
+        <TextInput
+          style={stepStyles.textarea}
+          multiline
+          numberOfLines={3}
+          placeholder="e.g. IT band issues on long runs. Or: None."
+          placeholderTextColor="#555"
+          value={formData.injuries || ''}
+          onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+        />
+        <Actions onBack={() => goTo(7)} onNext={() => goTo(9)} nextLabel="Continue" />
+      </StepWrap>
+    );
+
+    const step9mr = (
+      <StepWrap key="9" q="How many weeks until your marathon?" hint="Your long run progression, taper, and race-week plan are all built from this date.">
+        <Opts options={[
+          { icon: '🔥', label: '12 weeks',   desc: 'Standard marathon block',              value: '12 weeks' },
+          { icon: '💪', label: '16 weeks',   desc: 'Full build — most popular',            value: '16 weeks' },
+          { icon: '🏆', label: '20 weeks',   desc: 'Extended base + full race build',      value: '20 weeks' },
+          { icon: '🗓️', label: '24 weeks',   desc: 'Complete periodised marathon cycle',   value: '24 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Race day is set. Every run builds towards it.')} cols={2} />
+        <Actions onBack={() => goTo(8)} />
+      </StepWrap>
+    );
+
+    return [step1mr, step2mr,
+      <StepWrap key="3" q="Your current stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to estimate your training paces and race-day fuelling needs.'}>
+        <NumericRow
+          fields={[
+            { label: 'Age', key: 'age', placeholder: '32', decimal: false },
+            { label: 'Weight (kg)', key: 'weight', placeholder: '72', decimal: true },
+            { label: 'Height (cm)', key: 'height', placeholder: '175', decimal: false },
+          ]}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <SexSelector selected={sel('sex')} onSelect={v => setFormData(prev => ({ ...prev, sex: v }))} />
+        <Actions onBack={() => goTo(2)} onNext={() => {
+          const a = parseInt(formData.age, 10), w = parseFloat(formData.weight), h = parseFloat(formData.height);
+          if (!a || a < 10 || a > 100) return;
+          if (!w || w < 20 || w > 300) return;
+          if (!h || h < 100 || h > 250) return;
+          apiFetch('/api/auth/body-stats', {
+            method: 'PATCH',
+            body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+          }).then(() => refresh()).catch(() => {});
+          goTo(4);
+        }} nextLabel="Continue" />
+      </StepWrap>,
+      step4mr, step5mr, step6mr, step7mr, step8mr, step9mr,
     ];
   }
 

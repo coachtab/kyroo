@@ -64,6 +64,24 @@ export const PROGRAMS: Program[] = [
     filters: ['sport', 'endurance'],
     description: 'Structured pool sessions with warm-ups, drills, main sets, and cool-downs. Built for your stroke and current level.',
   },
+  {
+    id: 'hyrox',
+    name: 'Hyrox Race Plan',
+    icon: '🏟️',
+    tagline: 'your pace · race ready',
+    badge: 'PREMIUM',
+    filters: ['sport', 'gym', 'muscle'],
+    description: '8 stations. 8km of running. One race. A periodised plan covering station technique, hybrid conditioning, and race-day pacing strategy.',
+  },
+  {
+    id: 'marathon',
+    name: 'Marathon Plan',
+    icon: '🏃',
+    tagline: 'your pace · 42.2km',
+    badge: 'PREMIUM',
+    filters: ['sport', 'endurance'],
+    description: 'Long run progression, tempo work, and a structured taper — every run has a purpose. Built around your target time and race date.',
+  },
 ];
 
 export const FILTER_OPTIONS = [
