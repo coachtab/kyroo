@@ -7,9 +7,7 @@ import { useRouter } from 'expo-router';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { PROGRAMS, FILTER_OPTIONS, Program } from '../../src/lib/programs';
 import { useAuth } from '../../src/context/AuthContext';
-import { API_BASE } from '../../src/lib/api';
-
-const WS_URL = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws';
+import { useTrainingWS } from '../../src/hooks/useTrainingWS';
 
 const CARD_PALETTES = [
   { bg: '#0F2318', accent: '#3D9E6A' },
@@ -25,23 +23,8 @@ export default function ProgramsScreen() {
   const { user, isPremium } = useAuth();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
-  const [liveCount, setLiveCount] = useState(0);
+  const { count: liveCount } = useTrainingWS(isPremium);
   const pulse = useRef(new Animated.Value(1)).current;
-  const wsRef = useRef<WebSocket | null>(null);
-
-  // Live training WebSocket — Pro only
-  useEffect(() => {
-    if (!isPremium) return;
-    const socket = new WebSocket(WS_URL);
-    wsRef.current = socket;
-    socket.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'training-update') setLiveCount(msg.data.count ?? 0);
-      } catch {}
-    };
-    return () => { socket.close(); wsRef.current = null; };
-  }, [isPremium]);
 
   // Pulsing dot when someone is training
   useEffect(() => {

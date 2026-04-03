@@ -1,24 +1,21 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Animated, Platform,
+  SafeAreaView, ScrollView, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { spacing, radius, font } from '../../src/lib/theme';
 import { useAuth } from '../../src/context/AuthContext';
-import { apiFetch, API_BASE } from '../../src/lib/api';
-
-const WS_URL = API_BASE.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws';
+import { apiFetch } from '../../src/lib/api';
+import { useTrainingWS } from '../../src/hooks/useTrainingWS';
 
 export default function CommunityScreen() {
   const { user, isPremium } = useAuth();
   const router = useRouter();
 
-  const [count, setCount]         = useState(0);
-  const [training, setTraining]   = useState(false);
-  const [wsReady, setWsReady]     = useState(false);
+  const [training, setTraining] = useState(false);
+  const { count, connected: wsReady } = useTrainingWS(isPremium);
 
-  const ws        = useRef<WebSocket | null>(null);
   const pulse     = useRef(new Animated.Value(1)).current;
   const heartbeat = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -33,34 +30,6 @@ export default function CommunityScreen() {
     loop.start();
     return () => loop.stop();
   }, []);
-
-  // WebSocket connection
-  useEffect(() => {
-    if (!isPremium) return;
-
-    const socket = new WebSocket(WS_URL);
-    ws.current = socket;
-
-    socket.onopen  = () => setWsReady(true);
-    socket.onclose = () => { setWsReady(false); };
-    socket.onerror = () => { setWsReady(false); };
-    socket.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'training-update') {
-          setCount(msg.data.count ?? 0);
-        }
-      } catch {}
-    };
-
-    // Fetch initial count via REST in case WS takes a moment
-    apiFetch('/api/training/count').then(r => r.json()).then(d => setCount(d.count ?? 0)).catch(() => {});
-
-    return () => {
-      socket.close();
-      ws.current = null;
-    };
-  }, [isPremium]);
 
   // Heartbeat every 60s to keep session alive
   useEffect(() => {

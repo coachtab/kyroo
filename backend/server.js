@@ -1949,6 +1949,17 @@ wss.on('connection', (ws) => {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'training-update', data: { count: trainingCount() }, timestamp: Date.now() }));
   }
+  ws.on('message', (data) => {
+    try {
+      const msg = JSON.parse(data);
+      // Respond to client keepalive pings with a pong
+      if (msg.type === 'ping') {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+        }
+      }
+    } catch {}
+  });
   ws.on('close', () => wsClients.delete(ws));
   ws.on('error', () => wsClients.delete(ws));
 });
