@@ -566,68 +566,108 @@ app.delete('/api/checkins', authRequired, async (req, res) => {
   res.json({ success: true });
 });
 
-// ---- 12-Week Program Generator ----
+// ── Program-specific prompt builder ─────────────────────────────────────────
+function buildProgramPrompt(programId, data) {
+  const {
+    level, age, weight, height, sex,
+    days_per_week, session_minutes, equipment,
+    primary_goal, nutrition, biggest_challenge, injuries,
+  } = data;
+
+  const clientBase = [
+    `- Age: ${age} | Sex: ${sex} | Weight: ${weight}kg | Height: ${height}cm`,
+    `- Experience level: ${level}`,
+    `- Available days: ${days_per_week} days/week | Session length: ~${session_minutes || 60} min`,
+    `- Equipment: ${equipment || 'full commercial gym'}`,
+    `- Biggest challenge: ${biggest_challenge || 'staying consistent'}`,
+    `- Injuries / limitations: ${injuries || 'None'}`,
+    `- Nutrition focus requested: ${nutrition || 'basic principles'}`,
+  ].join('\n');
+
+  switch (programId) {
+
+    // ── 1. Weight Loss ──────────────────────────────────────────────────────
+    case 'weightloss':
+      return {
+        system: `You are a specialist fat-loss coach and registered dietitian with 12+ years helping clients shed body fat permanently — not just lose water weight. Every plan you write combines calorie-deficit nutrition, metabolic conditioning, and strategic cardio. You NEVER recommend crash diets, starvation, or unsustainable methods. You write so a complete beginner understands everything.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'lose body fat'}\n\nCreate a complete 12-WEEK WEIGHT LOSS PLAN. This plan must be ONLY about fat loss — no muscle-building programs repackaged as fat loss.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 12-WEEK WEIGHT LOSS PLAN\nDesigned for: ${level} | ${days_per_week} days/week | Goal: Sustainable fat loss\n\n## YOUR FAT-LOSS STRATEGY (plain English, 3-4 sentences)\nExplain caloric deficit, why this works, and what makes this plan different from crash diets.\n\n## DAILY CALORIE & MACRO TARGETS\n- Calculate and state their estimated TDEE\n- Recommend a deficit (state exact kcal target)\n- Protein, carbs, fat in grams with a one-line reason for each\n- Give 3 simple food swap examples\n\n## WEEKLY TRAINING STRUCTURE\nFor each of the ${days_per_week} training days per week, label as: FAT-BURN SESSION or RESISTANCE SESSION\n- FAT-BURN SESSIONS: cardio-focused (LISS, HIIT, or circuit). Explain what LISS and HIIT mean the first time. State duration, intensity (heart-rate zone or RPE), and exact format.\n- RESISTANCE SESSIONS: full-body or upper/lower. Use compound movements to preserve muscle during deficit. For every exercise include: name, one-line how-to, sets × reps, rest.\n\n## PHASE BREAKDOWN\n### Phase 1 — Weeks 1–4: Foundation (Build the habit)\n### Phase 2 — Weeks 5–8: Acceleration (Increase intensity)\n### Phase 3 — Weeks 9–12: Peak (Push to the finish)\nFor each phase: training approach, calorie adjustments if needed, what to expect on the scales.\n\n## WEEKLY CHECK-IN SYSTEM\nWhat to track each week (weight, measurements, energy levels). How to adjust if fat loss stalls.\n\n## WHAT NOT TO DO\n3 common fat-loss mistakes this client must avoid.`,
+        maxTokens: 8000,
+      };
+
+    // ── 2. Muscle Building ──────────────────────────────────────────────────
+    case 'muscle':
+      return {
+        system: `You are an elite hypertrophy coach with a decade of experience programming for natural athletes. You specialise in progressive overload, optimal training volume, and evidence-based muscle-building protocols. You write programs that maximise muscle growth within the time and equipment available. You never write generic fitness advice — every recommendation is specific and actionable.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'build muscle mass'}\n\nCreate a complete 16-WEEK MUSCLE BUILDING PROGRAM. This is PURELY a hypertrophy program — no cardio-heavy fat-loss content.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 16-WEEK MUSCLE BUILDING PROGRAM\nDesigned for: ${level} | ${days_per_week} days/week | Goal: Maximum hypertrophy\n\n## THE SCIENCE OF YOUR PROGRAM (3-4 sentences, plain English)\nExplain progressive overload, muscle protein synthesis, and why this 16-week structure works.\n\n## YOUR TRAINING SPLIT\nLabel every training day (e.g. Push / Pull / Legs or Upper / Lower). Explain why this split was chosen for this client.\n\n## PHASE 1 — WEEKS 1–4: FOUNDATION\n- Goal: Master technique, establish baseline loads\n- For each session: exercise name, one-line how-to, sets × reps, tempo (explain tempo notation once), rest\n- Weekly progression rule: how much weight to add and when\n\n## PHASE 2 — WEEKS 5–8: VOLUME BLOCK\n- Goal: Increase weekly sets to drive hypertrophy\n- New exercises introduced, volume increased per muscle group\n- Show total weekly sets per muscle group\n\n## PHASE 3 — WEEKS 9–12: INTENSITY BLOCK\n- Goal: Higher loads, lower reps, more mechanical tension\n- Explain the shift from volume to intensity and why it matters\n\n## PHASE 4 — WEEKS 13–16: PEAK & DELOAD\n- Weeks 13–15: Peak performance\n- Week 16: Full deload — explain what deload means, what to change, why it boosts long-term gains\n\n## NUTRITION FOR MUSCLE GROWTH\n- Calorie surplus recommendation (state exact kcal target above maintenance)\n- Protein target in grams/kg bodyweight — explain why\n- Meal timing around training (pre/post workout)\n- ${nutrition}\n\n## RECOVERY PROTOCOL\nSleep, rest days, how to know if you're overtraining.`,
+        maxTokens: 8000,
+      };
+
+    // ── 3. 90-Day Challenge ─────────────────────────────────────────────────
+    case 'challenge90':
+      return {
+        system: `You are a transformation coach who specialises in 90-day body and habit transformations. Your tone is direct, motivating, and honest — like a brilliant coach who has seen it all and knows exactly what separates people who finish from those who quit. You write accountability-first programs with clear daily actions, weekly milestones, and an escalating challenge structure across three 30-day phases.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'transform body and habits in 90 days'}\n\nCreate a 90-DAY TRANSFORMATION CHALLENGE. This is not a generic fitness plan — it is a structured challenge with escalating difficulty, daily accountability, and milestone checkpoints.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 90-DAY TRANSFORMATION CHALLENGE\nDesigned for: ${level} | ${days_per_week} days/week | 90 days to a new version of you\n\n## THE CHALLENGE RULES (make these feel exciting and non-negotiable)\n5 rules this client commits to for 90 days. Be specific and bold.\n\n## PHASE 1 — DAYS 1–30: BUILD THE FOUNDATION\n**Theme:** Consistency over intensity\n- Weekly training structure for this phase (all ${days_per_week} days written out)\n- Daily habit checklist (training, sleep, hydration, nutrition non-negotiables)\n- What to expect physically and mentally in week 1, 2, 3, 4\n- Day 30 checkpoint: measurements and performance tests to complete\n\n## PHASE 2 — DAYS 31–60: RAISE THE BAR\n**Theme:** Progressive overload and discipline\n- Training intensity increases — show the exact changes vs Phase 1\n- New challenges added (e.g. cardio finishers, weekly PR attempts)\n- Nutrition tightens — specific adjustments based on Phase 1 results\n- Day 60 checkpoint: compare to Day 30, celebrate wins, adjust if needed\n\n## PHASE 3 — DAYS 61–90: FINISH STRONG\n**Theme:** Peak performance\n- Highest intensity phase — hardest sessions of the program\n- Mental toughness tactics for the final stretch\n- Day 90 checkpoint: full re-test vs Day 1\n\n## NUTRITION STRATEGY\nPhase-by-phase nutrition shifts. ${nutrition}. Simple, practical, no calorie-counting obsession.\n\n## WHAT TO DO WHEN YOU MISS A DAY\nHonest, practical advice. No guilt. Just how to get back on track.\n\n## THE DAY 90 PROMISE\nWhat this client will have achieved if they complete every phase.`,
+        maxTokens: 8000,
+      };
+
+    // ── 4. Beginner Program ─────────────────────────────────────────────────
+    case 'beginner':
+      return {
+        system: `You are a beginner fitness coach who specialises in helping complete beginners start their fitness journey without injury, overwhelm, or confusion. Your entire job is to make fitness feel simple, achievable, and fun. You never use jargon without explaining it. You focus on movement patterns, habit building, and small wins that compound over time. You assume this client has never followed a structured program before.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'get started with fitness'}\n\nCreate an 8-WEEK BEGINNER PROGRAM. This is ONLY for beginners — no advanced techniques, no complex periodization, no jargon. Everything must be achievable on day one.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 8-WEEK BEGINNER PROGRAM\nDesigned for: First-timers | ${days_per_week} days/week | Building lifelong habits\n\n## WELCOME MESSAGE (write this like a coach talking directly to a nervous beginner)\n3-4 sentences: honest, warm, encouraging. Address the fear of starting.\n\n## THE 5 MOVEMENT PATTERNS YOU WILL MASTER\nThis beginner will learn: Push, Pull, Hinge, Squat, Carry. For each:\n- Plain-English explanation of what the movement is\n- Why it matters for everyday life\n- The beginner-friendly version they will use\n\n## YOUR WEEKLY SCHEDULE\n${days_per_week} days/week. Label each day (e.g. Full Body A / Rest / Full Body B).\nNO split routines — full body sessions only for beginners.\n\n## PHASE 1 — WEEKS 1–4: LEARNING (Form First)\nFor every session, list all exercises with:\n- Name\n- How to do it (2-3 sentences, imagine describing it to someone on the phone)\n- Sets × Reps (keep it LOW — 2-3 sets max)\n- Rest time\n- One common mistake to avoid\nNo weights in the first week unless they feel confident.\n\n## PHASE 2 — WEEKS 5–8: BUILDING (Add Load Gradually)\nProgression from Phase 1 — show exact changes.\nIntroduce light weights where appropriate.\nExplain how to know when to increase weight (the "2-rep rule": if you can do 2 extra reps easily, add weight).\n\n## BEGINNER NUTRITION BASICS\n${nutrition}. Simple plate method only — no macro counting. 3 rules max.\n\n## RECOVERY FOR BEGINNERS\nWhy rest days matter more than extra sessions. Sleep tips. Soreness vs injury — how to tell the difference.\n\n## HABIT TRACKER (simple weekly checklist)\nCheckboxes for: trained as planned, slept 7+ hours, drank enough water, ate protein at every meal.`,
+        maxTokens: 7000,
+      };
+
+    // ── 5. Home Workout Plan ────────────────────────────────────────────────
+    case 'home':
+      return {
+        system: `You are a calisthenics and home-fitness specialist who has coached hundreds of clients to get in outstanding shape using nothing but their bodyweight and a few household items. You know every bodyweight progression, every creative substitute for gym equipment, and how to make a living room feel like a serious training facility. You never suggest exercises that require gym equipment unless the client has stated they have it.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT PROFILE:\n${clientBase}\n- Training location: home only\n- Equipment available: ${equipment === 'full commercial gym' ? 'bodyweight only (assume no equipment unless client stated otherwise)' : equipment}\n- Primary goal: ${primary_goal || 'get fit at home'}\n\nCreate a 10-WEEK HOME WORKOUT PLAN. Use ONLY bodyweight exercises (and resistance bands / a pull-up bar if specifically mentioned in equipment). NO gym machines, NO barbells, NO dumbbells unless equipment states otherwise.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO 10-WEEK HOME WORKOUT PLAN\nDesigned for: Home training | ${days_per_week} days/week | Zero excuses\n\n## YOUR HOME GYM SETUP\nWhat space and items they need (a mat, a chair, a wall). Nothing that costs money unless they already have it.\n\n## THE BODYWEIGHT PROGRESSION SYSTEM\nExplain how bodyweight training creates progressive overload without weights:\n- Leverage (changing body angle to make exercises harder/easier)\n- Tempo (slower = harder)\n- Unilateral training (one limb at a time)\nGive one example for push-up, squat, and row progressions.\n\n## YOUR TRAINING SPLIT (${days_per_week} days/week)\nUse Upper / Lower or Full Body depending on days available.\n\n## PHASE 1 — WEEKS 1–3: BUILD THE BASE\n- Foundational exercises only (standard push-ups, squats, hinges, rows using a table)\n- All exercises: name, how-to (2 sentences), sets × reps or time, rest, easier and harder variation\n\n## PHASE 2 — WEEKS 4–7: INCREASE DIFFICULTY\n- Progress each exercise (e.g. standard push-up → decline push-up → archer push-up)\n- Introduce circuit formats to raise intensity without equipment\n\n## PHASE 3 — WEEKS 8–10: PEAK BODYWEIGHT STRENGTH\n- Most challenging progressions: pike push-ups, Bulgarian split squats, single-leg deadlifts, inverted rows\n- Introduce timed sets or AMRAP formats\n\n## CARDIO AT HOME (no equipment needed)\nCardio options for each phase. HIIT formats using only bodyweight. Explain each format.\n\n## NUTRITION FOR HOME ATHLETES\n${nutrition}. Focus on simple, budget-friendly meals.`,
+        maxTokens: 7000,
+      };
+
+    // ── 6. Swim Training ───────────────────────────────────────────────────
+    case 'swim':
+      return {
+        system: `You are an elite swim coach with 15+ years coaching competitive and recreational swimmers from beginner to national level. You write pool-based training programs structured like real swim practices — with warm-up sets, technique drills, main sets, and cool-downs written in standard swim notation (e.g. "4×100m @ 2:00"). You know stroke mechanics, training zones, and competition preparation inside-out. You NEVER include gym weights, running, or land-based training unless specifically requested for dryland conditioning.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `SWIMMER PROFILE:\n${clientBase}\n- Primary goal: ${primary_goal || 'improve swim fitness and technique'}\n\nCreate a PERSONALISED SWIM TRAINING PLAN. This is ONLY pool-based training — no running, no gym weights. Everything is written as proper swim sessions.\n\nSTRUCTURE YOUR PLAN EXACTLY LIKE THIS:\n\n# KYROO SWIM TRAINING PLAN\nDesigned for: ${level} swimmer | ${days_per_week} sessions/week | Goal: ${primary_goal || 'fitness and technique'}\n\n## SWIMMING NOTATION GUIDE (explain once at the start)\nExplain: what "4×100m @ 2:00" means, what REST vs INTERVAL means, what DRILL means, what KICK means (with kickboard), what PULL means (with pull buoy), what RPE means in swimming.\n\n## YOUR TRAINING ZONES\nZone 1 (easy/aerobic), Zone 2 (threshold), Zone 3 (race pace), Zone 4 (sprint). Give a simple feel-based description for each (not heart rate — most swimmers don't wear HRMs).\n\n## STROKE FOCUS\nBased on their level (${level}), identify the 2-3 technique areas to prioritise. For each: what it is, what the common fault looks like, the drill to fix it (with instructions).\n\n## WEEKLY SESSION STRUCTURE\nFor each of the ${days_per_week} sessions per week, provide a complete structured swim session:\n- Session type label (e.g. ENDURANCE / TECHNIQUE / THRESHOLD / RACE PACE)\n- Total distance: Xm\n- Warm-up set (written in swim notation)\n- Drill set (stroke correction)\n- Main set (the hard work)\n- Cool-down\n- Coach note: what to focus on in this session\n\n## PHASE 1 — WEEKS 1–3: BASE FITNESS\nLower intensity, longer rest, technique emphasis. Full sessions written out.\n\n## PHASE 2 — WEEKS 4–7: BUILD VOLUME\nIncrease total yardage/meterage, reduce rest intervals.\n\n## PHASE 3 — WEEKS 8–ONWARDS: RACE-PACE TRAINING\nShort, fast sets at goal race pace. Introduce taper if competition is approaching.\n\n## DRYLAND CONDITIONING (optional — 15 min, 2×/week)\nCore and shoulder stability only — no heavy lifting. Exercises that directly improve swim performance.\n\n## NUTRITION FOR SWIMMERS\n${nutrition}. Focus on fuelling around pool sessions and hydration (swimmers don't feel themselves sweating).`,
+        maxTokens: 8000,
+      };
+
+    // ── Default fallback ────────────────────────────────────────────────────
+    default:
+      return {
+        system: `You are an elite personal trainer with 10+ years of experience writing personalised training programs.\n\n${KYROO_SYSTEM_RULES}`,
+        user: `CLIENT:\n${clientBase}\n- Goal: ${primary_goal}\n\nCreate a complete 12-week training program with weekly sessions fully written out, nutrition guidance, and a progression plan.`,
+        maxTokens: 7000,
+      };
+  }
+}
+
+// ---- Program Generator (all programs use this single endpoint) ----
 app.post('/api/program/generate', authRequired, async (req, res) => {
-  if (!(await checkProgramAccess(req, res, req.body.program_id))) return;
+  if (!(await checkProgramAccess(req, res, req.body.programId))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'AI not configured' });
 
-  const { level, experience_years, weight, height, age, sex, squat, bench, deadlift, ohp, days_per_week, session_minutes, equipment, primary_goal, secondary_goal } = req.body;
-
-  if (!level || !weight || !height || !age || !sex || !days_per_week || !session_minutes) {
+  const { programId, age, weight, height, level } = req.body;
+  if (!age || !weight || !height || !level) {
     return res.status(400).json({ error: 'Please fill in all required fields' });
   }
 
   try {
     const client = new Anthropic({ apiKey });
-
-    const systemPrompt = `You are an elite personal trainer and strength coach with more than 10 years of experience. You write training programs that even complete beginners can follow without confusion.\n\n${KYROO_SYSTEM_RULES}`;
-
-    const userPrompt = `Your client:
-- Level: ${level} with ${experience_years || 'some'} years of training
-- Body: ${weight}kg, ${height}cm, ${age} years old, ${sex}
-- Current 1RMs: Squat ${squat || 'unknown'}kg, Bench ${bench || 'unknown'}kg, Deadlift ${deadlift || 'unknown'}kg, OHP ${ohp || 'unknown'}kg
-- Schedule: ${days_per_week} days per week, max ${session_minutes} minutes per session
-- Equipment: ${equipment || 'full commercial gym'}
-- Primary goal: ${primary_goal || 'hypertrophy'}
-- Secondary goal: ${secondary_goal || 'building raw strength'}
-
-Design a complete 12-week periodized training program.
-
-IMPORTANT FORMATTING RULES:
-- Write for someone who may have never followed a structured program before
-- For EVERY exercise, include a one-line plain-English description of how to perform it (e.g. "Stand with feet shoulder-width apart, lower your hips until thighs are parallel to the floor, then stand back up")
-- Explain what "tempo 3-1-1-0" means the first time you use it
-- Explain what RPE means the first time you use it
-- Explain what a deload is and why it matters
-- Use simple language throughout - no jargon without explanation
-- Format each training day clearly with: Exercise Name, How To Do It (one line), Sets x Reps, Tempo, Rest
-- Use numbered lists for exercises within each session
-- Group weeks clearly: Week 1-4, Week 5-8, Week 9-12
-
-Include:
-1. A short overview of the program approach (2-3 sentences, plain English)
-2. The weekly training split (which days train which body parts)
-3. Every session written out with exercise name, brief how-to, sets, reps, tempo, rest
-4. How to increase weight week by week (be specific: "add 2.5kg to upper body lifts, 5kg to lower body lifts each week")
-5. Deload instructions (when, what to change, why)
-6. A quick note on why key exercises were chosen
-
-Start with:
-
-# KYROO 12-WEEK TRAINING PROGRAM
-Designed for: ${level} | ${days_per_week} days/week | ${session_minutes} min sessions | Goal: ${primary_goal}`;
+    const { system, user, maxTokens } = buildProgramPrompt(programId, req.body);
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 8000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: 'user', content: user }],
     });
 
-    const program = message.content[0].text;
-    res.json({ program });
+    res.json({ program: message.content[0].text });
   } catch (err) {
     console.error('Program generation error:', err.message);
     res.status(500).json({ error: 'Failed to generate program' });

@@ -61,25 +61,20 @@ export default function WizardScreen() {
     setGenerating(true);
     setError('');
     try {
-      const equipmentMap: Record<string, string> = {
-        gym: 'full commercial gym',
-        home: 'bodyweight / minimal equipment at home',
-        both: 'gym and home',
-      };
       const payload = {
-        programId:       prog.id,
-        level:           formData.level,
-        age:             formData.age,
-        weight:          formData.weight,
-        height:          formData.height,
-        sex:             formData.sex,
-        days_per_week:   formData.schedule,
-        session_minutes: '60',
-        equipment:       equipmentMap[formData.location] || formData.location || 'full commercial gym',
-        primary_goal:    formData.goals,
-        nutrition:       formData.nutrition,
+        programId:         prog.id,
+        level:             formData.level,
+        age:               formData.age,
+        weight:            formData.weight,
+        height:            formData.height,
+        sex:               formData.sex,
+        days_per_week:     formData.schedule,
+        session_minutes:   '60',
+        equipment:         formData.location || 'full commercial gym',
+        primary_goal:      formData.goals,
+        nutrition:         formData.nutrition,
         biggest_challenge: formData.motivation,
-        injuries:        formData.injuries || 'None',
+        injuries:          formData.injuries || 'None',
       };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
@@ -224,8 +219,33 @@ function buildSteps(
 ) {
   const sel = (key: string) => formData[key];
 
-  return [
-    // Step 1 — Goal
+  const isSwim     = progId === 'swim';
+  const isHome     = progId === 'home';
+  const isBeginner = progId === 'beginner';
+  const isWeightLoss = progId === 'weightloss';
+
+  // Step 1 — Goal (program-specific or generic)
+  const step1 = isSwim ? (
+    <StepWrap key="1" q="What's your swim goal?" hint="This shapes every session in your plan.">
+      <Opts options={[
+        { icon: '🏁', label: 'Race prep', desc: 'Competition or event', value: 'prepare for a swim race or competition' },
+        { icon: '💪', label: 'Get stronger', desc: 'Power and endurance', value: 'build swim strength and endurance' },
+        { icon: '🌊', label: 'Learn technique', desc: 'Fix my stroke', value: 'improve stroke technique and efficiency' },
+        { icon: '❤️', label: 'Fitness & health', desc: 'Stay active in the pool', value: 'improve general fitness through swimming' },
+      ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Perfect. Every session will target that.', 2)} />
+      <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+    </StepWrap>
+  ) : isBeginner ? (
+    <StepWrap key="1" q="Why are you starting now?" hint="Be honest — your plan will work around your real life.">
+      <Opts options={[
+        { icon: '⚡', label: 'Lose some weight', desc: 'Feel better in my body', value: 'lose weight and build confidence' },
+        { icon: '💪', label: 'Get stronger', desc: 'Build a base of strength', value: 'build basic strength and fitness' },
+        { icon: '❤️', label: 'Health & energy', desc: 'More energy, less stress', value: 'improve health, energy, and wellbeing' },
+        { icon: '🏃', label: 'Just get moving', desc: 'Break a sedentary habit', value: 'establish a consistent exercise habit' },
+      ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Great reason. Your program will build around that.', 2)} />
+      <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
     <StepWrap key="1" q="What's your main goal?" hint="This shapes everything about your program.">
       <Opts options={[
         { icon: '🔥', label: 'Lose weight', desc: 'Burn fat, feel lighter', value: 'lose weight and reduce body fat' },
@@ -234,9 +254,20 @@ function buildSteps(
         { icon: '❤️', label: 'Feel better', desc: 'Health and longevity', value: 'improve health, mobility, and wellbeing' },
       ]} selected={sel('goals')} onSelect={v => selectOpt('goals', v, 'Smart choice. Your program will be built around this.', 2)} />
       <Actions onNext={() => sel('goals') && goTo(2)} nextLabel="Continue" />
-    </StepWrap>,
+    </StepWrap>
+  );
 
-    // Step 2 — Level
+  // Step 2 — Level
+  const step2 = isSwim ? (
+    <StepWrap key="2" q="Your swim level?" hint="Be honest — this calibrates every session.">
+      <Opts options={[
+        { icon: '🌱', label: 'Beginner', desc: 'Can swim 1–2 lengths', value: 'beginner' },
+        { icon: '💫', label: 'Intermediate', desc: 'Comfortable in the pool', value: 'intermediate' },
+        { icon: '🏆', label: 'Advanced', desc: 'Regular competitive swimmer', value: 'advanced' },
+      ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Sessions will match your level.', 3)} cols={3} />
+      <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
     <StepWrap key="2" q="Your experience level?" hint="How long have you been training consistently?">
       <Opts options={[
         { icon: '🌱', label: 'Beginner', desc: 'Under 1 year', value: 'beginner' },
@@ -244,10 +275,146 @@ function buildSteps(
         { icon: '🏆', label: 'Advanced', desc: '5+ years', value: 'advanced' },
       ]} selected={sel('level')} onSelect={v => selectOpt('level', v, 'Got it. Your plan will match your level.', 3)} cols={3} />
       <Actions onBack={() => goTo(1)} onNext={() => sel('level') && goTo(3)} nextLabel="Continue" />
-    </StepWrap>,
+    </StepWrap>
+  );
 
-    // Step 3 — Body stats
-    <StepWrap key="3" q="Your body stats?" hint={savedStats.age ? "Saved from your profile — update anytime." : "Used to personalize intensity and nutrition."}>
+  // Step 4 — Schedule
+  const step4 = isSwim ? (
+    <StepWrap key="4" q="Pool sessions per week?" hint="Include only sessions you can realistically commit to.">
+      <Opts options={[
+        { icon: '2', label: '2 sessions', desc: 'Steady progress', value: '2' },
+        { icon: '3', label: '3 sessions', desc: 'Solid base', value: '3' },
+        { icon: '4', label: '4 sessions', desc: 'Committed swimmer', value: '4' },
+        { icon: '5', label: '5 sessions', desc: 'Serious training', value: '5' },
+      ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Perfect. Each session will be fully planned.', 5)} cols={2} monoKey />
+      <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
+    <StepWrap key="4" q="How many days a week?" hint="Be realistic — consistency beats ambition.">
+      <Opts options={[
+        { icon: '2', label: '2 days', desc: 'Light week', value: '2' },
+        { icon: '3', label: '3 days', desc: 'Balanced', value: '3' },
+        { icon: '4', label: '4 days', desc: 'Committed', value: '4' },
+        { icon: '5', label: '5 days', desc: 'Serious', value: '5' },
+        { icon: '6', label: '6 days', desc: 'Intense', value: '6' },
+      ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Perfect. Your plan will fit that schedule.', 5)} cols={3} monoKey />
+      <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
+    </StepWrap>
+  );
+
+  // Step 5 — Location (swim gets pool type, home program skips choice)
+  const step5 = isSwim ? (
+    <StepWrap key="5" q="Pool access?" hint="This affects session length and structure.">
+      <Opts options={[
+        { icon: '🏊', label: 'Public pool', desc: 'Shared lanes, time limits', value: 'public pool (shared lanes, 25m or 50m)' },
+        { icon: '🏅', label: 'Club / private', desc: 'Dedicated lane time', value: 'private or club pool (dedicated lane access)' },
+        { icon: '🔀', label: 'Both', desc: 'Varies by day', value: 'mix of public and private pool' },
+      ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Noted. Sessions will be structured for that pool.', 6)} cols={3} />
+      <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+    </StepWrap>
+  ) : isHome ? (
+    <StepWrap key="5" q="What equipment do you have?" hint="Be honest — your plan uses only what you list.">
+      <Opts options={[
+        { icon: '🤲', label: 'Nothing', desc: 'Pure bodyweight only', value: 'bodyweight only, no equipment' },
+        { icon: '🎗️', label: 'Resistance bands', desc: 'Bands and bodyweight', value: 'bodyweight and resistance bands' },
+        { icon: '🔩', label: 'Pull-up bar', desc: 'Bar and bodyweight', value: 'bodyweight and pull-up bar' },
+        { icon: '💪', label: 'Bands + bar', desc: 'Full home setup', value: 'bodyweight, resistance bands, and pull-up bar' },
+      ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Got it. Every exercise will work with that.', 6)} />
+      <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
+    <StepWrap key="5" q="Where will you train?" hint="This determines the exercises in your plan.">
+      <Opts options={[
+        { icon: '🏋️', label: 'Gym', desc: 'Full equipment', value: 'full commercial gym' },
+        { icon: '🏠', label: 'Home', desc: 'Bodyweight / minimal', value: 'home with bodyweight and minimal equipment' },
+        { icon: '🔀', label: 'Both', desc: 'Mix it up', value: 'mix of gym and home' },
+      ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Good. Exercises will be tailored to that setting.', 6)} cols={3} />
+      <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
+    </StepWrap>
+  );
+
+  // Step 6 — Nutrition
+  const step6 = isSwim ? (
+    <StepWrap key="6" q="Nutrition for swimmers?" hint="Fuelling right makes a real difference in the pool.">
+      <Opts options={[
+        { icon: '🍽️', label: 'Full plan', desc: 'Pre/post swim meals, macros', value: 'full swimmer nutrition plan with pre/post session meals and hydration' },
+        { icon: '📋', label: 'Key principles', desc: 'Simple fuelling rules', value: 'basic swimmer nutrition principles and hydration tips' },
+        { icon: '🏊', label: 'Training only', desc: 'Skip nutrition', value: 'training only, skip nutrition' },
+      ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Noted. Your plan will cover that.', 7)} />
+      <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+    </StepWrap>
+  ) : isWeightLoss ? (
+    <StepWrap key="6" q="Nutrition depth?" hint="Fat loss is 80% what you eat — choose how detailed you want it.">
+      <Opts options={[
+        { icon: '📊', label: 'Full macros', desc: 'Calories, protein, carbs, fat', value: 'full macro and calorie breakdown with meal ideas' },
+        { icon: '🍽️', label: 'Meal plans', desc: 'Actual example meals', value: 'simple meal plan examples without strict calorie counting' },
+        { icon: '📋', label: 'Basic rules', desc: '3-5 simple principles', value: 'basic fat-loss nutrition principles only' },
+      ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Perfect. Nutrition will be tailored to that level.', 7)} />
+      <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
+    <StepWrap key="6" q="Nutrition focus?" hint="How much do you want nutrition guidance?">
+      <Opts options={[
+        { icon: '📊', label: 'Full guidance', desc: 'Macros, meals, timing', value: 'full nutrition guidance with macros and meal ideas' },
+        { icon: '📋', label: 'Basic principles', desc: 'Simple rules only', value: 'basic nutrition principles' },
+        { icon: '🏋️', label: 'Training only', desc: 'Skip nutrition', value: 'training only, skip nutrition advice' },
+      ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Noted. Your plan will include that level of nutrition detail.', 7)} />
+      <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
+    </StepWrap>
+  );
+
+  // Step 7 — Biggest challenge
+  const step7 = isSwim ? (
+    <StepWrap key="7" q="Biggest swim challenge?" hint="Your plan will address this directly.">
+      <Opts options={[
+        { icon: '💨', label: 'Running out of breath', desc: 'Fitness and pacing', value: 'running out of breath and pacing' },
+        { icon: '🌊', label: 'Stroke technique', desc: 'Form breaks down when tired', value: 'maintaining good stroke technique when fatigued' },
+        { icon: '⏰', label: 'Consistency', desc: 'Hard to get to the pool', value: 'staying consistent and getting to the pool regularly' },
+        { icon: '🏁', label: 'Race nerves', desc: 'Anxiety before competing', value: 'managing nerves and race-day performance' },
+      ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will tackle that head-on.', 8)} />
+      <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+    </StepWrap>
+  ) : isBeginner ? (
+    <StepWrap key="7" q="What's stopped you before?" hint="Your plan will be designed around this.">
+      <Opts options={[
+        { icon: '⏰', label: 'No time', desc: 'Life is too busy', value: 'finding time to train consistently' },
+        { icon: '😕', label: 'Not knowing what to do', desc: "Feel lost in the gym", value: 'not knowing what exercises to do or how to do them' },
+        { icon: '😴', label: 'Losing motivation', desc: 'Start strong, fade fast', value: 'staying motivated after the first few weeks' },
+        { icon: '😟', label: 'Feeling self-conscious', desc: 'Intimidated by gyms', value: 'feeling self-conscious or intimidated in a gym environment' },
+      ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will specifically address that.', 8)} />
+      <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+    </StepWrap>
+  ) : (
+    <StepWrap key="7" q="Your biggest challenge?" hint="Your plan will address this directly.">
+      <Opts options={[
+        { icon: '⏰', label: 'Staying consistent', desc: 'Life gets in the way', value: 'staying consistent' },
+        { icon: '😤', label: 'Staying motivated', desc: 'Hard to keep going', value: 'staying motivated' },
+        { icon: '🍕', label: 'Diet and nutrition', desc: 'Hard to eat right', value: 'diet and nutrition' },
+        { icon: '😴', label: 'Recovery', desc: 'Sleep and soreness', value: 'recovery and sleep' },
+      ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will include strategies to tackle exactly that.', 8)} />
+      <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
+    </StepWrap>
+  );
+
+  // Step 8 — Injuries
+  const step8 = (
+    <StepWrap key="8" q={isSwim ? 'Any injuries or physical limitations?' : 'Any injuries or limitations?'} hint={isSwim ? 'Shoulder, knee, back issues? Type "None" if injury-free.' : 'Type "None" if you\'re injury-free.'}>
+      <TextInput
+        style={stepStyles.textarea}
+        multiline
+        numberOfLines={3}
+        placeholder={isSwim ? 'e.g. Shoulder impingement, avoid butterfly. Or: None.' : 'e.g. Bad lower back, avoid heavy deadlifts. Or: None.'}
+        placeholderTextColor="#555"
+        value={formData.injuries || ''}
+        onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
+      />
+      <Actions onBack={() => goTo(7)} />
+    </StepWrap>
+  );
+
+  return [step1, step2,
+    // Step 3 — Body stats (same for all)
+    <StepWrap key="3" q={isSwim ? 'Your body stats?' : 'Your body stats?'} hint={savedStats.age ? 'Saved from your profile — update anytime.' : 'Used to personalize intensity and nutrition.'}>
       <NumericRow
         fields={[
           { label: 'Age', key: 'age', placeholder: '28', decimal: false },
@@ -263,7 +430,6 @@ function buildSteps(
         if (!a || a < 10 || a > 100) return;
         if (!w || w < 20 || w > 300) return;
         if (!h || h < 100 || h > 250) return;
-        // Save body stats and refresh user so future wizards pre-fill
         apiFetch('/api/auth/body-stats', {
           method: 'PATCH',
           body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
@@ -271,63 +437,7 @@ function buildSteps(
         goTo(4);
       }} nextLabel="Continue" />
     </StepWrap>,
-
-    // Step 4 — Schedule
-    <StepWrap key="4" q="How many days a week?" hint="Be realistic — consistency beats ambition.">
-      <Opts options={[
-        { icon: '2', label: '2 days', desc: 'Light week', value: '2' },
-        { icon: '3', label: '3 days', desc: 'Balanced', value: '3' },
-        { icon: '4', label: '4 days', desc: 'Committed', value: '4' },
-        { icon: '5', label: '5 days', desc: 'Serious', value: '5' },
-        { icon: '6', label: '6 days', desc: 'Intense', value: '6' },
-      ]} selected={sel('schedule')} onSelect={v => selectOpt('schedule', v, 'Perfect. Your plan will fit that schedule.', 5)} cols={3} monoKey />
-      <Actions onBack={() => goTo(3)} onNext={() => sel('schedule') && goTo(5)} nextLabel="Continue" />
-    </StepWrap>,
-
-    // Step 5 — Location
-    <StepWrap key="5" q="Where will you train?" hint="This determines the exercises in your plan.">
-      <Opts options={[
-        { icon: '🏋️', label: 'Gym', desc: 'Full equipment', value: 'gym' },
-        { icon: '🏠', label: 'Home', desc: 'Bodyweight / minimal', value: 'home' },
-        { icon: '🔀', label: 'Both', desc: 'Mix it up', value: 'both' },
-      ]} selected={sel('location')} onSelect={v => selectOpt('location', v, 'Good. Exercises will be tailored to that setting.', 6)} cols={3} />
-      <Actions onBack={() => goTo(4)} onNext={() => sel('location') && goTo(6)} nextLabel="Continue" />
-    </StepWrap>,
-
-    // Step 6 — Nutrition
-    <StepWrap key="6" q="Nutrition focus?" hint="How much do you want nutrition guidance?">
-      <Opts options={[
-        { icon: '📊', label: 'Full guidance', desc: 'Macros, meals, timing', value: 'full nutrition guidance with macros and meal ideas' },
-        { icon: '📋', label: 'Basic principles', desc: 'Simple rules only', value: 'basic nutrition principles' },
-        { icon: '🏋️', label: 'Training only', desc: 'Skip nutrition', value: 'training only, skip nutrition advice' },
-      ]} selected={sel('nutrition')} onSelect={v => selectOpt('nutrition', v, 'Noted. Your plan will include that level of nutrition detail.', 7)} />
-      <Actions onBack={() => goTo(5)} onNext={() => sel('nutrition') && goTo(7)} nextLabel="Continue" />
-    </StepWrap>,
-
-    // Step 7 — Commitment
-    <StepWrap key="7" q="Your biggest challenge?" hint="Your plan will address this directly.">
-      <Opts options={[
-        { icon: '⏰', label: 'Staying consistent', desc: 'Life gets in the way', value: 'staying consistent' },
-        { icon: '😤', label: 'Staying motivated', desc: 'Hard to keep going', value: 'staying motivated' },
-        { icon: '🍕', label: 'Diet and nutrition', desc: 'Hard to eat right', value: 'diet and nutrition' },
-        { icon: '😴', label: 'Recovery', desc: 'Sleep and soreness', value: 'recovery and sleep' },
-      ]} selected={sel('motivation')} onSelect={v => selectOpt('motivation', v, 'Your plan will include strategies to tackle exactly that.', 8)} />
-      <Actions onBack={() => goTo(6)} onNext={() => sel('motivation') && goTo(8)} nextLabel="Continue" />
-    </StepWrap>,
-
-    // Step 8 — Injuries + generate
-    <StepWrap key="8" q="Any injuries or limitations?" hint={'Type "None" if you\'re injury-free.'}>
-      <TextInput
-        style={stepStyles.textarea}
-        multiline
-        numberOfLines={3}
-        placeholder="e.g. Bad lower back, avoid heavy deadlifts. Or: None."
-        placeholderTextColor="#555"
-        value={formData.injuries || ''}
-        onChangeText={v => setFormData(prev => ({ ...prev, injuries: v }))}
-      />
-      <Actions onBack={() => goTo(7)} />
-    </StepWrap>,
+    step4, step5, step6, step7, step8,
   ];
 }
 
