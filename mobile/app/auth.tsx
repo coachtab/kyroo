@@ -276,7 +276,7 @@ function SignupSentView({ email, onLogin }: { email: string; onLogin: () => void
       <Text style={[styles.sub, { marginTop: spacing[4] }]}>
         Click the link in the email to activate your account. Check your spam folder if you don't see it.
       </Text>
-      <TouchableOpacity style={[styles.btn, { marginTop: spacing[8] }]} onPress={onLogin}>
+      <TouchableOpacity style={[styles.btn, { marginTop: spacing[8], alignSelf: 'stretch' }]} onPress={onLogin}>
         <Text style={styles.btnText}>Back to sign in</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -363,7 +363,7 @@ function ForgotSentView({ onBack }: { onBack: () => void }) {
         Check your spam folder if you don't see it.
       </Text>
 
-      <TouchableOpacity style={[styles.btn, { marginTop: spacing[8] }]} onPress={onBack}>
+      <TouchableOpacity style={[styles.btn, { marginTop: spacing[8], alignSelf: 'stretch' }]} onPress={onBack}>
         <Text style={styles.btnText}>Back to sign in</Text>
       </TouchableOpacity>
     </ScrollView>
