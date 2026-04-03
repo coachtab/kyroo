@@ -12,13 +12,24 @@ import { apiFetch } from '../src/lib/api';
 type AuthView = 'login' | 'signup' | 'signup-sent' | 'forgot' | 'forgot-sent';
 
 export default function AuthScreen() {
-  const params = useLocalSearchParams<{ tab?: string }>();
-  const [view, setView] = useState<AuthView>(params.tab === 'signup' ? 'signup' : 'login');
+  const params = useLocalSearchParams<{ tab?: string; verified?: string; error?: string }>();
+  const initialView: AuthView = params.tab === 'signup' ? 'signup' : 'login';
+  const [view, setView] = useState<AuthView>(initialView);
   const [signupEmail, setSignupEmail] = useState('');
+
+  const verifiedBanner = params.verified === 'true';
+  const expiredBanner  = params.error === 'expired';
 
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        {(verifiedBanner || expiredBanner) && (
+          <View style={[styles.banner, expiredBanner && styles.bannerError]}>
+            <Text style={styles.bannerText}>
+              {verifiedBanner ? '✓  Email verified — you can now sign in.' : '✕  Link expired or already used. Please sign up again.'}
+            </Text>
+          </View>
+        )}
         {view === 'login'        && <LoginView onSignup={() => setView('signup')} onForgot={() => setView('forgot')} />}
         {view === 'signup'       && <SignupView onLogin={() => setView('login')} onSent={e => { setSignupEmail(e); setView('signup-sent'); }} />}
         {view === 'signup-sent'  && <SignupSentView email={signupEmail} onLogin={() => setView('login')} />}
@@ -421,6 +432,10 @@ const styles = StyleSheet.create({
     marginTop: spacing[8], marginBottom: spacing[6],
   },
   brandMarkText: { fontFamily: font.sansBd, fontSize: 28, color: '#FFFFFF' },
+
+  banner: { backgroundColor: '#0F2318', borderBottomWidth: 1, borderBottomColor: '#3D9E6A', paddingHorizontal: spacing[5], paddingVertical: spacing[3] },
+  bannerError: { backgroundColor: '#2A1510', borderBottomColor: '#C06848' },
+  bannerText: { fontFamily: font.sans, fontSize: 13, color: '#6DBF8A', lineHeight: 18 },
 
   closeBtn: { alignSelf: 'flex-end', padding: spacing[2], marginBottom: spacing[5] },
   closeBtnText: { fontSize: 18, color: '#444' },

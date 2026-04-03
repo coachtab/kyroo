@@ -292,8 +292,8 @@ app.get('/api/auth/verify', async (req, res) => {
       'UPDATE users SET email_verified = true, verify_token = NULL WHERE verify_token = $1',
       [token]
     );
-    if (rowCount === 0) return res.send('<html><body style="font-family:sans-serif;text-align:center;padding:80px"><h2>Link expired or already used.</h2><a href="/">Go to KYROO</a></body></html>');
-    res.send('<html><body style="font-family:sans-serif;text-align:center;padding:80px"><h2>Email verified.</h2><p style="color:#666">You can close this tab.</p><a href="/">Go to KYROO</a></body></html>');
+    if (rowCount === 0) return res.redirect('https://app.kyroo.de/auth?error=expired');
+    res.redirect('https://app.kyroo.de/auth?verified=true');
   } catch (err) {
     res.status(500).send('Verification failed');
   }
@@ -315,7 +315,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       [resetToken, expires, rows[0].id]
     );
 
-    const resetUrl = `${BASE_URL}/reset-password.html?token=${resetToken}`;
+    const resetUrl = `https://app.kyroo.de/reset-password?token=${resetToken}`;
     await sendEmail(email, 'KYROO - Reset your password', `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
         <h1 style="font-size:24px;margin-bottom:8px">Reset your password</h1>
