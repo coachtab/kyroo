@@ -18,7 +18,7 @@ type FormData = Record<string, any>;
 export default function WizardScreen() {
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const prog = PROGRAMS.find(p => p.id === programId);
 
   // Pre-fill body stats from saved profile
@@ -167,7 +167,7 @@ export default function WizardScreen() {
     );
   }
 
-  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData, savedStats);
+  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData, savedStats, refresh);
   const activeStep = steps[step - 1];
 
   return (
@@ -220,6 +220,7 @@ function buildSteps(
   error: string,
   setFormData: (fn: (prev: FormData) => FormData) => void,
   savedStats: { age: string; weight: string; height: string; sex: string },
+  refresh: () => Promise<void>,
 ) {
   const sel = (key: string) => formData[key];
 
@@ -262,11 +263,11 @@ function buildSteps(
         if (!a || a < 10 || a > 100) return;
         if (!w || w < 20 || w > 300) return;
         if (!h || h < 100 || h > 250) return;
-        // Save body stats to profile (fire-and-forget)
+        // Save body stats and refresh user so future wizards pre-fill
         apiFetch('/api/auth/body-stats', {
           method: 'PATCH',
           body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
-        }).catch(() => {});
+        }).then(() => refresh()).catch(() => {});
         goTo(4);
       }} nextLabel="Continue" />
     </StepWrap>,
