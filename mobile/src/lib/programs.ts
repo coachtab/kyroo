@@ -41,7 +41,7 @@ export const PROGRAMS: Program[] = [
     id: 'beginner',
     name: 'Beginner Program',
     icon: '🌱',
-    tagline: '8-week · first steps',
+    tagline: 'your pace · first steps',
     badge: 'PREMIUM',
     filters: ['beginner', 'home', 'gym'],
     description: 'Learn the 5 fundamental movement patterns, build real habits, and finish 8 weeks feeling confident in any gym.',

@@ -89,7 +89,7 @@ export default function WizardScreen() {
         timeframe:         formData.timeframe,
         muscle_focus:      formData.muscle_focus,
         challenge_vision:  formData.challenge_vision,
-        beginner_vision:   formData.beginner_vision,
+        beginner_vision:   formData.timeframe,
       };
       const res = await apiFetch('/api/program/generate', {
         method: 'POST',
@@ -761,13 +761,13 @@ function buildSteps(
     );
 
     const step9bg = (
-      <StepWrap key="9" q="What does Week 8 success look like for you?" hint="This becomes the target your entire 8-week plan is built towards.">
+      <StepWrap key="9" q="How long do you want your program to be?" hint="Your phases, session volume, and progression will be scaled to fit.">
         <Opts options={[
-          { icon: '💦', label: 'Full workouts',     desc: 'Complete sessions without stopping',    value: 'complete a full workout without stopping or feeling overwhelmed' },
-          { icon: '💪', label: 'Stronger & confident', desc: 'Feel capable in the gym or at home', value: 'feel genuinely stronger and confident in my body and in the gym' },
-          { icon: '🔁', label: 'Exercise is a habit', desc: 'It feels automatic, not forced',     value: 'exercise has become a real habit — I look forward to it, not dread it' },
-          { icon: '🪞', label: 'See a difference',  desc: 'Clothes fit better, body changing',    value: 'see and feel a visible difference — better posture, lighter, more toned' },
-        ]} selected={sel('beginner_vision')} onSelect={v => selectOpt('beginner_vision', v, 'That\'s your Week 8 target. Everything builds towards it.')} cols={2} />
+          { icon: '⚡', label: '4 weeks',  desc: 'Taste it — learn the basics fast',    value: '4 weeks'  },
+          { icon: '🌱', label: '6 weeks',  desc: 'Steady — build real confidence',      value: '6 weeks'  },
+          { icon: '💪', label: '8 weeks',  desc: 'The full program — most popular',     value: '8 weeks'  },
+          { icon: '🏆', label: '12 weeks', desc: 'Take your time — deep foundations',   value: '12 weeks' },
+        ]} selected={sel('timeframe')} onSelect={v => selectOpt('timeframe', v, 'Perfect. Your program will be paced exactly for that.')} cols={2} />
         <Actions onBack={() => goTo(8)} />
       </StepWrap>
     );
