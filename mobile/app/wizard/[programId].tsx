@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
   ScrollView, TextInput,
@@ -23,20 +23,23 @@ export default function WizardScreen() {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({ sex: 'male' });
+  const statsApplied = useRef(false);
 
-  // Sync saved body stats into formData as soon as the user object is ready.
-  // useEffect re-runs whenever the user's body stats change, but only fills
-  // in fields that are still empty so in-progress edits are never overwritten.
+  // Sync saved body stats once — as soon as user is loaded.
+  // We use a ref so we never overwrite values the user has already started editing.
   useEffect(() => {
-    if (!user) return;
+    if (!user || statsApplied.current) return;
+    // Only apply if we actually have at least one saved stat
+    if (!user.body_age && !user.body_weight && !user.body_height && !user.body_sex) return;
+    statsApplied.current = true;
     setFormData(prev => ({
       ...prev,
-      age:    prev.age    || (user.body_age    ? String(user.body_age)    : ''),
-      weight: prev.weight || (user.body_weight ? String(user.body_weight) : ''),
-      height: prev.height || (user.body_height ? String(user.body_height) : ''),
-      sex:    prev.sex    || (user.body_sex    ?? 'male'),
+      age:    user.body_age    ? String(user.body_age)    : prev.age    ?? '',
+      weight: user.body_weight ? String(user.body_weight) : prev.weight ?? '',
+      height: user.body_height ? String(user.body_height) : prev.height ?? '',
+      sex:    user.body_sex    ? user.body_sex             : prev.sex    ?? 'male',
     }));
-  }, [user?.body_age, user?.body_weight, user?.body_height, user?.body_sex]); // eslint-disable-line
+  }, [user]); // eslint-disable-line
 
   // For the hint text on step 3
   const hasSavedStats = !!(user?.body_age && user?.body_weight && user?.body_height);

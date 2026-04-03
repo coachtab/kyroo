@@ -91,14 +91,22 @@ export default function SettingsScreen() {
   const [nameErr, setNameErr]       = useState('');
   const [pwErr, setPwErr]           = useState('');
 
-  // Body stats
-  const [bAge,    setBAge]    = useState(user?.body_age    ? String(user.body_age)    : '');
-  const [bWeight, setBWeight] = useState(user?.body_weight ? String(user.body_weight) : '');
-  const [bHeight, setBHeight] = useState(user?.body_height ? String(user.body_height) : '');
-  const [bSex,    setBSex]    = useState<string>(user?.body_sex ?? 'male');
+  // Body stats — initialise empty, sync from user once loaded
+  const [bAge,    setBAge]    = useState('');
+  const [bWeight, setBWeight] = useState('');
+  const [bHeight, setBHeight] = useState('');
+  const [bSex,    setBSex]    = useState<string>('male');
   const [bSaving, setBSaving] = useState(false);
   const [bMsg,    setBMsg]    = useState('');
   const [bErr,    setBErr]    = useState('');
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.body_age)    setBAge(String(user.body_age));
+    if (user.body_weight) setBWeight(String(user.body_weight));
+    if (user.body_height) setBHeight(String(user.body_height));
+    if (user.body_sex)    setBSex(user.body_sex);
+  }, [user?.body_age, user?.body_weight, user?.body_height, user?.body_sex]); // eslint-disable-line
 
   async function saveBodyStats() {
     const a = parseInt(bAge, 10), w = parseFloat(bWeight), h = parseFloat(bHeight);
