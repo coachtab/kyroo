@@ -63,7 +63,7 @@ export default function ProgramsScreen() {
             </View>
             <TouchableOpacity
               style={styles.avatarBtn}
-              onPress={() => router.push('/auth')}
+              onPress={() => router.push(user ? '/(tabs)/profile' : '/auth')}
               activeOpacity={0.8}
             >
               {user ? (
