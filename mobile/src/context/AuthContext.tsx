@@ -16,7 +16,7 @@ type AuthContextType = {
   loading: boolean;
   isPremium: boolean;
   login: (email: string, password: string) => Promise<User>;
-  signup: (name: string, email: string, password: string) => Promise<User>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -60,16 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data.user as User;
   }, []);
 
-  const signup = useCallback(async (name: string, email: string, password: string): Promise<User> => {
+  const signup = useCallback(async (name: string, email: string, password: string): Promise<void> => {
     const res = await apiFetch('/api/auth/signup', {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Signup failed');
-    await AsyncStorage.setItem('kyroo_token', data.token);
-    setUser(data.user);
-    return data.user as User;
+    // No token issued — user must verify email first
   }, []);
 
   const logout = useCallback(async () => {

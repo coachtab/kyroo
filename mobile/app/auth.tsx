@@ -9,19 +9,21 @@ import { colors, spacing, radius, font } from '../src/lib/theme';
 import { useAuth } from '../src/context/AuthContext';
 import { apiFetch } from '../src/lib/api';
 
-type AuthView = 'login' | 'signup' | 'forgot' | 'forgot-sent';
+type AuthView = 'login' | 'signup' | 'signup-sent' | 'forgot' | 'forgot-sent';
 
 export default function AuthScreen() {
   const params = useLocalSearchParams<{ tab?: string }>();
   const [view, setView] = useState<AuthView>(params.tab === 'signup' ? 'signup' : 'login');
+  const [signupEmail, setSignupEmail] = useState('');
 
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        {view === 'login'       && <LoginView onSignup={() => setView('signup')} onForgot={() => setView('forgot')} />}
-        {view === 'signup'      && <SignupView onLogin={() => setView('login')} />}
-        {view === 'forgot'      && <ForgotView onBack={() => setView('login')} onSent={() => setView('forgot-sent')} />}
-        {view === 'forgot-sent' && <ForgotSentView onBack={() => setView('login')} />}
+        {view === 'login'        && <LoginView onSignup={() => setView('signup')} onForgot={() => setView('forgot')} />}
+        {view === 'signup'       && <SignupView onLogin={() => setView('login')} onSent={e => { setSignupEmail(e); setView('signup-sent'); }} />}
+        {view === 'signup-sent'  && <SignupSentView email={signupEmail} onLogin={() => setView('login')} />}
+        {view === 'forgot'       && <ForgotView onBack={() => setView('login')} onSent={() => setView('forgot-sent')} />}
+        {view === 'forgot-sent'  && <ForgotSentView onBack={() => setView('login')} />}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -124,8 +126,7 @@ function LoginView({ onSignup, onForgot }: { onSignup: () => void; onForgot: () 
 }
 
 // ─── SIGNUP ──────────────────────────────────────────────────
-function SignupView({ onLogin }: { onLogin: () => void }) {
-  const router  = useRouter();
+function SignupView({ onLogin, onSent }: { onLogin: () => void; onSent: (email: string) => void }) {
   const { signup } = useAuth();
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
@@ -149,7 +150,7 @@ function SignupView({ onLogin }: { onLogin: () => void }) {
     setLoading(true);
     try {
       await signup(n, e, password);
-      router.back();
+      onSent(e);
     } catch (err: any) {
       setError(err.message || 'Sign up failed. Please try again.');
     } finally {
@@ -250,6 +251,28 @@ function SignupView({ onLogin }: { onLogin: () => void }) {
 }
 
 // ─── FORGOT PASSWORD ─────────────────────────────────────────
+// ─── SIGNUP SENT ─────────────────────────────────────────────
+function SignupSentView({ email, onLogin }: { email: string; onLogin: () => void }) {
+  return (
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <View style={styles.sentIcon}><Text style={styles.sentIconText}>✉️</Text></View>
+      <Text style={styles.eyebrow}>// CHECK YOUR EMAIL</Text>
+      <Text style={styles.title}>One more step.</Text>
+      <Text style={styles.sub}>
+        We sent an activation link to{'\n'}
+        <Text style={styles.sentEmail}>{email}</Text>
+      </Text>
+      <Text style={[styles.sub, { marginTop: spacing[4] }]}>
+        Click the link in the email to activate your account. Check your spam folder if you don't see it.
+      </Text>
+      <TouchableOpacity style={[styles.btn, { marginTop: spacing[8] }]} onPress={onLogin}>
+        <Text style={styles.btnText}>Back to sign in</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+// ─── FORGOT ──────────────────────────────────────────────────
 function ForgotView({ onBack, onSent }: { onBack: () => void; onSent: () => void }) {
   const [email, setEmail]     = useState('');
   const [error, setError]     = useState('');
@@ -424,6 +447,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   sentIconText: { fontSize: 32, color: colors.forest },
+  sentEmail: { fontFamily: font.sansBd, color: colors.ink },
 });
 
 const fieldStyles = StyleSheet.create({

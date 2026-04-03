@@ -262,20 +262,21 @@ app.post('/api/auth/signup', async (req, res) => {
       [email, hash, name || null, verifyToken, 'free']
     );
     const user = rows[0];
-    const token = generateToken(user);
 
-    // Send verification email (non-blocking - don't fail signup if email fails)
+    // Send verification email before issuing any token
     const verifyUrl = `${BASE_URL}/api/auth/verify?token=${verifyToken}`;
-    sendEmail(email, 'Welcome to KYROO - Verify your email', `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
-        <h1 style="font-size:24px;margin-bottom:8px">Welcome to KYROO${name ? ', ' + name : ''}</h1>
-        <p style="color:#666;margin-bottom:32px">Verify your email to get full access.</p>
-        <a href="${verifyUrl}" style="display:inline-block;background:#c27a56;color:#fff;padding:12px 32px;text-decoration:none;border-radius:999px;font-weight:600;font-size:14px">Verify email</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">Or copy this link: ${verifyUrl}</p>
+    sendEmail(email, 'Welcome to KYROO – Verify your email', `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;background:#f9f8f5">
+        <h1 style="font-size:24px;margin-bottom:8px;color:#1a1a2e">Welcome to KYROO${name ? ', ' + name : ''}!</h1>
+        <p style="color:#666;margin-bottom:32px">One last step — verify your email to activate your account.</p>
+        <a href="${verifyUrl}" style="display:inline-block;background:#4a6741;color:#fff;padding:14px 36px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px">Activate my account</a>
+        <p style="color:#999;font-size:12px;margin-top:32px">Or copy this link:<br>${verifyUrl}</p>
+        <p style="color:#ccc;font-size:11px;margin-top:16px">If you didn't create this account, you can safely ignore this email.</p>
       </div>
     `).catch(err => console.error('Verification email failed:', err.message));
 
-    res.status(201).json({ user, token });
+    // No token issued — user must verify email first
+    res.status(201).json({ message: 'Account created. Please check your email and click the activation link to sign in.' });
   } catch (err) {
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Signup failed' });
@@ -369,6 +370,9 @@ app.post('/api/auth/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    if (!user.email_verified) {
+      return res.status(403).json({ error: 'Please verify your email before signing in. Check your inbox for the activation link.', unverified: true });
     }
     const token = generateToken(user);
     res.json({
