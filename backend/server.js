@@ -392,7 +392,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/auth/me', authRequired, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, email, name, is_premium, is_admin, plan, premium_started_at, premium_expires_at, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, is_premium, is_admin, plan, premium_started_at, premium_expires_at, created_at, body_age, body_weight, body_height, body_sex FROM users WHERE id = $1',
       [req.user.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -402,6 +402,26 @@ app.get('/api/auth/me', authRequired, async (req, res) => {
     res.json({ ...user, usage: { used, limit, remaining: Math.max(0, limit - used) } });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// PATCH /api/auth/body-stats — save body stats once, reused across all wizards
+app.patch('/api/auth/body-stats', authRequired, async (req, res) => {
+  const { age, weight, height, sex } = req.body;
+  const a = parseInt(age, 10);
+  const w = parseFloat(weight);
+  const h = parseInt(height, 10);
+  if (!a || a < 10 || a > 100) return res.status(400).json({ error: 'Invalid age.' });
+  if (!w || w < 20 || w > 300) return res.status(400).json({ error: 'Invalid weight.' });
+  if (!h || h < 100 || h > 250) return res.status(400).json({ error: 'Invalid height.' });
+  try {
+    await pool.query(
+      'UPDATE users SET body_age=$1, body_weight=$2, body_height=$3, body_sex=$4 WHERE id=$5',
+      [a, w, h, sex || 'male', req.user.id]
+    );
+    res.json({ message: 'Body stats saved.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save body stats.' });
   }
 });
 

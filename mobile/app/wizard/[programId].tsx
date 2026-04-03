@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
   ScrollView, TextInput,
@@ -9,6 +9,7 @@ import Markdown from 'react-native-markdown-display';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { PROGRAMS } from '../../src/lib/programs';
 import { apiFetch } from '../../src/lib/api';
+import { useAuth } from '../../src/context/AuthContext';
 
 const TOTAL_STEPS = 8;
 
@@ -17,10 +18,24 @@ type FormData = Record<string, any>;
 export default function WizardScreen() {
   const { programId } = useLocalSearchParams<{ programId: string }>();
   const router = useRouter();
+  const { user } = useAuth();
   const prog = PROGRAMS.find(p => p.id === programId);
 
+  // Pre-fill body stats from saved profile
+  const savedStats = useMemo(() => ({
+    age:    user?.body_age    ? String(user.body_age)    : '',
+    weight: user?.body_weight ? String(user.body_weight) : '',
+    height: user?.body_height ? String(user.body_height) : '',
+    sex:    user?.body_sex    ?? 'male',
+  }), [user]);
+
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({});
+  const [formData, setFormData] = useState<FormData>(() => ({
+    age:    savedStats.age,
+    weight: savedStats.weight,
+    height: savedStats.height,
+    sex:    savedStats.sex,
+  }));
   const [reaction, setReaction] = useState('');
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -152,7 +167,7 @@ export default function WizardScreen() {
     );
   }
 
-  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData);
+  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData, savedStats);
   const activeStep = steps[step - 1];
 
   return (
@@ -204,6 +219,7 @@ function buildSteps(
   generate: () => void,
   error: string,
   setFormData: (fn: (prev: FormData) => FormData) => void,
+  savedStats: { age: string; weight: string; height: string; sex: string },
 ) {
   const sel = (key: string) => formData[key];
 
@@ -230,7 +246,7 @@ function buildSteps(
     </StepWrap>,
 
     // Step 3 — Body stats
-    <StepWrap key="3" q="Your body stats?" hint="Used to personalize intensity and nutrition.">
+    <StepWrap key="3" q="Your body stats?" hint={savedStats.age ? "Saved from your profile — update anytime." : "Used to personalize intensity and nutrition."}>
       <NumericRow
         fields={[
           { label: 'Age', key: 'age', placeholder: '28', decimal: false },
@@ -246,6 +262,11 @@ function buildSteps(
         if (!a || a < 10 || a > 100) return;
         if (!w || w < 20 || w > 300) return;
         if (!h || h < 100 || h > 250) return;
+        // Save body stats to profile (fire-and-forget)
+        apiFetch('/api/auth/body-stats', {
+          method: 'PATCH',
+          body: JSON.stringify({ age: formData.age, weight: formData.weight, height: formData.height, sex: formData.sex }),
+        }).catch(() => {});
         goTo(4);
       }} nextLabel="Continue" />
     </StepWrap>,

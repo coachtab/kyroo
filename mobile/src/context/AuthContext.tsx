@@ -9,6 +9,10 @@ export type User = {
   is_admin: boolean;
   is_premium: boolean;
   plan: string;
+  body_age?: number | null;
+  body_weight?: number | null;
+  body_height?: number | null;
+  body_sex?: string | null;
 };
 
 type AuthContextType = {
