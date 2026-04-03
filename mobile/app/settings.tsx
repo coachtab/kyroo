@@ -1,16 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, Alert, Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { colors, spacing, radius, font } from '../src/lib/theme';
 import { useAuth } from '../src/context/AuthContext';
 import { apiFetch } from '../src/lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type Payment = { id: number; amount: number; currency: string; description: string; status: string; created_at: string };
 
 export default function SettingsScreen() {
-  const { user, refresh } = useAuth();
+  const { user, isPremium, refresh } = useAuth();
   const router = useRouter();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+  useFocusEffect(useCallback(() => {
+    apiFetch('/api/payments').then(r => r.json()).then(d => setPayments(d.payments || [])).catch(() => {});
+  }, []));
+
+  async function handleCancel() {
+    const doCancel = async () => {
+      setCancelLoading(true);
+      try {
+        const res  = await apiFetch('/api/premium/cancel', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        if (data.token) await AsyncStorage.setItem('kyroo_token', data.token);
+        await refresh();
+        Alert.alert('Subscription cancelled', 'Your Pro access has been removed.');
+      } catch (err: any) {
+        Alert.alert('Error', err.message || 'Could not cancel subscription.');
+      } finally {
+        setCancelLoading(false);
+      }
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm('Cancel your Pro subscription? You will lose access immediately.')) doCancel();
+    } else {
+      Alert.alert('Cancel subscription', 'You will lose Pro access immediately.', [
+        { text: 'Keep Pro', style: 'cancel' },
+        { text: 'Cancel subscription', style: 'destructive', onPress: doCancel },
+      ]);
+    }
+  }
 
   const [name, setName]             = useState(user?.name ?? '');
   const [currentPw, setCurrentPw]   = useState('');
@@ -123,6 +158,55 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* ── Subscription ── */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>Subscription</Text>
+
+          <View style={s.subRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.subPlan}>{isPremium ? 'KYROO Pro' : 'Free plan'}</Text>
+              {user?.plan && <Text style={s.subDetail}>{user.plan === 'pro' ? 'Full access · all programs' : 'Limited access'}</Text>}
+            </View>
+            <View style={[s.subBadge, isPremium && s.subBadgePro]}>
+              <Text style={[s.subBadgeText, isPremium && s.subBadgeTextPro]}>{isPremium ? 'PRO' : 'FREE'}</Text>
+            </View>
+          </View>
+
+          {isPremium ? (
+            <TouchableOpacity
+              style={[s.cancelBtn, cancelLoading && s.btnDisabled]}
+              onPress={handleCancel}
+              disabled={cancelLoading}
+              activeOpacity={0.8}
+            >
+              <Text style={s.cancelBtnText}>{cancelLoading ? 'Cancelling…' : 'Cancel subscription'}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={s.upgradeBtn} onPress={() => router.push('/upgrade')} activeOpacity={0.85}>
+              <Text style={s.upgradeBtnText}>Upgrade to Pro →</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* ── Payment history ── */}
+        {payments.length > 0 && (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Payment history</Text>
+            {payments.map((p, i) => (
+              <View key={p.id} style={[s.payRow, i < payments.length - 1 && s.payRowBorder]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.payDesc}>{p.description}</Text>
+                  <Text style={s.payDate}>{new Date(p.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={s.payAmount}>€{Number(p.amount).toFixed(2)}</Text>
+                  <Text style={s.payStatus}>{p.status}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -168,4 +252,25 @@ const s = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.4 },
   btnText: { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2' },
+
+  // Subscription
+  subRow:     { flexDirection: 'row', alignItems: 'center', marginBottom: spacing[4] },
+  subPlan:    { fontFamily: font.sansBd, fontSize: 16, color: '#F5F5F2', marginBottom: 2 },
+  subDetail:  { fontFamily: font.sans, fontSize: 13, color: '#555' },
+  subBadge:   { paddingHorizontal: spacing[3], paddingVertical: 5, borderRadius: radius.full, backgroundColor: '#1C1C18', borderWidth: 1, borderColor: '#252520' },
+  subBadgePro:{ backgroundColor: '#0F2318', borderColor: '#3D9E6A' },
+  subBadgeText:    { fontFamily: font.mono, fontSize: 10, color: '#555', letterSpacing: 0.5 },
+  subBadgeTextPro: { color: '#3D9E6A' },
+  cancelBtn:   { borderWidth: 1, borderColor: '#5A2510', borderRadius: radius.sm, height: 44, alignItems: 'center', justifyContent: 'center' },
+  cancelBtnText: { fontFamily: font.sans, fontSize: 14, color: '#C06848' },
+  upgradeBtn:  { backgroundColor: '#3D9E6A', height: 48, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  upgradeBtnText: { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2' },
+
+  // Payments
+  payRow:       { paddingVertical: spacing[3], flexDirection: 'row', alignItems: 'center' },
+  payRowBorder: { borderBottomWidth: 1, borderBottomColor: '#1C1C18' },
+  payDesc:      { fontFamily: font.sans, fontSize: 13, color: '#CCCCC8', marginBottom: 2 },
+  payDate:      { fontFamily: font.mono, fontSize: 10, color: '#444', textTransform: 'uppercase' },
+  payAmount:    { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2', marginBottom: 2 },
+  payStatus:    { fontFamily: font.mono, fontSize: 10, color: '#3D9E6A', textTransform: 'uppercase' },
 });

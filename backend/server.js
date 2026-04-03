@@ -116,7 +116,10 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // handle preflight for all routes
-app.use(express.json({ type: 'application/json' }));
+app.use(express.json({
+  type: 'application/json',
+  verify: (req, _res, buf) => { req.rawBody = buf; },
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Force UTF-8 charset on every JSON/text response
@@ -1316,115 +1319,136 @@ app.get('/api/usage', authRequired, async (req, res) => {
 
 // ---- Stripe Checkout ----
 
-// POST /api/stripe/create-payment-intent - create a Stripe PaymentIntent
-app.post('/api/stripe/create-payment-intent', authRequired, async (req, res) => {
-  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured on this server.' });
+async function activatePremium(userId, plan) {
+  const now = new Date();
+  const expires = new Date(now);
+  if (plan === 'yearly') expires.setFullYear(expires.getFullYear() + 1);
+  else expires.setMonth(expires.getMonth() + 1);
+  await pool.query(
+    'UPDATE users SET is_premium=true, plan=$1, premium_started_at=$2, premium_expires_at=$3, updated_at=$2 WHERE id=$4',
+    [plan === 'yearly' ? 'pro' : 'pro', now, expires, userId]
+  );
+  const amount = plan === 'yearly' ? 72.00 : 6.00;
+  const desc   = plan === 'yearly' ? 'KYROO Pro – Annual (€72/year)' : 'KYROO Pro – Monthly (€6/month)';
+  await pool.query(
+    'INSERT INTO payments (user_id, amount, currency, description, status) VALUES ($1,$2,$3,$4,$5)',
+    [userId, amount, 'EUR', desc, 'completed']
+  );
+}
+
+// POST /api/stripe/create-checkout-session
+app.post('/api/stripe/create-checkout-session', authRequired, async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured.' });
   const { plan } = req.body;
-  if (!plan || !['monthly', 'yearly'].includes(plan)) {
-    return res.status(400).json({ error: 'Invalid plan' });
-  }
-
-  const amount = plan === 'yearly' ? 7200 : 600; // Stripe uses cents
-  const desc = plan === 'yearly' ? 'KYROO Premium - Annual' : 'KYROO Premium - Monthly';
-
+  if (!plan || !['monthly', 'yearly'].includes(plan)) return res.status(400).json({ error: 'Invalid plan.' });
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'eur',
-      description: desc,
-      metadata: {
-        user_id: String(req.user.id),
-        user_email: req.user.email,
-        plan,
-      },
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: req.user.email,
+      line_items: [{
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: plan === 'yearly' ? 'KYROO Pro – Annual' : 'KYROO Pro – Monthly',
+            description: plan === 'yearly' ? 'Full access for 12 months' : 'Full access for 1 month',
+          },
+          unit_amount: plan === 'yearly' ? 7200 : 600,
+        },
+        quantity: 1,
+      }],
+      success_url: `https://app.kyroo.de/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `https://app.kyroo.de/upgrade`,
+      metadata: { user_id: String(req.user.id), plan },
     });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
+    res.json({ url: session.url, session_id: session.id });
   } catch (err) {
-    console.error('Stripe error:', err.message);
-    res.status(500).json({ error: 'Payment setup failed' });
+    console.error('Stripe checkout error:', err.message);
+    res.status(500).json({ error: 'Failed to create checkout session.' });
   }
 });
 
-// POST /api/stripe/confirm-payment - confirm payment and activate premium
-app.post('/api/stripe/confirm-payment', authRequired, async (req, res) => {
-  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured on this server.' });
-  const { payment_intent_id, plan } = req.body;
-
+// GET /api/stripe/verify-session?session_id=... — called from app after redirect
+app.get('/api/stripe/verify-session', authRequired, async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured.' });
+  const { session_id } = req.query;
+  if (!session_id) return res.status(400).json({ error: 'Missing session_id.' });
   try {
-    // Verify payment with Stripe
-    const intent = await stripe.paymentIntents.retrieve(payment_intent_id);
-    if (intent.status !== 'succeeded') {
-      return res.status(400).json({ error: 'Payment not completed' });
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
+    // Guard: ensure this session belongs to the logged-in user
+    if (session.metadata?.user_id !== String(req.user.id)) return res.status(403).json({ error: 'Session does not match your account.' });
+    const plan = session.metadata?.plan || 'monthly';
+    await activatePremium(req.user.id, plan);
+    const { rows } = await pool.query('SELECT * FROM users WHERE id=$1', [req.user.id]);
+    const token = generateToken(rows[0]);
+    res.json({ token, message: 'Welcome to KYROO Pro!' });
+  } catch (err) {
+    console.error('Verify session error:', err.message);
+    res.status(500).json({ error: 'Verification failed.' });
+  }
+});
+
+// POST /api/stripe/webhook — Stripe sends events here (set STRIPE_WEBHOOK_SECRET in .env)
+app.post('/api/stripe/webhook', async (req, res) => {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  let event;
+  if (webhookSecret) {
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], webhookSecret);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    const amount = plan === 'yearly' ? 72.00 : 6.00;
-    const desc = plan === 'yearly' ? 'KYROO Premium - Annual (72 EUR/year)' : 'KYROO Premium - Monthly (6 EUR/month)';
-
-    // Record payment in our database
-    await pool.query(
-      'INSERT INTO payments (user_id, amount, currency, description, status) VALUES ($1, $2, $3, $4, $5)',
-      [req.user.id, amount, 'EUR', desc, 'completed']
-    );
-
-    // Activate premium
-    const now = new Date();
-    const expires = new Date(now);
-    if (plan === 'yearly') {
-      expires.setFullYear(expires.getFullYear() + 1);
-    } else {
-      expires.setMonth(expires.getMonth() + 1);
+  } else {
+    event = req.body;
+    console.warn('[stripe webhook] STRIPE_WEBHOOK_SECRET not set — skipping signature verification');
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    if (session.payment_status === 'paid') {
+      const userId = parseInt(session.metadata?.user_id);
+      const plan   = session.metadata?.plan || 'monthly';
+      if (userId) {
+        await activatePremium(userId, plan).catch(err => console.error('activatePremium webhook error:', err));
+        console.log(`[stripe] Activated premium for user ${userId} (${plan})`);
+      }
     }
+  }
+  res.json({ received: true });
+});
 
-    await pool.query(
-      'UPDATE users SET is_premium = true, premium_started_at = $1, premium_expires_at = $2, updated_at = $1 WHERE id = $3',
-      [now, expires, req.user.id]
-    );
+// GET /api/stripe/publishable-key
+app.get('/api/stripe/publishable-key', (_req, res) => {
+  res.json({ key: process.env.STRIPE_PUBLISHABLE_KEY || '' });
+});
 
+// GET /api/payments
+app.get('/api/payments', authRequired, async (req, res) => {
+  try {
     const { rows } = await pool.query(
-      'SELECT id, email, name, is_premium, is_admin, premium_started_at, premium_expires_at FROM users WHERE id = $1',
+      'SELECT id, amount, currency, description, status, created_at FROM payments WHERE user_id=$1 ORDER BY created_at DESC',
       [req.user.id]
     );
-    const user = rows[0];
-    const token = generateToken(user);
-    res.json({ user, token, message: 'Premium activated! Welcome to KYROO Premium.' });
-    broadcast('premium-activated', { userId: req.user.id });
+    res.json({ payments: rows });
   } catch (err) {
-    console.error('Payment confirmation error:', err);
-    res.status(500).json({ error: 'Payment confirmation failed' });
+    res.status(500).json({ error: 'Failed to fetch payments.' });
   }
-});
-
-// GET /api/stripe/publishable-key - expose publishable key to frontend
-app.get('/api/stripe/publishable-key', (req, res) => {
-  res.json({ key: process.env.STRIPE_PUBLISHABLE_KEY || '' });
 });
 
 // POST /api/premium/cancel
 app.post('/api/premium/cancel', authRequired, async (req, res) => {
   try {
     await pool.query(
-      'UPDATE users SET is_premium = false, premium_expires_at = NULL, updated_at = NOW() WHERE id = $1',
+      'UPDATE users SET is_premium=false, plan=\'free\', premium_expires_at=NULL, updated_at=NOW() WHERE id=$1',
       [req.user.id]
     );
-    const { rows } = await pool.query(
-      'SELECT id, email, name, is_premium FROM users WHERE id = $1',
-      [req.user.id]
-    );
+    const { rows } = await pool.query('SELECT * FROM users WHERE id=$1', [req.user.id]);
     const token = generateToken(rows[0]);
-    res.json({ user: rows[0], token, message: 'Premium cancelled.' });
+    res.json({ token, message: 'Subscription cancelled.' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to cancel premium' });
+    res.status(500).json({ error: 'Failed to cancel subscription.' });
   }
-});
-
-// GET /api/payments
-app.get('/api/payments', authRequired, async (req, res) => {
-  const { rows } = await pool.query(
-    'SELECT id, amount, currency, description, status, created_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC',
-    [req.user.id]
-  );
-  res.json(rows);
 });
 
 // ========================================
