@@ -26,6 +26,9 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.ghostBtn} onPress={() => router.push('/auth?tab=signup')}>
             <Text style={styles.ghostBtnText}>Create account — it's free</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.legalLink} onPress={() => router.push('/legal')}>
+            <Text style={styles.legalLinkText}>Imprint · Terms · Privacy & GDPR</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -96,6 +99,7 @@ export default function ProfileScreen() {
           <MenuItem icon="⚡" label="My Programs" onPress={() => router.push('/plans')} />
           <MenuItem icon="⚙️" label="Account Settings" onPress={() => router.push('/settings')} />
           <MenuItem icon="💬" label="Support" onPress={() => Linking.openURL('mailto:support@kyroo.de')} />
+          <MenuItem icon="📄" label="Legal & Privacy" onPress={() => router.push('/legal')} />
         </View>
 
         {/* ── Sign out ── */}
@@ -186,6 +190,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#252520',
   },
   ghostBtnText: { fontFamily: font.sans, fontSize: 15, color: '#888' },
+  legalLink:     { marginTop: spacing[6] },
+  legalLinkText: { fontFamily: font.mono, fontSize: 11, color: '#333', textAlign: 'center', letterSpacing: 0.4 },
 
   // Logged in
   container: { padding: spacing[5], paddingBottom: spacing[12] },
