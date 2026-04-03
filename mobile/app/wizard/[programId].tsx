@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
   ScrollView, TextInput,
@@ -21,21 +21,25 @@ export default function WizardScreen() {
   const { user, isPremium, refresh } = useAuth();
   const prog = PROGRAMS.find(p => p.id === programId);
 
-  // Pre-fill body stats from saved profile
-  const savedStats = useMemo(() => ({
-    age:    user?.body_age    ? String(user.body_age)    : '',
-    weight: user?.body_weight ? String(user.body_weight) : '',
-    height: user?.body_height ? String(user.body_height) : '',
-    sex:    user?.body_sex    ?? 'male',
-  }), [user]);
-
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>(() => ({
-    age:    savedStats.age,
-    weight: savedStats.weight,
-    height: savedStats.height,
-    sex:    savedStats.sex,
-  }));
+  const [formData, setFormData] = useState<FormData>({ sex: 'male' });
+
+  // Sync saved body stats into formData as soon as the user object is ready.
+  // useEffect re-runs whenever the user's body stats change, but only fills
+  // in fields that are still empty so in-progress edits are never overwritten.
+  useEffect(() => {
+    if (!user) return;
+    setFormData(prev => ({
+      ...prev,
+      age:    prev.age    || (user.body_age    ? String(user.body_age)    : ''),
+      weight: prev.weight || (user.body_weight ? String(user.body_weight) : ''),
+      height: prev.height || (user.body_height ? String(user.body_height) : ''),
+      sex:    prev.sex    || (user.body_sex    ?? 'male'),
+    }));
+  }, [user?.body_age, user?.body_weight, user?.body_height, user?.body_sex]); // eslint-disable-line
+
+  // For the hint text on step 3
+  const hasSavedStats = !!(user?.body_age && user?.body_weight && user?.body_height);
   const [reaction, setReaction] = useState('');
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -162,7 +166,7 @@ export default function WizardScreen() {
     );
   }
 
-  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData, savedStats, refresh);
+  const steps = buildSteps(prog.id, formData, selectOpt, step, goTo, generate, error, setFormData, hasSavedStats, refresh);
   const activeStep = steps[step - 1];
 
   return (
@@ -228,7 +232,7 @@ function buildSteps(
   generate: () => void,
   error: string,
   setFormData: (fn: (prev: FormData) => FormData) => void,
-  savedStats: { age: string; weight: string; height: string; sex: string },
+  hasSavedStats: boolean,
   refresh: () => Promise<void>,
 ) {
   const sel = (key: string) => formData[key];
@@ -428,7 +432,7 @@ function buildSteps(
 
   return [step1, step2,
     // Step 3 — Body stats (same for all)
-    <StepWrap key="3" q={isSwim ? 'Your body stats?' : 'Your body stats?'} hint={savedStats.age ? 'Saved from your profile — update anytime.' : 'Used to personalize intensity and nutrition.'}>
+    <StepWrap key="3" q="Your body stats?" hint={hasSavedStats ? 'Saved from your profile — update anytime.' : 'Used to personalize intensity and nutrition.'}>
       <NumericRow
         fields={[
           { label: 'Age', key: 'age', placeholder: '28', decimal: false },
