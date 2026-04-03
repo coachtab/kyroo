@@ -1897,8 +1897,58 @@ const wss = new WebSocket.Server({ server, path: '/ws' });
 
 const wsClients = new Set();
 
+// ── Live training presence (user_id → last-seen timestamp) ──
+const trainingNow = new Map(); // userId -> timestamp
+
+function trainingCount() { return trainingNow.size; }
+
+function broadcastTraining() {
+  broadcast('training-update', { count: trainingCount() });
+}
+
+// Remove stale entries (no heartbeat within 90s)
+setInterval(() => {
+  const cutoff = Date.now() - 90_000;
+  let changed = false;
+  for (const [uid, ts] of trainingNow) {
+    if (ts < cutoff) { trainingNow.delete(uid); changed = true; }
+  }
+  if (changed) broadcastTraining();
+}, 30_000);
+
+// POST /api/training/join
+app.post('/api/training/join', authRequired, (req, res) => {
+  trainingNow.set(req.user.id, Date.now());
+  broadcastTraining();
+  res.json({ count: trainingCount() });
+});
+
+// POST /api/training/leave
+app.post('/api/training/leave', authRequired, (req, res) => {
+  trainingNow.delete(req.user.id);
+  broadcastTraining();
+  res.json({ count: trainingCount() });
+});
+
+// POST /api/training/heartbeat — keeps session alive every 60s
+app.post('/api/training/heartbeat', authRequired, (req, res) => {
+  if (trainingNow.has(req.user.id)) {
+    trainingNow.set(req.user.id, Date.now());
+  }
+  res.json({ count: trainingCount() });
+});
+
+// GET /api/training/count
+app.get('/api/training/count', (_req, res) => {
+  res.json({ count: trainingCount() });
+});
+
 wss.on('connection', (ws) => {
   wsClients.add(ws);
+  // Send current count immediately on connect
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'training-update', data: { count: trainingCount() }, timestamp: Date.now() }));
+  }
   ws.on('close', () => wsClients.delete(ws));
   ws.on('error', () => wsClients.delete(ws));
 });
