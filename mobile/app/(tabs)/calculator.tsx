@@ -167,7 +167,7 @@ function ToolScreen({ tool, onBack }: { tool: typeof TOOLS[number]; onBack: () =
 // ══════════════════════════════════════════════════════════════════════════════
 // Tool 1: Calorie & Macro Calculator
 // ══════════════════════════════════════════════════════════════════════════════
-type Sex  = 'male' | 'female';
+type Sex  = 'male' | 'female' | 'other';
 type Goal = 'lose' | 'maintain' | 'gain';
 
 const ACTIVITY_OPTS = [
@@ -202,7 +202,9 @@ function CalorieTool({ accent }: { accent: string }) {
     if (!w || w < 20 || w > 300) { setError('Weight must be 20–300 kg'); return; }
     if (!h || h < 100 || h > 250) { setError('Height must be 100–250 cm'); return; }
     setError('');
-    const bmr    = sex === 'female' ? (10 * w + 6.25 * h - 5 * a - 161) : (10 * w + 6.25 * h - 5 * a + 5);
+    const bmrM   = 10 * w + 6.25 * h - 5 * a + 5;
+    const bmrF   = 10 * w + 6.25 * h - 5 * a - 161;
+    const bmr    = sex === 'female' ? bmrF : sex === 'male' ? bmrM : (bmrM + bmrF) / 2;
     const tdee   = Math.round(bmr * activity);
     const adj    = GOAL_OPTS.find(g => g.id === goal)!.adj;
     const target = tdee + adj;
@@ -229,9 +231,9 @@ function CalorieTool({ accent }: { accent: string }) {
 
       {/* Sex */}
       <View style={f.segRow}>
-        {(['male','female'] as Sex[]).map(sv => (
-          <SegPill key={sv} label={sv === 'male' ? '♂  Male' : '♀  Female'} active={sex === sv} onPress={() => setSex(sv)} accent={accent} />
-        ))}
+        <SegPill label="♂  Male"   active={sex === 'male'}   onPress={() => setSex('male')}   accent={accent} />
+        <SegPill label="♀  Female" active={sex === 'female'} onPress={() => setSex('female')} accent={accent} />
+        <SegPill label="⚥  Other"  active={sex === 'other'}  onPress={() => setSex('other')}  accent={accent} />
       </View>
 
       {/* Step 2: Goal */}
