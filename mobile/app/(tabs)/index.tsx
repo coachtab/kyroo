@@ -1,15 +1,66 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, SafeAreaView, ScrollView, Platform, Animated,
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, ScrollView, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, spacing, radius, font } from '../../src/lib/theme';
-import { PROGRAMS, FILTER_OPTIONS, Program } from '../../src/lib/programs';
+import { spacing, radius, font } from '../../src/lib/theme';
+import { PROGRAMS, Program } from '../../src/lib/programs';
 import { useAuth } from '../../src/context/AuthContext';
 import { useTrainingWS } from '../../src/hooks/useTrainingWS';
 
-const CARD_PALETTES = [
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const BG      = '#07070F';
+const SURFACE = '#0C0C1A';
+const CARD    = '#10101E';
+const BORDER  = '#18183A';
+const INDIGO  = '#5B5EF4';
+const VIOLET  = '#8B5CF6';
+const GREEN   = '#3D9E6A';
+const TEXT    = '#F0F0EE';
+const MUTED   = '#52526A';
+const DIM     = '#1A1A2E';
+
+// ── Adaptive scoring ───────────────────────────────────────────────────────────
+function matchScore(p: Program, energy: number, mins: number): number {
+  let s = 0;
+  const f = p.filters;
+  if (mins <= 20) {
+    if (f.includes('home') || f.includes('beginner') || f.includes('fat-loss')) s += 3;
+    if (f.includes('strength') || f.includes('sport')) s -= 2;
+  } else if (mins >= 45) {
+    if (f.includes('strength') || f.includes('sport')) s += 2;
+  } else {
+    s += 1;
+  }
+  if (energy <= 2) {
+    if (f.includes('home') || f.includes('beginner')) s += 3;
+    if (f.includes('strength') || f.includes('sport')) s -= 2;
+  } else if (energy >= 4) {
+    if (f.includes('strength') || f.includes('sport')) s += 2;
+    if (f.includes('beginner')) s -= 1;
+  }
+  return s;
+}
+
+// ── Energy / time config ───────────────────────────────────────────────────────
+const ENERGY_LEVELS = [
+  { id: 1, emoji: '💤', label: 'Low' },
+  { id: 2, emoji: '😔', label: 'Tired' },
+  { id: 3, emoji: '😊', label: 'Good' },
+  { id: 4, emoji: '💪', label: 'Strong' },
+  { id: 5, emoji: '⚡', label: 'Peak' },
+];
+
+const TIME_OPTIONS = [
+  { label: '15m', mins: 15 },
+  { label: '20m', mins: 20 },
+  { label: '30m', mins: 30 },
+  { label: '45m', mins: 45 },
+  { label: '60m+', mins: 60 },
+];
+
+const PALETTES = [
   { bg: '#0F2318', accent: '#3D9E6A' },
   { bg: '#1A1200', accent: '#D4923F' },
   { bg: '#0E1A2B', accent: '#4A8FC4' },
@@ -18,41 +69,54 @@ const CARD_PALETTES = [
   { bg: '#160A1E', accent: '#9A6AC8' },
 ];
 
-export default function ProgramsScreen() {
+// ── Main screen ────────────────────────────────────────────────────────────────
+export default function TodayScreen() {
   const router = useRouter();
   const { user, isPremium } = useAuth();
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
   const { count: liveCount } = useTrainingWS(isPremium);
-  const pulse = useRef(new Animated.Value(1)).current;
 
-  // Pulsing dot when someone is training
-  useEffect(() => {
-    if (!isPremium || liveCount === 0) return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.5, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1,   duration: 900, useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [isPremium, liveCount]);
+  const [energy, setEnergy] = useState<number | null>(null);
+  const [time,   setTime]   = useState<number | null>(null);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return PROGRAMS.filter(p => {
-      const matchSearch = !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
-      const matchFilter = filter === 'all' || p.filters.includes(filter);
-      return matchSearch && matchFilter;
+  const scales = useRef(ENERGY_LEVELS.map(() => new Animated.Value(1))).current;
+  const scrollRef = useRef<ScrollView>(null);
+  const programsY = useRef(0);
+
+  function selectEnergy(id: number) {
+    scales.forEach((s, i) => {
+      Animated.spring(s, {
+        toValue: ENERGY_LEVELS[i].id === id ? 1.22 : 0.9,
+        useNativeDriver: true,
+        damping: 14,
+        stiffness: 220,
+      }).start();
     });
-  }, [search, filter]);
+    setEnergy(id);
+  }
+
+  const adapted = useMemo(() => {
+    if (!energy || !time) return { recommended: [] as Program[], rest: PROGRAMS };
+    const scored = [...PROGRAMS].sort((a, b) =>
+      matchScore(b, energy, time) - matchScore(a, energy, time)
+    );
+    const top = scored.slice(0, 3);
+    const rest = scored.slice(3);
+    return { recommended: top, rest };
+  }, [energy, time]);
 
   function openProgram(prog: Program) {
     if (!user) { router.push('/auth'); return; }
     if (prog.badge === 'PREMIUM' && !isPremium) { router.push('/upgrade'); return; }
-    router.push(`/wizard/${prog.id}`);
+    const q = energy || time ? `?energy=${energy ?? ''}&time=${time ?? ''}` : '';
+    router.push(`/wizard/${prog.id}${q}`);
   }
+
+  function findWorkout() {
+    scrollRef.current?.scrollTo({ y: programsY.current - 24, animated: true });
+  }
+
+  const ready    = energy !== null && time !== null;
+  const adapting = ready;
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -62,313 +126,461 @@ export default function ProgramsScreen() {
   })();
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={s.safe}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        ref={scrollRef}
+        contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]}
       >
-        {/* ── Header ── */}
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>{greeting}</Text>
-              <Text style={styles.headerTitle}>
-                {user ? user.name.split(' ')[0] : 'Athlete'} 👋
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.avatarBtn}
-              onPress={() => router.push(user ? '/(tabs)/profile' : '/auth')}
-              activeOpacity={0.8}
-            >
-              {user ? (
-                <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
-              ) : (
-                <Text style={styles.avatarText}>?</Text>
-              )}
-            </TouchableOpacity>
+
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <View style={s.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={s.greeting}>{greeting}</Text>
+            <Text style={s.name}>
+              {user ? user.name.split(' ')[0] : 'Athlete'} 👋
+            </Text>
           </View>
-          <Text style={styles.headerSub}>
-            Pick a program · answer a few questions · get your plan.
-          </Text>
-
-          {/* Upgrade promo — free users */}
-          {user && !isPremium && !user.is_admin && (
-            <TouchableOpacity
-              style={styles.usageBanner}
-              onPress={() => router.push('/upgrade')}
-              activeOpacity={0.85}
-            >
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={styles.usageLabel}>🔓 Unlock all 12 programs</Text>
-                <Text style={styles.usageReset}>Premium · €6/mo or €72/yr</Text>
-              </View>
-              <Text style={styles.usageUpgrade}>Upgrade →</Text>
-            </TouchableOpacity>
-          )}
-
-          {/* Usage counter — premium users (5/month cap) */}
-          {user && isPremium && !user.is_admin && (() => {
-            const used      = user.usage?.used      ?? 0;
-            const limit     = user.usage?.limit     ?? 5;
-            const remaining = user.usage?.remaining ?? Math.max(0, limit - used);
-            const pct       = Math.min((used / limit) * 100, 100);
-            const warn      = remaining <= 1;
-            return (
-              <View style={styles.usageBanner}>
-                <View style={{ flex: 1, gap: 6 }}>
-                  <View style={styles.usageTopRow}>
-                    <Text style={[styles.usageLabel, warn && styles.usageLabelWarn]}>
-                      {remaining === 0
-                        ? 'No plans left this month'
-                        : `${remaining} of ${limit} plans remaining`}
-                    </Text>
-                    <Text style={styles.usageReset}>resets monthly</Text>
-                  </View>
-                  <View style={styles.usageBar}>
-                    <View style={[styles.usageBarFill, { width: `${pct}%` as any }, warn && styles.usageBarWarn]} />
-                  </View>
-                </View>
-              </View>
-            );
-          })()}
-
-          {isPremium && liveCount > 0 && (
-            <TouchableOpacity
-              style={styles.liveBanner}
-              onPress={() => router.push('/(tabs)/community')}
-              activeOpacity={0.8}
-            >
-              <Animated.View style={[styles.liveDot, { transform: [{ scale: pulse }] }]} />
-              <Text style={styles.liveBannerText}>
-                {liveCount === 1 ? '1 athlete training now' : `${liveCount} athletes training now`}
-              </Text>
-              <Text style={styles.liveBannerArrow}>→</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={s.avatar}
+            onPress={() => router.push(user ? '/(tabs)/profile' : '/auth')}
+            activeOpacity={0.8}
+          >
+            <Text style={s.avatarText}>
+              {user ? user.name.charAt(0).toUpperCase() : '?'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* ── Sticky toolbar ── */}
-        <View style={styles.toolbar}>
-          <View style={styles.searchWrap}>
-            <Text style={styles.searchIcon}>⌕</Text>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search programs…"
-              placeholderTextColor="#555"
-              value={search}
-              onChangeText={setSearch}
-              autoCorrect={false}
-              autoCapitalize="none"
-            />
-            {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')} hitSlop={8}>
-                <Text style={styles.searchClear}>✕</Text>
-              </TouchableOpacity>
-            )}
+        {/* ── Command card ─────────────────────────────────────────────────── */}
+        <View style={s.commandCard}>
+          {/* Accent line top */}
+          <View style={s.commandAccentBar} />
+
+          <Text style={s.commandTitle}>What's today's plan?</Text>
+          <Text style={s.commandSub}>
+            Set your energy and time — we'll surface your best match.
+          </Text>
+
+          {/* Energy picker */}
+          <Text style={s.inputLabel}>Energy level</Text>
+          <View style={s.energyRow}>
+            {ENERGY_LEVELS.map((e, i) => {
+              const sel = energy === e.id;
+              return (
+                <TouchableOpacity
+                  key={e.id}
+                  onPress={() => selectEnergy(e.id)}
+                  activeOpacity={0.75}
+                  style={s.energyWrap}
+                >
+                  <Animated.View style={[
+                    s.energyBubble,
+                    sel && s.energyBubbleSel,
+                    { transform: [{ scale: scales[i] }] },
+                  ]}>
+                    <Text style={s.energyEmoji}>{e.emoji}</Text>
+                  </Animated.View>
+                  <Text style={[s.energyLabel, sel && { color: INDIGO }]}>
+                    {e.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
-            {FILTER_OPTIONS.map(f => (
+
+          {/* Time picker */}
+          <Text style={[s.inputLabel, { marginTop: spacing[5] }]}>Time available</Text>
+          <View style={s.timeRow}>
+            {TIME_OPTIONS.map(t => (
               <TouchableOpacity
-                key={f.value}
-                style={[styles.chip, filter === f.value && styles.chipActive]}
-                onPress={() => setFilter(f.value)}
+                key={t.mins}
+                style={[s.timePill, time === t.mins && s.timePillSel]}
+                onPress={() => setTime(t.mins)}
                 activeOpacity={0.75}
               >
-                <Text style={[styles.chipText, filter === f.value && styles.chipTextActive]}>
-                  {f.label}
+                <Text style={[s.timePillText, time === t.mins && s.timePillTextSel]}>
+                  {t.label}
                 </Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </View>
+
+          {/* CTA */}
+          <TouchableOpacity
+            style={[s.cta, ready && s.ctaReady]}
+            onPress={findWorkout}
+            disabled={!ready}
+            activeOpacity={0.87}
+          >
+            <Text style={[s.ctaText, ready && s.ctaTextReady]}>
+              {ready ? 'Find My Workout →' : 'Select energy + time to continue'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* ── Cards ── */}
-        <View style={styles.list}>
-          {filtered.length === 0 ? (
-            <View style={styles.empty}>
-              <Text style={styles.emptyEmoji}>🔍</Text>
-              <Text style={styles.emptyTitle}>No results</Text>
-              <Text style={styles.emptySub}>Try a different search or filter.</Text>
+        {/* ── Banners ───────────────────────────────────────────────────────── */}
+        {user && !isPremium && !user.is_admin && (
+          <TouchableOpacity
+            style={s.upgradeBanner}
+            onPress={() => router.push('/upgrade')}
+            activeOpacity={0.85}
+          >
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={s.upgradeTitle}>🔓 Unlock all 12 programs</Text>
+              <Text style={s.upgradeSub}>Premium · €6/mo or €72/yr</Text>
             </View>
-          ) : (
-            filtered.map((prog, i) => {
-              const p = CARD_PALETTES[i % CARD_PALETTES.length];
-              const locked = prog.badge === 'PREMIUM' && !isPremium;
-              return (
-                <TouchableOpacity
+            <Text style={s.upgradeArrow}>Upgrade →</Text>
+          </TouchableOpacity>
+        )}
+
+        {user && isPremium && !user.is_admin && (() => {
+          const used      = user.usage?.used      ?? 0;
+          const limit     = user.usage?.limit     ?? 5;
+          const remaining = user.usage?.remaining ?? Math.max(0, limit - used);
+          const pct       = Math.min((used / limit) * 100, 100);
+          const warn      = remaining <= 1;
+          return (
+            <View style={s.usageBanner}>
+              <View style={{ flex: 1, gap: 6 }}>
+                <View style={s.usageTop}>
+                  <Text style={[s.usageLabel, warn && s.usageWarn]}>
+                    {remaining === 0
+                      ? 'No plans left this month'
+                      : `${remaining} of ${limit} plans remaining`}
+                  </Text>
+                  <Text style={s.usageReset}>resets monthly</Text>
+                </View>
+                <View style={s.usageBar}>
+                  <View style={[s.usageBarFill, { width: `${pct}%` as any }, warn && s.usageBarWarn]} />
+                </View>
+              </View>
+            </View>
+          );
+        })()}
+
+        {isPremium && liveCount > 0 && (
+          <TouchableOpacity
+            style={s.liveBanner}
+            onPress={() => router.push('/(tabs)/community')}
+            activeOpacity={0.8}
+          >
+            <View style={s.liveDot} />
+            <Text style={s.liveText}>
+              {liveCount === 1 ? '1 athlete training now' : `${liveCount} athletes training now`}
+            </Text>
+            <Text style={s.liveArrow}>→</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* ── Programs ──────────────────────────────────────────────────────── */}
+        <View
+          onLayout={e => { programsY.current = e.nativeEvent.layout.y; }}
+          style={s.programsSection}
+        >
+
+          {/* Recommended (when adapting) */}
+          {adapting && adapted.recommended.length > 0 && (
+            <>
+              <View style={s.sectionHead}>
+                <View>
+                  <Text style={s.sectionTitle}>Best match</Text>
+                  <Text style={s.sectionSub}>Matched to your energy + time</Text>
+                </View>
+                <View style={s.matchPill}>
+                  <Text style={s.matchPillText}>
+                    {adapted.recommended.length} of {PROGRAMS.length}
+                  </Text>
+                </View>
+              </View>
+              {adapted.recommended.map((prog, i) => (
+                <ProgramRow
                   key={prog.id}
-                  style={[styles.card, { backgroundColor: p.bg }]}
+                  prog={prog}
+                  palette={PALETTES[i % PALETTES.length]}
+                  locked={prog.badge === 'PREMIUM' && !isPremium}
                   onPress={() => openProgram(prog)}
-                  activeOpacity={0.82}
-                >
-                  <View style={[styles.iconWrap, { backgroundColor: p.accent + '25' }]}>
-                    <Text style={styles.iconText}>{prog.icon}</Text>
-                  </View>
+                  recommended
+                />
+              ))}
 
-                  <View style={styles.cardBody}>
-                    <View style={styles.cardTopRow}>
-                      <Text style={styles.cardName}>{prog.name}</Text>
-                      {prog.badge === 'FREE'
-                        ? <View style={styles.badgeFree}><Text style={styles.badgeFreeText}>FREE</Text></View>
-                        : <View style={[styles.badgePro, { borderColor: p.accent + '50' }]}>
-                            <Text style={[styles.badgeProText, { color: p.accent }]}>PRO</Text>
-                          </View>
-                      }
-                    </View>
-                    <Text style={styles.cardDesc} numberOfLines={2}>{prog.description}</Text>
-                    <View style={styles.cardFooter}>
-                      <Text style={[styles.cardTagline, { color: p.accent }]}>{prog.tagline}</Text>
-                      {locked && <Text style={styles.lockIcon}>🔒</Text>}
-                    </View>
-                  </View>
+              {adapted.rest.length > 0 && (
+                <Text style={s.restLabel}>More programs</Text>
+              )}
+              {adapted.rest.map((prog, i) => (
+                <ProgramRow
+                  key={prog.id}
+                  prog={prog}
+                  palette={PALETTES[(adapted.recommended.length + i) % PALETTES.length]}
+                  locked={prog.badge === 'PREMIUM' && !isPremium}
+                  onPress={() => openProgram(prog)}
+                />
+              ))}
+            </>
+          )}
 
-                  <Text style={[styles.arrow, { color: p.accent }]}>›</Text>
-                </TouchableOpacity>
-              );
-            })
+          {/* Default list */}
+          {!adapting && (
+            <>
+              <Text style={s.sectionTitle}>All Programs</Text>
+              {PROGRAMS.map((prog, i) => (
+                <ProgramRow
+                  key={prog.id}
+                  prog={prog}
+                  palette={PALETTES[i % PALETTES.length]}
+                  locked={prog.badge === 'PREMIUM' && !isPremium}
+                  onPress={() => openProgram(prog)}
+                />
+              ))}
+            </>
           )}
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe:      { flex: 1, backgroundColor: '#0D0D0B' },
-  container: { paddingBottom: spacing[12] },
+// ── Program row card ───────────────────────────────────────────────────────────
+function ProgramRow({
+  prog, palette, locked, onPress, recommended,
+}: {
+  prog: Program;
+  palette: { bg: string; accent: string };
+  locked: boolean;
+  onPress: () => void;
+  recommended?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      style={[
+        row.card,
+        { backgroundColor: palette.bg },
+        recommended && { borderColor: INDIGO + '60', borderWidth: 1 },
+      ]}
+      onPress={onPress}
+      activeOpacity={0.82}
+    >
+      <View style={[row.icon, { backgroundColor: palette.accent + '25' }]}>
+        <Text style={row.iconText}>{prog.icon}</Text>
+      </View>
+
+      <View style={row.body}>
+        <View style={row.topRow}>
+          <Text style={row.name}>{prog.name}</Text>
+          {recommended && (
+            <View style={row.matchBadge}>
+              <Text style={row.matchBadgeText}>✦ Match</Text>
+            </View>
+          )}
+          {!recommended && (prog.badge === 'FREE'
+            ? <View style={row.badgeFree}><Text style={row.badgeFreeText}>FREE</Text></View>
+            : <View style={[row.badgePro, { borderColor: palette.accent + '50' }]}>
+                <Text style={[row.badgeProText, { color: palette.accent }]}>PRO</Text>
+              </View>
+          )}
+        </View>
+        <Text style={row.desc} numberOfLines={2}>{prog.description}</Text>
+        <View style={row.footer}>
+          <Text style={[row.tagline, { color: palette.accent }]}>{prog.tagline}</Text>
+          {locked && <Text style={row.lock}>🔒</Text>}
+        </View>
+      </View>
+
+      <Text style={[row.arrow, { color: palette.accent }]}>›</Text>
+    </TouchableOpacity>
+  );
+}
+
+// ── Styles ─────────────────────────────────────────────────────────────────────
+const s = StyleSheet.create({
+  safe:   { flex: 1, backgroundColor: BG },
+  scroll: { paddingBottom: spacing[12] },
 
   // Header
   header: {
-    backgroundColor: '#0D0D0B',
+    flexDirection: 'row', alignItems: 'flex-start',
     paddingHorizontal: spacing[5],
     paddingTop: spacing[6],
-    paddingBottom: spacing[5],
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: spacing[3],
+    paddingBottom: spacing[4],
   },
   greeting: {
-    fontFamily: font.mono,
-    fontSize: 11,
-    color: '#555',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 4,
+    fontFamily: font.mono, fontSize: 11, color: MUTED,
+    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4,
   },
-  headerTitle:  { fontFamily: font.sansBd, fontSize: 30, color: '#F5F5F2', lineHeight: 36 },
-  headerSub:    { fontFamily: font.sans, fontSize: 13, color: '#555', lineHeight: 20 },
-  avatarBtn: {
-    width: 42, height: 42, borderRadius: 21,
-    backgroundColor: colors.forest,
+  name:     { fontFamily: font.sansBd, fontSize: 30, color: TEXT, lineHeight: 36 },
+  avatar: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: '#1A1A3A', borderWidth: 1, borderColor: INDIGO + '40',
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { fontFamily: font.sansBd, fontSize: 17, color: '#F5F5F2' },
+  avatarText: { fontFamily: font.sansBd, fontSize: 17, color: TEXT },
 
-  // Toolbar
-  toolbar: {
-    backgroundColor: '#0D0D0B',
-    paddingHorizontal: spacing[5],
-    paddingBottom: spacing[4],
-    gap: spacing[3],
-    borderBottomWidth: 1,
-    borderBottomColor: '#1C1C18',
+  // Command card
+  commandCard: {
+    marginHorizontal: spacing[5],
+    marginBottom: spacing[4],
+    backgroundColor: SURFACE,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: spacing[5],
+    overflow: 'hidden',
   },
-  searchWrap: {
+  commandAccentBar: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    height: 3,
+    backgroundColor: INDIGO,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+  },
+  commandTitle: {
+    fontFamily: font.sansBd, fontSize: 20, color: TEXT,
+    marginTop: spacing[2], marginBottom: 6,
+  },
+  commandSub: { fontFamily: font.sans, fontSize: 13, color: MUTED, lineHeight: 19, marginBottom: spacing[5] },
+  inputLabel: { fontFamily: font.mono, fontSize: 10, color: MUTED, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: spacing[3] },
+
+  // Energy
+  energyRow:    { flexDirection: 'row', justifyContent: 'space-between' },
+  energyWrap:   { alignItems: 'center', gap: 6, flex: 1 },
+  energyBubble: {
+    width: 50, height: 50, borderRadius: 25,
+    backgroundColor: DIM, borderWidth: 1, borderColor: BORDER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  energyBubbleSel: {
+    backgroundColor: INDIGO + '22',
+    borderColor: INDIGO,
+    borderWidth: 2,
+  },
+  energyEmoji:  { fontSize: 22 },
+  energyLabel:  { fontFamily: font.mono, fontSize: 9, color: MUTED, textTransform: 'uppercase', letterSpacing: 0.3 },
+
+  // Time
+  timeRow:         { flexDirection: 'row', gap: spacing[2] },
+  timePill: {
+    flex: 1, height: 38, borderRadius: radius.full,
+    backgroundColor: DIM, borderWidth: 1, borderColor: BORDER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  timePillSel:     { backgroundColor: INDIGO, borderColor: INDIGO },
+  timePillText:    { fontFamily: font.mono, fontSize: 11, color: MUTED, letterSpacing: 0.3 },
+  timePillTextSel: { color: TEXT },
+
+  // CTA
+  cta: {
+    marginTop: spacing[5], height: 52, borderRadius: radius.full,
+    backgroundColor: DIM, borderWidth: 1, borderColor: BORDER,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ctaReady: { backgroundColor: INDIGO, borderColor: INDIGO },
+  ctaText: {
+    fontFamily: font.mono, fontSize: 12, color: MUTED,
+    letterSpacing: 0.4, textTransform: 'uppercase',
+  },
+  ctaTextReady: { color: TEXT },
+
+  // Upgrade banner
+  upgradeBanner: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#181816', borderRadius: radius.full,
-    paddingHorizontal: spacing[4], height: 44, gap: spacing[2],
-    borderWidth: 1, borderColor: '#252520',
+    marginHorizontal: spacing[5], marginBottom: spacing[3],
+    backgroundColor: SURFACE, borderRadius: radius.md,
+    borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[3],
   },
-  searchIcon:  { fontSize: 16, color: '#444' },
-  searchInput: {
-    flex: 1, fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } as any : {}),
+  upgradeTitle: { fontFamily: font.mono, fontSize: 11, color: '#888', letterSpacing: 0.3 },
+  upgradeSub:   { fontFamily: font.mono, fontSize: 10, color: MUTED, letterSpacing: 0.3 },
+  upgradeArrow: { fontFamily: font.mono, fontSize: 11, color: GREEN, letterSpacing: 0.3, flexShrink: 0 },
+
+  // Usage banner
+  usageBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    marginHorizontal: spacing[5], marginBottom: spacing[3],
+    backgroundColor: SURFACE, borderRadius: radius.md,
+    borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[3],
   },
-  searchClear: { fontSize: 13, color: '#444' },
-  filtersRow:  { gap: spacing[2], paddingRight: spacing[2] },
-  chip: {
-    paddingHorizontal: spacing[4], paddingVertical: 8,
-    borderRadius: radius.full, backgroundColor: '#181816',
-    borderWidth: 1, borderColor: '#252520',
+  usageTop:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  usageLabel:   { fontFamily: font.mono, fontSize: 11, color: '#888', letterSpacing: 0.3 },
+  usageWarn:    { color: '#C06848' },
+  usageReset:   { fontFamily: font.mono, fontSize: 10, color: MUTED, letterSpacing: 0.3 },
+  usageBar:     { height: 3, backgroundColor: DIM, borderRadius: 2, overflow: 'hidden', marginTop: 2 },
+  usageBarFill: { height: '100%', backgroundColor: GREEN, borderRadius: 2 },
+  usageBarWarn: { backgroundColor: '#C06848' },
+
+  // Live banner
+  liveBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    marginHorizontal: spacing[5], marginBottom: spacing[3],
+    backgroundColor: '#0A1A12', borderRadius: radius.full,
+    borderWidth: 1, borderColor: GREEN + '40',
+    paddingHorizontal: spacing[4], paddingVertical: 7,
+    gap: spacing[2], alignSelf: 'stretch',
   },
-  chipActive:      { backgroundColor: colors.forest, borderColor: colors.forest },
-  chipText:        { fontFamily: font.mono, fontSize: 11, color: '#555', letterSpacing: 0.4 },
-  chipTextActive:  { color: '#F5F5F2' },
+  liveDot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: GREEN },
+  liveText: { fontFamily: font.mono, fontSize: 11, color: '#6DBF8A', letterSpacing: 0.4, flex: 1 },
+  liveArrow:{ fontFamily: font.mono, fontSize: 11, color: GREEN, opacity: 0.5 },
 
-  // List
-  list: { padding: spacing[4], gap: spacing[3] },
+  // Programs section
+  programsSection: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[2],
+    gap: spacing[3],
+  },
+  sectionHead: {
+    flexDirection: 'row', alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[1],
+    marginBottom: spacing[1],
+  },
+  sectionTitle: {
+    fontFamily: font.sansBd, fontSize: 16, color: TEXT,
+    paddingHorizontal: spacing[1], marginBottom: spacing[1],
+  },
+  sectionSub: { fontFamily: font.mono, fontSize: 10, color: MUTED, letterSpacing: 0.3 },
+  matchPill: {
+    backgroundColor: INDIGO + '20', borderRadius: radius.full,
+    borderWidth: 1, borderColor: INDIGO + '50',
+    paddingHorizontal: spacing[3], paddingVertical: 4,
+  },
+  matchPillText: { fontFamily: font.mono, fontSize: 10, color: INDIGO, letterSpacing: 0.3 },
+  restLabel: {
+    fontFamily: font.mono, fontSize: 10, color: MUTED,
+    textTransform: 'uppercase', letterSpacing: 0.6,
+    paddingHorizontal: spacing[1], marginTop: spacing[2],
+  },
+});
 
-  // Empty
-  empty: { alignItems: 'center', paddingVertical: spacing[12], gap: spacing[3] },
-  emptyEmoji: { fontSize: 40 },
-  emptyTitle: { fontFamily: font.sansBd, fontSize: 18, color: '#555' },
-  emptySub:   { fontFamily: font.sans, fontSize: 14, color: '#444' },
-
-  // Card
+const row = StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
-    padding: spacing[4], borderRadius: radius.lg,
-    gap: spacing[4],
+    padding: spacing[4], borderRadius: radius.lg, gap: spacing[4],
   },
-  iconWrap: {
+  icon: {
     width: 54, height: 54, borderRadius: radius.md,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  iconText:    { fontSize: 26 },
-  cardBody:    { flex: 1, gap: 6 },
-  cardTopRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
-  cardName:    { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2', flex: 1 },
+  iconText: { fontSize: 26 },
+  body:     { flex: 1, gap: 6 },
+  topRow:   { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+  name:     { fontFamily: font.sansBd, fontSize: 15, color: TEXT, flex: 1 },
+  matchBadge: {
+    backgroundColor: INDIGO + '25', borderRadius: radius.full,
+    borderWidth: 1, borderColor: INDIGO + '60',
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  matchBadgeText: { fontFamily: font.mono, fontSize: 9, color: INDIGO, letterSpacing: 0.5 },
   badgeFree: {
-    paddingHorizontal: 8, paddingVertical: 3,
-    borderRadius: radius.full,
-    backgroundColor: colors.forest + '30',
-    borderWidth: 1, borderColor: colors.forest + '50',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full,
+    backgroundColor: GREEN + '30', borderWidth: 1, borderColor: GREEN + '50',
   },
-  badgeFreeText: { fontFamily: font.mono, fontSize: 9, color: '#6DBF8A', letterSpacing: 0.5 },
-  badgePro: {
-    paddingHorizontal: 8, paddingVertical: 3,
-    borderRadius: radius.full, borderWidth: 1,
-    backgroundColor: 'transparent',
-  },
+  badgeFreeText:  { fontFamily: font.mono, fontSize: 9, color: '#6DBF8A', letterSpacing: 0.5 },
+  badgePro:       { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full, borderWidth: 1, backgroundColor: 'transparent' },
   badgeProText:   { fontFamily: font.mono, fontSize: 9, letterSpacing: 0.5 },
-  cardDesc:       { fontFamily: font.sans, fontSize: 13, color: '#666', lineHeight: 18 },
-  cardFooter:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
-  cardTagline:    { fontFamily: font.mono, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 },
-  lockIcon:       { fontSize: 12 },
+  desc:           { fontFamily: font.sans, fontSize: 13, color: '#666', lineHeight: 18 },
+  footer:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
+  tagline:        { fontFamily: font.mono, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 },
+  lock:           { fontSize: 12 },
   arrow:          { fontSize: 28, flexShrink: 0, opacity: 0.5 },
-
-  // Usage counter banner
-  usageBanner: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#181816', borderRadius: radius.md,
-    borderWidth: 1, borderColor: '#252520',
-    paddingHorizontal: spacing[4], paddingVertical: spacing[3],
-    gap: spacing[3], marginTop: spacing[3],
-  },
-  usageTopRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  usageLabel:       { fontFamily: font.mono, fontSize: 11, color: '#888', letterSpacing: 0.3 },
-  usageLabelWarn:   { color: '#C06848' },
-  usageReset:       { fontFamily: font.mono, fontSize: 10, color: '#333', letterSpacing: 0.3 },
-  usageBar:         { height: 3, backgroundColor: '#252520', borderRadius: 2, overflow: 'hidden' },
-  usageBarFill:     { height: '100%', backgroundColor: '#3D9E6A', borderRadius: 2 },
-  usageBarWarn:     { backgroundColor: '#C06848' },
-  usageUpgrade:     { fontFamily: font.mono, fontSize: 11, color: '#3D9E6A', letterSpacing: 0.3, flexShrink: 0 },
-
-  // Live training banner
-  liveBanner: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#0F2318', borderRadius: radius.full,
-    borderWidth: 1, borderColor: '#3D9E6A40',
-    paddingHorizontal: spacing[4], paddingVertical: 7,
-    gap: spacing[2], marginTop: spacing[3],
-    alignSelf: 'flex-start',
-  },
-  liveDot:         { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3D9E6A' },
-  liveBannerText:  { fontFamily: font.mono, fontSize: 11, color: '#6DBF8A', letterSpacing: 0.4 },
-  liveBannerArrow: { fontFamily: font.mono, fontSize: 11, color: '#3D9E6A', opacity: 0.5 },
 });

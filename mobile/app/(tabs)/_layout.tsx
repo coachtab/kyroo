@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
-import { colors, font } from '../../src/lib/theme';
+import { font } from '../../src/lib/theme';
 import { Text } from 'react-native';
 
 function TabIcon({ label, active }: { label: string; active: boolean }) {
   return (
-    <Text style={{ fontSize: 20, opacity: active ? 1 : 0.45 }}>{label}</Text>
+    <Text style={{ fontSize: 20, opacity: active ? 1 : 0.4 }}>{label}</Text>
   );
 }
 
@@ -14,8 +14,8 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0D0D0B',
-          borderTopColor: '#1C1C18',
+          backgroundColor: '#07070F',
+          borderTopColor: '#18183A',
           borderTopWidth: 1,
           height: 64,
           paddingBottom: 8,
@@ -26,14 +26,14 @@ export default function TabLayout() {
           textTransform: 'uppercase',
           letterSpacing: 0.6,
         },
-        tabBarActiveTintColor: '#3D9E6A',
-        tabBarInactiveTintColor: '#444',
+        tabBarActiveTintColor: '#5B5EF4',
+        tabBarInactiveTintColor: '#40405A',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Programs',
+          title: 'Today',
           tabBarIcon: ({ focused }) => <TabIcon label="⚡" active={focused} />,
         }}
       />
@@ -48,13 +48,13 @@ export default function TabLayout() {
         name="community"
         options={{
           title: 'Community',
-          tabBarIcon: ({ focused }) => <TabIcon label="⚡" active={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon label="🌐" active={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'Me',
           tabBarIcon: ({ focused }) => <TabIcon label="👤" active={focused} />,
         }}
       />
