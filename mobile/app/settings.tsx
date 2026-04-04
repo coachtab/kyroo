@@ -19,8 +19,20 @@ export default function SettingsScreen() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useFocusEffect(useCallback(() => {
-    refresh();
+    // Fetch latest user data directly from server — don't rely on context timing
+    apiFetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        setName(data.name ?? '');
+        if (data.body_age != null)    setBAge(String(data.body_age));
+        if (data.body_weight != null) setBWeight(String(data.body_weight));
+        if (data.body_height != null) setBHeight(String(data.body_height));
+        if (data.body_sex)            setBSex(data.body_sex);
+      })
+      .catch(() => {});
     apiFetch('/api/payments').then(r => r.json()).then(d => setPayments(d.payments || [])).catch(() => {});
+    refresh(); // keep context in sync for other screens
   }, [])); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleCancel() {
@@ -92,12 +104,7 @@ export default function SettingsScreen() {
   const [nameErr, setNameErr]       = useState('');
   const [pwErr, setPwErr]           = useState('');
 
-  // Sync name from user when it loads asynchronously
-  useEffect(() => {
-    if (user?.name) setName(user.name);
-  }, [user?.name]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Body stats — initialise empty, sync from user once loaded
+  // Body stats — populated directly from API in useFocusEffect above
   const [bAge,    setBAge]    = useState('');
   const [bWeight, setBWeight] = useState('');
   const [bHeight, setBHeight] = useState('');
@@ -105,14 +112,6 @@ export default function SettingsScreen() {
   const [bSaving, setBSaving] = useState(false);
   const [bMsg,    setBMsg]    = useState('');
   const [bErr,    setBErr]    = useState('');
-
-  useEffect(() => {
-    if (!user) return;
-    if (user.body_age)    setBAge(String(user.body_age));
-    if (user.body_weight) setBWeight(String(user.body_weight));
-    if (user.body_height) setBHeight(String(user.body_height));
-    if (user.body_sex)    setBSex(user.body_sex);
-  }, [user?.body_age, user?.body_weight, user?.body_height, user?.body_sex]); // eslint-disable-line
 
   async function saveBodyStats() {
     const a = parseInt(bAge, 10), w = parseFloat(bWeight), h = parseFloat(bHeight);

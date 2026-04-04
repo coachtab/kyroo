@@ -379,7 +379,14 @@ app.post('/api/auth/login', async (req, res) => {
     }
     const token = generateToken(user);
     res.json({
-      user: { id: user.id, email: user.email, name: user.name, is_premium: user.is_premium, is_admin: user.is_admin, plan: user.plan || 'free' },
+      user: {
+        id: user.id, email: user.email, name: user.name,
+        is_premium: user.is_premium, is_admin: user.is_admin, plan: user.plan || 'free',
+        body_age: user.body_age ?? null,
+        body_weight: user.body_weight ?? null,
+        body_height: user.body_height ?? null,
+        body_sex: user.body_sex ?? 'male',
+      },
       token,
     });
   } catch (err) {
