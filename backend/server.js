@@ -172,11 +172,11 @@ function generateToken(user) {
   );
 }
 
-// Plan limits — free users get 5 generations/month, Pro is unlimited
-const PLAN_LIMITS = { free: 5, basic: 5, pro: Infinity };
+// Premium users: 5 plan generations per month
+const PREMIUM_MONTHLY_LIMIT = 5;
 
 // Programs accessible on the free plan
-const FREE_PROGRAM_IDS = new Set(['beginner', 'home']);
+const FREE_PROGRAM_IDS = new Set(['beginner']);
 
 async function getUserUsageThisMonth(userId) {
   const { rows } = await pool.query(
@@ -184,13 +184,6 @@ async function getUserUsageThisMonth(userId) {
     [userId]
   );
   return parseInt(rows[0].count);
-}
-
-async function canGenerateProgram(userId, plan) {
-  if (plan === 'pro' || plan === 'admin') return { allowed: true, used: 0, limit: Infinity };
-  const used = await getUserUsageThisMonth(userId);
-  const limit = PLAN_LIMITS[plan] || 0;
-  return { allowed: used < limit, used, limit };
 }
 
 async function recordUsage(userId, programType, tokensUsed) {
@@ -208,25 +201,24 @@ async function checkProgramAccess(req, res, programId) {
   // Admins: unlimited, unrestricted
   if (user.is_admin) return true;
 
-  const plan = user.plan || 'free';
-  const isPro = user.is_premium || plan === 'pro';
+  const isPremium = user.is_premium || user.plan === 'premium' || user.plan === 'pro';
+  const isFreeProgram = FREE_PROGRAM_IDS.has(programId);
 
-  // Block free users from premium programs (they can still use beginner & home)
-  const isFreeProgram = !programId || FREE_PROGRAM_IDS.has(programId);
-  if (!isPro && !isFreeProgram) {
-    res.status(403).json({ error: 'Upgrade to Pro to unlock all programs.', plan });
-    return false;
+  // Free users: only free programs (unlimited), blocked from premium programs
+  if (!isPremium) {
+    if (!isFreeProgram) {
+      res.status(403).json({ error: 'Upgrade to Premium to unlock all programs.', upgradeRequired: true });
+      return false;
+    }
+    return true;
   }
 
-  // Pro users: unlimited
-  if (isPro) return true;
-
-  // Free / basic users: enforce monthly generation limit
-  const { allowed, used, limit } = await canGenerateProgram(req.user.id, plan);
-  if (!allowed) {
+  // Premium users: 5 plan generations per month
+  const used = await getUserUsageThisMonth(req.user.id);
+  if (used >= PREMIUM_MONTHLY_LIMIT) {
     res.status(429).json({
-      error: `You've used all ${limit} plans this month. Upgrade to Pro for unlimited.`,
-      used, limit, plan,
+      error: `You've used all ${PREMIUM_MONTHLY_LIMIT} plans this month. Your limit resets on the 1st.`,
+      used, limit: PREMIUM_MONTHLY_LIMIT,
     });
     return false;
   }
@@ -406,8 +398,9 @@ app.get('/api/auth/me', authRequired, async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
     const user = rows[0];
     const used = await getUserUsageThisMonth(user.id);
-    const limit = user.is_admin ? Infinity : (PLAN_LIMITS[user.plan] || 0);
-    res.json({ ...user, usage: { used, limit, remaining: Math.max(0, limit - used) } });
+    const isPremiumUser = user.is_premium || user.plan === 'premium' || user.plan === 'pro';
+    const limit = user.is_admin ? Infinity : (isPremiumUser ? PREMIUM_MONTHLY_LIMIT : 0);
+    res.json({ ...user, usage: { used, limit, remaining: limit === Infinity ? Infinity : Math.max(0, limit - used) } });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
@@ -1482,11 +1475,12 @@ ${swim_level || 'Intermediate'} swimmer · ${pool_sessions || 3} pool sessions/w
 
 // GET /api/usage - get current user's usage
 app.get('/api/usage', authRequired, async (req, res) => {
-  const { rows } = await pool.query('SELECT plan FROM users WHERE id = $1', [req.user.id]);
+  const { rows } = await pool.query('SELECT plan, is_premium FROM users WHERE id = $1', [req.user.id]);
   const plan = rows[0]?.plan || 'free';
   const used = await getUserUsageThisMonth(req.user.id);
-  const limit = req.user.is_admin ? Infinity : (PLAN_LIMITS[plan] || 0);
-  res.json({ plan, used, limit, remaining: limit === Infinity ? 'unlimited' : Math.max(0, limit - used) });
+  const isPremiumUser = rows[0]?.is_premium || plan === 'premium' || plan === 'pro';
+  const limit = req.user.is_admin ? Infinity : (isPremiumUser ? PREMIUM_MONTHLY_LIMIT : 0);
+  res.json({ plan: isPremiumUser ? 'premium' : plan, used, limit, remaining: limit === Infinity ? 'unlimited' : Math.max(0, limit - used) });
 });
 
 // ---- Stripe Checkout ----

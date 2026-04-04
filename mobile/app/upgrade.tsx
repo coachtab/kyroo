@@ -32,7 +32,7 @@ const PLANS: Record<Plan, { label: string; price: string; per: string; sub: stri
 const FEATURES = [
   { icon: '⚡', label: 'All programs', desc: 'Every AI fitness program unlocked' },
   { icon: '🧬', label: 'Personalised plans', desc: 'Built around your body and goals' },
-  { icon: '🔄', label: 'Unlimited generations', desc: 'Regenerate anytime, no caps' },
+  { icon: '⚡', label: '5 AI plans per month', desc: 'Generate up to 5 personalised plans monthly' },
   { icon: '📋', label: 'Saved plan history', desc: 'Every plan stored in your profile' },
   { icon: '🧮', label: 'Full calculator', desc: 'BMR, TDEE, macros and more' },
   { icon: '🎯', label: 'Priority AI', desc: 'Faster, more detailed responses' },
@@ -93,8 +93,8 @@ export default function UpgradeScreen() {
         </TouchableOpacity>
         <View style={s.activeWrap}>
           <View style={s.activeIcon}><Text style={{ fontSize: 36 }}>✦</Text></View>
-          <Text style={s.activeTitle}>You're on Pro</Text>
-          <Text style={s.activeSub}>You have full access to every program and feature on KYROO.</Text>
+          <Text style={s.activeTitle}>You're on Premium</Text>
+          <Text style={s.activeSub}>You have full access to every program. Up to 5 AI-generated plans per month.</Text>
           <TouchableOpacity style={s.activeBtn} onPress={() => router.back()} activeOpacity={0.85}>
             <Text style={s.activeBtnText}>Back to app</Text>
           </TouchableOpacity>
@@ -115,7 +115,7 @@ export default function UpgradeScreen() {
         {/* Hero */}
         <View style={s.hero}>
           <View style={s.heroMark}><Text style={s.heroMarkText}>✦</Text></View>
-          <Text style={s.eyebrow}>// KYROO PRO</Text>
+          <Text style={s.eyebrow}>// KYROO PREMIUM</Text>
           <Text style={s.title}>Unlock your full{'\n'}potential.</Text>
           <Text style={s.sub}>AI-powered programs personalised to your goals, body, and schedule.</Text>
         </View>

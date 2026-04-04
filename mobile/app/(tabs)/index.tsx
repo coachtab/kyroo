@@ -93,19 +93,30 @@ export default function ProgramsScreen() {
             Pick a program · answer a few questions · get your plan.
           </Text>
 
-          {/* Usage counter — free users only */}
-          {user && !isPremium && (() => {
+          {/* Upgrade promo — free users */}
+          {user && !isPremium && !user.is_admin && (
+            <TouchableOpacity
+              style={styles.usageBanner}
+              onPress={() => router.push('/upgrade')}
+              activeOpacity={0.85}
+            >
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={styles.usageLabel}>🔓 Unlock all 12 programs</Text>
+                <Text style={styles.usageReset}>Premium · €6/mo or €72/yr</Text>
+              </View>
+              <Text style={styles.usageUpgrade}>Upgrade →</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Usage counter — premium users (5/month cap) */}
+          {user && isPremium && !user.is_admin && (() => {
             const used      = user.usage?.used      ?? 0;
             const limit     = user.usage?.limit     ?? 5;
-            const remaining = user.usage?.remaining ?? limit;
+            const remaining = user.usage?.remaining ?? Math.max(0, limit - used);
             const pct       = Math.min((used / limit) * 100, 100);
             const warn      = remaining <= 1;
             return (
-              <TouchableOpacity
-                style={styles.usageBanner}
-                onPress={() => router.push('/upgrade')}
-                activeOpacity={0.85}
-              >
+              <View style={styles.usageBanner}>
                 <View style={{ flex: 1, gap: 6 }}>
                   <View style={styles.usageTopRow}>
                     <Text style={[styles.usageLabel, warn && styles.usageLabelWarn]}>
@@ -119,8 +130,7 @@ export default function ProgramsScreen() {
                     <View style={[styles.usageBarFill, { width: `${pct}%` as any }, warn && styles.usageBarWarn]} />
                   </View>
                 </View>
-                <Text style={styles.usageUpgrade}>Upgrade →</Text>
-              </TouchableOpacity>
+              </View>
             );
           })()}
 

@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isPremium = user
-    ? (user.is_admin || user.is_premium || user.plan === 'pro' || user.plan === 'basic')
+    ? (user.is_admin || user.is_premium || user.plan === 'premium' || user.plan === 'pro' || user.plan === 'basic')
     : false;
 
   return (
