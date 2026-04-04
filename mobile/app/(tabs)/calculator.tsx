@@ -2,11 +2,9 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   SafeAreaView, ScrollView, KeyboardAvoidingView, Platform,
-  Animated, Dimensions, StatusBar,
+  Animated,
 } from 'react-native';
 import { spacing, radius, font, colors } from '../../src/lib/theme';
-
-const { width: SW } = Dimensions.get('window');
 
 // ── Tool registry ─────────────────────────────────────────────────────────────
 const TOOLS = [
@@ -16,42 +14,47 @@ const TOOLS = [
     title: 'Calories\n& Macros',
     label: 'Calorie & Macro Calculator',
     desc: 'Your daily calorie target + exact protein, carbs and fat split',
+    tagline: 'Eat with precision',
     accent: '#C06848',
     bg: '#1A0F09',
   },
   {
     id: 'oneRM',
     icon: '💪',
-    title: '1RM\nEstimator',
+    title: '1RM Estimator',
     label: '1-Rep Max Estimator',
     desc: 'Turn any set you did into your estimated one-rep max',
+    tagline: 'Know your true max',
     accent: '#3D9E6A',
     bg: '#091A0F',
   },
   {
     id: 'pace',
     icon: '🏃',
-    title: 'Pace &\nRace',
+    title: 'Pace & Race',
     label: 'Pace & Race Calculator',
     desc: 'Convert between pace and finish time for any race distance',
+    tagline: 'Run your race',
     accent: '#4A8FAA',
     bg: '#091218',
   },
   {
     id: 'hydration',
     icon: '💧',
-    title: 'Hydration\nGuide',
+    title: 'Hydration Guide',
     label: 'Hydration Guide',
     desc: 'How much water you actually need today',
+    tagline: 'Stay dialled in',
     accent: '#5A9FCC',
     bg: '#091318',
   },
   {
     id: 'timer',
     icon: '⏱️',
-    title: 'Rest\nTimer',
+    title: 'Rest Timer',
     label: 'Rest Timer',
     desc: 'Countdown between sets — tap once, rest, go again',
+    tagline: 'Rest smarter',
     accent: '#9A6AC8',
     bg: '#120918',
   },
@@ -80,40 +83,40 @@ export default function ToolsScreen() {
         contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={s.header}>
-          <View>
-            <Text style={s.eyebrow}>FREE · NO ACCOUNT NEEDED</Text>
-            <Text style={s.title}>Tools</Text>
-          </View>
-          <View style={s.freeTag}>
-            <Text style={s.freeTagText}>FREE</Text>
-          </View>
+          <Text style={s.eyebrow}>FREE · NO ACCOUNT NEEDED</Text>
+          <Text style={s.title}>Tools 🛠️</Text>
+          <Text style={s.sub}>Fitness calculators built for athletes. No sign-up required.</Text>
         </View>
-        <Text style={s.sub}>Fitness calculators built for athletes. No sign-up required.</Text>
 
-        {/* 2-col grid */}
-        <View style={s.grid}>
-          {TOOLS.map((tool, i) => {
-            const isLast = i === TOOLS.length - 1 && TOOLS.length % 2 !== 0;
-            return (
-              <TouchableOpacity
-                key={tool.id}
-                style={[s.tile, { backgroundColor: tool.bg, borderColor: tool.accent + '40' }, isLast && s.tileFull]}
-                onPress={() => setActive(tool.id)}
-                activeOpacity={0.82}
-              >
-                <View style={[s.tileIconWrap, { backgroundColor: tool.accent + '18' }]}>
-                  <Text style={s.tileIcon}>{tool.icon}</Text>
+        {/* ── Cards ── */}
+        <View style={s.list}>
+          {TOOLS.map(tool => (
+            <TouchableOpacity
+              key={tool.id}
+              style={[s.card, { backgroundColor: tool.bg }]}
+              onPress={() => setActive(tool.id)}
+              activeOpacity={0.82}
+            >
+              <View style={[s.iconWrap, { backgroundColor: tool.accent + '25' }]}>
+                <Text style={s.iconText}>{tool.icon}</Text>
+              </View>
+
+              <View style={s.cardBody}>
+                <View style={s.cardTopRow}>
+                  <Text style={s.cardName}>{tool.title}</Text>
+                  <View style={[s.badge, { borderColor: tool.accent + '50', backgroundColor: tool.accent + '15' }]}>
+                    <Text style={[s.badgeText, { color: tool.accent }]}>FREE</Text>
+                  </View>
                 </View>
-                <Text style={[s.tileTitle, { color: '#F5F5F2' }]}>{tool.title}</Text>
-                <Text style={s.tileDesc} numberOfLines={2}>{tool.desc}</Text>
-                <View style={[s.tileArrow, { backgroundColor: tool.accent + '20' }]}>
-                  <Text style={[s.tileArrowText, { color: tool.accent }]}>Open →</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                <Text style={s.cardDesc} numberOfLines={2}>{tool.desc}</Text>
+                <Text style={[s.cardTagline, { color: tool.accent }]}>{tool.tagline}</Text>
+              </View>
+
+              <Text style={[s.arrow, { color: tool.accent }]}>›</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -846,28 +849,42 @@ function MacroBar({ label, grams, pct, color, note }: { label: string; grams: nu
 
 // Grid screen
 const s = StyleSheet.create({
-  safe:       { flex: 1, backgroundColor: '#0D0D0B' },
-  container:  { padding: spacing[4], paddingTop: spacing[8], paddingBottom: spacing[12] },
-  header:     { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: spacing[2] },
-  eyebrow:    { fontFamily: font.mono, fontSize: 10, color: '#555', letterSpacing: 1.0, textTransform: 'uppercase', marginBottom: spacing[1] },
-  title:      { fontFamily: font.sansBd, fontSize: 34, color: '#F5F5F2' },
-  freeTag:    { backgroundColor: '#0F2318', borderRadius: radius.full, borderWidth: 1, borderColor: '#3D9E6A40', paddingHorizontal: spacing[3], paddingVertical: 5, marginTop: spacing[2] },
-  freeTagText:{ fontFamily: font.mono, fontSize: 10, color: '#3D9E6A', letterSpacing: 0.8, textTransform: 'uppercase' },
-  sub:        { fontFamily: font.sans, fontSize: 13, color: '#555', lineHeight: 19, marginBottom: spacing[5] },
+  safe:      { flex: 1, backgroundColor: '#0D0D0B' },
+  container: { paddingBottom: spacing[12] },
 
-  grid:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
-  tile: {
-    width: (SW - spacing[4] * 2 - spacing[3]) / 2,
-    borderRadius: radius.lg, borderWidth: 1,
-    padding: spacing[4], gap: spacing[3],
+  header: {
+    backgroundColor: '#0D0D0B',
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[6],
+    paddingBottom: spacing[5],
   },
-  tileFull:   { width: '100%' },
-  tileIconWrap: { width: 48, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  tileIcon:   { fontSize: 24 },
-  tileTitle:  { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2', lineHeight: 20 },
-  tileDesc:   { fontFamily: font.sans, fontSize: 12, color: '#555', lineHeight: 17, flex: 1 },
-  tileArrow:  { alignSelf: 'flex-start', paddingHorizontal: spacing[3], paddingVertical: 6, borderRadius: radius.full, marginTop: spacing[1] },
-  tileArrowText: { fontFamily: font.mono, fontSize: 11, letterSpacing: 0.3 },
+  eyebrow:  { fontFamily: font.mono, fontSize: 11, color: '#555', letterSpacing: 1, textTransform: 'uppercase', marginBottom: spacing[2] },
+  title:    { fontFamily: font.sansBd, fontSize: 30, color: '#F5F5F2', lineHeight: 36, marginBottom: spacing[2] },
+  sub:      { fontFamily: font.sans, fontSize: 13, color: '#555', lineHeight: 20 },
+
+  list: { padding: spacing[4], gap: spacing[3] },
+
+  card: {
+    flexDirection: 'row', alignItems: 'center',
+    padding: spacing[4], borderRadius: radius.lg,
+    gap: spacing[4],
+  },
+  iconWrap: {
+    width: 54, height: 54, borderRadius: radius.md,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  iconText:    { fontSize: 26 },
+  cardBody:    { flex: 1, gap: 6 },
+  cardTopRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+  cardName:    { fontFamily: font.sansBd, fontSize: 15, color: '#F5F5F2', flex: 1 },
+  badge: {
+    paddingHorizontal: 8, paddingVertical: 3,
+    borderRadius: radius.full, borderWidth: 1,
+  },
+  badgeText:   { fontFamily: font.mono, fontSize: 9, letterSpacing: 0.5 },
+  cardDesc:    { fontFamily: font.sans, fontSize: 13, color: '#666', lineHeight: 18 },
+  cardTagline: { fontFamily: font.mono, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4 },
+  arrow:       { fontSize: 28, flexShrink: 0, opacity: 0.5 },
 });
 
 // Tool shell
