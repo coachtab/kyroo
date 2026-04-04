@@ -1492,10 +1492,10 @@ async function activatePremium(userId, plan) {
   else expires.setMonth(expires.getMonth() + 1);
   await pool.query(
     'UPDATE users SET is_premium=true, plan=$1, premium_started_at=$2, premium_expires_at=$3, updated_at=$2 WHERE id=$4',
-    [plan === 'yearly' ? 'pro' : 'pro', now, expires, userId]
+    ['premium', now, expires, userId]
   );
   const amount = plan === 'yearly' ? 72.00 : 6.00;
-  const desc   = plan === 'yearly' ? 'KYROO Pro – Annual (€72/year)' : 'KYROO Pro – Monthly (€6/month)';
+  const desc   = plan === 'yearly' ? 'KYROO Premium – Annual (€72/year)' : 'KYROO Premium – Monthly (€6/month)';
   await pool.query(
     'INSERT INTO payments (user_id, amount, currency, description, status) VALUES ($1,$2,$3,$4,$5)',
     [userId, amount, 'EUR', desc, 'completed']
@@ -1510,16 +1510,19 @@ app.post('/api/stripe/create-checkout-session', authRequired, async (req, res) =
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      mode: 'payment',
+      mode: 'subscription',
       customer_email: req.user.email,
       line_items: [{
         price_data: {
           currency: 'eur',
           product_data: {
-            name: plan === 'yearly' ? 'KYROO Pro – Annual' : 'KYROO Pro – Monthly',
-            description: plan === 'yearly' ? 'Full access for 12 months' : 'Full access for 1 month',
+            name: plan === 'yearly' ? 'KYROO Premium – Annual' : 'KYROO Premium – Monthly',
+            description: plan === 'yearly'
+              ? 'Full access to all programs · 5 AI plans/month · billed annually'
+              : 'Full access to all programs · 5 AI plans/month · billed monthly',
           },
           unit_amount: plan === 'yearly' ? 7200 : 600,
+          recurring: { interval: plan === 'yearly' ? 'year' : 'month' },
         },
         quantity: 1,
       }],
@@ -1541,14 +1544,16 @@ app.get('/api/stripe/verify-session', authRequired, async (req, res) => {
   if (!session_id) return res.status(400).json({ error: 'Missing session_id.' });
   try {
     const session = await stripe.checkout.sessions.retrieve(session_id);
-    if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Payment not completed.' });
+    // For subscriptions, status is 'complete' and payment_status is 'paid' or 'no_payment_required'
+    const paid = session.payment_status === 'paid' || session.status === 'complete';
+    if (!paid) return res.status(402).json({ error: 'Payment not completed.' });
     // Guard: ensure this session belongs to the logged-in user
     if (session.metadata?.user_id !== String(req.user.id)) return res.status(403).json({ error: 'Session does not match your account.' });
     const plan = session.metadata?.plan || 'monthly';
     await activatePremium(req.user.id, plan);
     const { rows } = await pool.query('SELECT * FROM users WHERE id=$1', [req.user.id]);
     const token = generateToken(rows[0]);
-    res.json({ token, message: 'Welcome to KYROO Pro!' });
+    res.json({ token, message: 'Welcome to KYROO Premium!' });
   } catch (err) {
     console.error('Verify session error:', err.message);
     res.status(500).json({ error: 'Verification failed.' });
@@ -1572,7 +1577,8 @@ app.post('/api/stripe/webhook', async (req, res) => {
   }
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    if (session.payment_status === 'paid') {
+    const paid = session.payment_status === 'paid' || session.status === 'complete';
+    if (paid) {
       const userId = parseInt(session.metadata?.user_id);
       const plan   = session.metadata?.plan || 'monthly';
       if (userId) {
@@ -1581,6 +1587,34 @@ app.post('/api/stripe/webhook', async (req, res) => {
       }
     }
   }
+
+  // Subscription renewed — extend expiry
+  if (event.type === 'invoice.payment_succeeded') {
+    const invoice = event.data.object;
+    if (invoice.subscription && invoice.customer_email) {
+      const { rows } = await pool.query('SELECT id, plan FROM users WHERE email=$1', [invoice.customer_email]);
+      if (rows.length) {
+        const userId = rows[0].id;
+        const plan   = rows[0].plan || 'monthly';
+        await activatePremium(userId, plan).catch(err => console.error('renewal error:', err));
+        console.log(`[stripe] Renewed premium for user ${userId}`);
+      }
+    }
+  }
+
+  // Subscription cancelled or payment failed — revoke access
+  if (event.type === 'customer.subscription.deleted' || event.type === 'invoice.payment_failed') {
+    const obj = event.data.object;
+    const email = obj.customer_email || obj.customer_details?.email;
+    if (email) {
+      await pool.query(
+        "UPDATE users SET is_premium=false, plan='free', premium_expires_at=NOW() WHERE email=$1",
+        [email]
+      ).catch(err => console.error('revoke premium error:', err));
+      console.log(`[stripe] Revoked premium for ${email} (${event.type})`);
+    }
+  }
+
   res.json({ received: true });
 });
 
