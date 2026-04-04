@@ -100,6 +100,21 @@ async function waitForDb(retries = 15, delay = 2000) {
   throw new Error('Could not connect to database');
 }
 
+async function runMigrations() {
+  // Safe to run on every startup — IF NOT EXISTS means no-ops if already applied
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(20) DEFAULT 'free'`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS verify_token VARCHAR(255)`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_age INT`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_weight NUMERIC(5,1)`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_height INT`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_sex VARCHAR(10) DEFAULT 'male'`);
+  console.log('Migrations applied.');
+}
+
 // Middleware
 const corsOptions = {
   origin: [
@@ -2190,6 +2205,7 @@ function broadcast(type, data) {
 // Start server
 async function start() {
   await waitForDb();
+  await runMigrations();
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`KYROO API running on http://localhost:${PORT}`);
     console.log(`WebSocket available at ws://localhost:${PORT}/ws`);
