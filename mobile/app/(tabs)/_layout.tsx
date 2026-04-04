@@ -40,8 +40,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="calculator"
         options={{
-          title: 'Calculator',
-          tabBarIcon: ({ focused }) => <TabIcon label="🧮" active={focused} />,
+          title: 'Tools',
+          tabBarIcon: ({ focused }) => <TabIcon label="🛠️" active={focused} />,
         }}
       />
       <Tabs.Screen
