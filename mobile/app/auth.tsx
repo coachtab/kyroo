@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#252520',
     borderRadius: radius.sm,
     height: 52, paddingHorizontal: spacing[4],
-    fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',,
+    fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',
   },
   inputError: { borderColor: '#C06848' },
 
