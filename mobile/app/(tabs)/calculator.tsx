@@ -5,6 +5,7 @@ import {
   Animated,
 } from 'react-native';
 import { spacing, radius, font, colors } from '../../src/lib/theme';
+import { useAuth } from '../../src/context/AuthContext';
 
 // ── Tool registry ─────────────────────────────────────────────────────────────
 const TOOLS = [
@@ -184,14 +185,16 @@ const GOAL_OPTS: { id: Goal; label: string; emoji: string; adj: number; color: s
 ];
 
 function CalorieTool({ accent }: { accent: string }) {
-  const [age, setAge]     = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [sex, setSex]     = useState<Sex>('male');
+  const { user } = useAuth();
+  const [age,    setAge]    = useState(user?.body_age    != null ? String(user.body_age)    : '');
+  const [weight, setWeight] = useState(user?.body_weight != null ? String(user.body_weight) : '');
+  const [height, setHeight] = useState(user?.body_height != null ? String(user.body_height) : '');
+  const [sex,    setSex]    = useState<Sex>((user?.body_sex as Sex) ?? 'male');
   const [activity, setActivity] = useState(1.55);
   const [goal, setGoal]   = useState<Goal>('maintain');
   const [result, setResult] = useState<null | { bmr: number; tdee: number; target: number; protein: number; carbs: number; fat: number }>(null);
   const [error, setError] = useState('');
+  const fromProfile = user?.body_age != null && user?.body_weight != null && user?.body_height != null;
 
   function calc() {
     const a = parseInt(age); const w = parseFloat(weight); const h = parseFloat(height);
@@ -215,6 +218,9 @@ function CalorieTool({ accent }: { accent: string }) {
     <View style={f.wrap}>
       {/* Step 1 */}
       <StepLabel n={1} label="Your stats" />
+      {fromProfile && (
+        <Text style={f.profileHint}>✓ Pre-filled from your profile</Text>
+      )}
       <View style={f.row3}>
         <Field label="Age" placeholder="28" value={age} onChangeText={v => setAge(v.replace(/\D/g,''))} maxLength={3} />
         <Field label="Weight (kg)" placeholder="75" value={weight} onChangeText={v => setWeight(v.replace(/[^0-9.]/g,''))} decimal maxLength={5} />
@@ -919,6 +925,7 @@ const f = StyleSheet.create({
   actLabel: { fontFamily: font.sans, fontSize: 14, color: '#888', marginBottom: 2 },
   actSub:   { fontFamily: font.mono, fontSize: 10, color: '#444' },
   statsRow: { flexDirection: 'row', gap: spacing[2] },
+  profileHint: { fontFamily: font.mono, fontSize: 10, color: '#3D9E6A', letterSpacing: 0.4, marginBottom: spacing[1] },
 
   // 1RM
   rmHero:   { alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: spacing[2], paddingVertical: spacing[4] },

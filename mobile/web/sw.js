@@ -1,7 +1,7 @@
 // Kyroo Service Worker
 // Caches the app shell so it loads instantly and works offline.
 
-const CACHE = 'kyroo-v11';
+const CACHE = 'kyroo-v12';
 
 // App shell — files needed to render the UI
 const SHELL = ['/', '/index.html', '/manifest.webmanifest'];
