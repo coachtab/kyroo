@@ -19,8 +19,9 @@ export default function SettingsScreen() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useFocusEffect(useCallback(() => {
+    refresh();
     apiFetch('/api/payments').then(r => r.json()).then(d => setPayments(d.payments || [])).catch(() => {});
-  }, []));
+  }, [])); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleCancel() {
     const doCancel = async () => {
@@ -90,6 +91,11 @@ export default function SettingsScreen() {
   const [pwMsg, setPwMsg]           = useState('');
   const [nameErr, setNameErr]       = useState('');
   const [pwErr, setPwErr]           = useState('');
+
+  // Sync name from user when it loads asynchronously
+  useEffect(() => {
+    if (user?.name) setName(user.name);
+  }, [user?.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Body stats — initialise empty, sync from user once loaded
   const [bAge,    setBAge]    = useState('');

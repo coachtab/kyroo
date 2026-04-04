@@ -118,6 +118,10 @@ CREATE TABLE users (
     reset_token_expires TIMESTAMP,
     premium_started_at TIMESTAMP,
     premium_expires_at TIMESTAMP,
+    body_age INT,
+    body_weight NUMERIC(5,1),
+    body_height INT,
+    body_sex VARCHAR(10) DEFAULT 'male',
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
