@@ -402,7 +402,7 @@ const s = StyleSheet.create({
   input: {
     backgroundColor: '#0D0D0B', borderWidth: 1, borderColor: '#252520',
     borderRadius: radius.sm, height: 48, paddingHorizontal: spacing[4],
-    fontFamily: font.sans, fontSize: 15, color: '#F5F5F2',
+    fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',,
   },
   readOnly: {
     backgroundColor: '#0D0D0B', borderWidth: 1, borderColor: '#1C1C18',

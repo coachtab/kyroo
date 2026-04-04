@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   searchIcon:  { fontSize: 16, color: '#444' },
   searchInput: {
-    flex: 1, fontFamily: font.sans, fontSize: 14, color: '#F5F5F2',
+    flex: 1, fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } as any : {}),
   },
   searchClear: { fontSize: 13, color: '#444' },

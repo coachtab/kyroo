@@ -1952,13 +1952,13 @@ const stepStyles = StyleSheet.create({
   numInput: {
     backgroundColor: '#181816', borderWidth: 1, borderColor: '#252520',
     borderRadius: radius.sm, height: 48,
-    fontFamily: font.sans, fontSize: 15, color: '#F5F5F2',
+    fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',
     textAlign: 'center',
   },
   textarea: {
     backgroundColor: '#181816', borderWidth: 1, borderColor: '#252520',
     borderRadius: radius.sm, padding: spacing[3],
-    fontFamily: font.sans, fontSize: 14, color: '#F5F5F2',
+    fontFamily: font.sans, fontSize: 16, color: '#F5F5F2',
     minHeight: 100, textAlignVertical: 'top', marginBottom: spacing[4],
   },
   error: { fontFamily: font.sans, fontSize: 13, color: '#C06848', marginBottom: spacing[3] },
