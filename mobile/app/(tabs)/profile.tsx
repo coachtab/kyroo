@@ -1,11 +1,28 @@
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform, ScrollView, Linking } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Platform, ScrollView, Linking, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius, font } from '../../src/lib/theme';
 import { useAuth } from '../../src/context/AuthContext';
+import { apiFetch } from '../../src/lib/api';
 
 export default function ProfileScreen() {
   const { user, loading, isPremium, logout } = useAuth();
   const router = useRouter();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  async function openPortal() {
+    setPortalLoading(true);
+    try {
+      const res  = await apiFetch('/api/stripe/portal', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not open portal.');
+      await Linking.openURL(data.url);
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   if (loading) return null;
 
@@ -65,7 +82,7 @@ export default function ProfileScreen() {
           <Text style={styles.heroEmail}>{user.email}</Text>
           {isPremium ? (
             <View style={styles.premiumBadge}>
-              <Text style={styles.premiumBadgeText}>✦ PRO MEMBER</Text>
+              <Text style={styles.premiumBadgeText}>✦ PREMIUM</Text>
             </View>
           ) : (
             <View style={styles.freeBadge}>
@@ -76,17 +93,17 @@ export default function ProfileScreen() {
 
         {/* ── Stats row ── */}
         <View style={styles.statsRow}>
-          <StatCard label="Plan" value={isPremium ? 'Pro' : 'Free'} accent={isPremium ? '#3D9E6A' : '#666'} />
-          <StatCard label="Access" value={isPremium ? 'Unlimited' : 'Limited'} accent={isPremium ? '#3D9E6A' : '#666'} />
-          {user.is_admin && <StatCard label="Role" value="Admin" accent="#D4923F" />}
+          <StatCard label="Plan" value={user.is_admin ? 'Admin' : isPremium ? 'Premium' : 'Free'} accent={user.is_admin ? '#D4923F' : isPremium ? '#3D9E6A' : '#666'} />
+          <StatCard label="Plans/month" value={user.is_admin ? '∞' : isPremium ? '5' : '0'} accent={isPremium || user.is_admin ? '#3D9E6A' : '#666'} />
+          <StatCard label="Programs" value={user.is_admin ? 'All' : isPremium ? 'All' : '1'} accent={isPremium || user.is_admin ? '#3D9E6A' : '#666'} />
         </View>
 
-        {/* ── Upgrade banner ── */}
-        {!isPremium && (
+        {/* ── Upgrade banner (free users) ── */}
+        {!isPremium && !user.is_admin && (
           <TouchableOpacity style={styles.upgradeBanner} onPress={() => router.push('/upgrade')} activeOpacity={0.85}>
             <View>
-              <Text style={styles.upgradeBannerTitle}>Unlock Pro</Text>
-              <Text style={styles.upgradeBannerSub}>All programs · Unlimited plans · Priority AI</Text>
+              <Text style={styles.upgradeBannerTitle}>Unlock Premium</Text>
+              <Text style={styles.upgradeBannerSub}>All 12 programs · 5 AI plans/month · €6/mo</Text>
             </View>
             <View style={styles.upgradeBannerBtn}>
               <Text style={styles.upgradeBannerBtnText}>Upgrade ›</Text>
@@ -94,9 +111,31 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
 
+        {/* ── Subscription management (premium users) ── */}
+        {isPremium && !user.is_admin && (
+          <TouchableOpacity
+            style={styles.portalCard}
+            onPress={openPortal}
+            activeOpacity={0.85}
+            disabled={portalLoading}
+          >
+            <View style={styles.portalCardLeft}>
+              <Text style={styles.portalCardIcon}>✦</Text>
+              <View>
+                <Text style={styles.portalCardTitle}>Premium · Active</Text>
+                <Text style={styles.portalCardSub}>Manage, pause or cancel your subscription</Text>
+              </View>
+            </View>
+            {portalLoading
+              ? <ActivityIndicator color="#3D9E6A" size="small" />
+              : <Text style={styles.portalCardArrow}>›</Text>
+            }
+          </TouchableOpacity>
+        )}
+
         {/* ── Menu items ── */}
         <View style={styles.menu}>
-          <MenuItem icon="⚡" label="My Programs" onPress={() => router.push('/plans')} />
+          <MenuItem icon="⚡" label="My Plans" onPress={() => router.push('/plans')} />
           <MenuItem icon="⚙️" label="Account Settings" onPress={() => router.push('/settings')} />
           <MenuItem icon="💬" label="Support" onPress={() => Linking.openURL('mailto:support@kyroo.de')} />
           <MenuItem icon="📄" label="Legal & Privacy" onPress={() => router.push('/legal')} />
@@ -236,6 +275,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4], paddingVertical: 8,
   },
   upgradeBannerBtnText: { fontFamily: font.sansBd, fontSize: 13, color: colors.forest },
+
+  portalCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#0F2318', borderRadius: radius.lg,
+    borderWidth: 1, borderColor: '#3D9E6A40',
+    padding: spacing[4], marginBottom: spacing[5],
+  },
+  portalCardLeft:  { flexDirection: 'row', alignItems: 'center', gap: spacing[3], flex: 1 },
+  portalCardIcon:  { fontSize: 22, color: '#3D9E6A' },
+  portalCardTitle: { fontFamily: font.sansBd, fontSize: 14, color: '#F5F5F2', marginBottom: 2 },
+  portalCardSub:   { fontFamily: font.sans, fontSize: 12, color: '#4A8A5A' },
+  portalCardArrow: { fontSize: 22, color: '#3D9E6A' },
 
   menu: { backgroundColor: '#0D0D0B', marginBottom: spacing[6] },
 

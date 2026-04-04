@@ -1623,6 +1623,31 @@ app.get('/api/stripe/publishable-key', (_req, res) => {
   res.json({ key: process.env.STRIPE_PUBLISHABLE_KEY || '' });
 });
 
+// POST /api/stripe/portal — open Stripe customer portal for subscription management
+app.post('/api/stripe/portal', authRequired, async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payment processing is not configured.' });
+  try {
+    const { rows } = await pool.query('SELECT email FROM users WHERE id=$1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found.' });
+
+    // Find or create the Stripe customer by email
+    const customers = await stripe.customers.list({ email: rows[0].email, limit: 1 });
+    if (!customers.data.length) {
+      return res.status(404).json({ error: 'No Stripe subscription found for this account.' });
+    }
+    const customerId = customers.data[0].id;
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: 'https://app.kyroo.de',
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe portal error:', err.message);
+    res.status(500).json({ error: 'Could not open subscription portal.' });
+  }
+});
+
 // GET /api/payments
 app.get('/api/payments', authRequired, async (req, res) => {
   try {
