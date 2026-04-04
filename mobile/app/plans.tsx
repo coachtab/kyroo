@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, ScrollView, Alert, Platform, ActivityIndicator,
+  SafeAreaView, ScrollView, Alert, Platform, ActivityIndicator, TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
@@ -15,6 +15,8 @@ type Plan = {
   program_icon: string;
   content: string;
   created_at: string;
+  effort_rating?: number | null;
+  feedback_notes?: string | null;
 };
 
 // ── Fitness glossary ──────────────────────────────────────────────────────────
@@ -122,6 +124,84 @@ function parsePlan(content: string): { meta: string; sections: Section[] } {
 
   const meta = metaLines.filter(l => l.trim()).join('\n').trim();
   return { meta, sections };
+}
+
+// ── Post-workout feedback ─────────────────────────────────────────────────────
+const EFFORT_LEVELS = [
+  { value: 1, emoji: '😴', label: 'Easy' },
+  { value: 2, emoji: '🙂', label: 'Moderate' },
+  { value: 3, emoji: '💪', label: 'Good' },
+  { value: 4, emoji: '🔥', label: 'Hard' },
+  { value: 5, emoji: '⚡', label: 'All Out' },
+];
+
+function FeedbackSection({
+  planId, initialRating, initialNotes,
+}: {
+  planId: number;
+  initialRating?: number | null;
+  initialNotes?: string | null;
+}) {
+  const [rating,  setRating]  = useState<number | null>(initialRating ?? null);
+  const [notes,   setNotes]   = useState(initialNotes ?? '');
+  const [saved,   setSaved]   = useState(!!initialRating);
+  const [saving,  setSaving]  = useState(false);
+
+  async function save() {
+    if (!rating) return;
+    setSaving(true);
+    try {
+      await apiFetch(`/api/plans/${planId}/feedback`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ effort_rating: rating, feedback_notes: notes.trim() || null }),
+      });
+      setSaved(true);
+    } catch {}
+    setSaving(false);
+  }
+
+  return (
+    <View style={fb.card}>
+      <View style={fb.accentBar} />
+      <Text style={fb.title}>How was this workout?</Text>
+      <Text style={fb.sub}>Rate your effort level</Text>
+      <View style={fb.pills}>
+        {EFFORT_LEVELS.map((e) => (
+          <TouchableOpacity
+            key={e.value}
+            style={[fb.pill, rating === e.value && fb.pillActive]}
+            onPress={() => { setRating(e.value); setSaved(false); }}
+            activeOpacity={0.8}
+          >
+            <Text style={fb.pillEmoji}>{e.emoji}</Text>
+            <Text style={[fb.pillLabel, rating === e.value && fb.pillLabelActive]}>{e.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <TextInput
+        style={fb.notesInput}
+        placeholder="Add a note... (optional)"
+        placeholderTextColor="#40405A"
+        value={notes}
+        onChangeText={(t) => { setNotes(t); setSaved(false); }}
+        multiline
+        numberOfLines={3}
+        fontSize={16}
+      />
+      <TouchableOpacity
+        style={[fb.saveBtn, (!rating || saved) && fb.saveBtnDisabled]}
+        onPress={save}
+        disabled={!rating || saved || saving}
+        activeOpacity={0.8}
+      >
+        {saving
+          ? <ActivityIndicator size="small" color="#FFF" />
+          : <Text style={fb.saveBtnText}>{saved ? '✓  Feedback saved' : 'Save feedback'}</Text>
+        }
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -320,6 +400,13 @@ function PlanDetail({ plan, onBack, onDelete }: { plan: Plan; onBack: () => void
           );
         })}
 
+        {/* Post-workout feedback */}
+        <FeedbackSection
+          planId={plan.id}
+          initialRating={plan.effort_rating}
+          initialNotes={plan.feedback_notes}
+        />
+
         <View style={{ height: spacing[12] }} />
       </ScrollView>
     </SafeAreaView>
@@ -442,6 +529,45 @@ const s = StyleSheet.create({
   glossaryTerm:  { fontFamily: font.monoMd, fontSize: 12, color: '#F5F5F2', marginBottom: 2 },
   glossaryShort: { fontFamily: font.mono, fontSize: 10, color: '#4A8A5A', textTransform: 'uppercase', letterSpacing: 0.3 },
   glossaryDef:   { fontFamily: font.sans, fontSize: 13, color: '#888', lineHeight: 19, flex: 1 },
+});
+
+// ── Feedback styles ───────────────────────────────────────────────────────────
+const fb = StyleSheet.create({
+  card: {
+    backgroundColor: '#10101E', borderRadius: radius.lg,
+    borderWidth: 1, borderColor: '#18183A',
+    padding: spacing[5], marginBottom: spacing[4],
+    overflow: 'hidden', position: 'relative',
+  },
+  accentBar: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    height: 3, backgroundColor: '#5B5EF4',
+  },
+  title:   { fontFamily: font.sansBd, fontSize: 16, color: '#E8E8F0', marginBottom: 4, marginTop: spacing[1] },
+  sub:     { fontFamily: font.mono, fontSize: 11, color: '#40405A', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: spacing[4] },
+  pills:   { flexDirection: 'row', gap: spacing[2], marginBottom: spacing[4] },
+  pill: {
+    flex: 1, alignItems: 'center', paddingVertical: spacing[3],
+    backgroundColor: '#0C0C1A', borderRadius: radius.md,
+    borderWidth: 1, borderColor: '#18183A', gap: 4,
+  },
+  pillActive:      { borderColor: '#5B5EF4', backgroundColor: '#0D0D1E' },
+  pillEmoji:       { fontSize: 20 },
+  pillLabel:       { fontFamily: font.mono, fontSize: 9, color: '#40405A', textTransform: 'uppercase', letterSpacing: 0.3 },
+  pillLabelActive: { color: '#5B5EF4' },
+  notesInput: {
+    backgroundColor: '#0C0C1A', borderRadius: radius.md,
+    borderWidth: 1, borderColor: '#18183A',
+    color: '#E8E8F0', fontFamily: font.sans,
+    padding: spacing[3], marginBottom: spacing[4],
+    minHeight: 72, textAlignVertical: 'top',
+  },
+  saveBtn: {
+    height: 48, borderRadius: radius.md,
+    backgroundColor: '#5B5EF4', alignItems: 'center', justifyContent: 'center',
+  },
+  saveBtnDisabled: { backgroundColor: '#1A1A2E' },
+  saveBtnText:     { fontFamily: font.sansBd, fontSize: 14, color: '#FFF' },
 });
 
 // ── Per-section markdown styles (accent color varies) ─────────────────────────

@@ -112,6 +112,8 @@ async function runMigrations() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_weight NUMERIC(5,1)`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_height INT`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS body_sex VARCHAR(10) DEFAULT 'male'`);
+  await pool.query(`ALTER TABLE user_plans ADD COLUMN IF NOT EXISTS effort_rating INT`);
+  await pool.query(`ALTER TABLE user_plans ADD COLUMN IF NOT EXISTS feedback_notes TEXT`);
   console.log('Migrations applied.');
 }
 
@@ -466,7 +468,7 @@ app.post('/api/plans', authRequired, async (req, res) => {
 app.get('/api/plans', authRequired, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, program_id, program_name, program_icon, content, created_at FROM user_plans WHERE user_id = $1 ORDER BY created_at DESC',
+      'SELECT id, program_id, program_name, program_icon, content, created_at, effort_rating, feedback_notes FROM user_plans WHERE user_id = $1 ORDER BY created_at DESC',
       [req.user.id]
     );
     res.json({ plans: rows });
@@ -485,6 +487,20 @@ app.delete('/api/plans/:id', authRequired, async (req, res) => {
     res.json({ message: 'Plan deleted.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete plan.' });
+  }
+});
+
+app.patch('/api/plans/:id/feedback', authRequired, async (req, res) => {
+  const { effort_rating, feedback_notes } = req.body;
+  try {
+    const { rowCount } = await pool.query(
+      'UPDATE user_plans SET effort_rating=$1, feedback_notes=$2 WHERE id=$3 AND user_id=$4',
+      [effort_rating ?? null, feedback_notes ?? null, req.params.id, req.user.id]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Plan not found.' });
+    res.json({ message: 'Feedback saved.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save feedback.' });
   }
 });
 
