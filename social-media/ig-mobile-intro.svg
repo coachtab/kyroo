@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <radialGradient id="bgGlow" cx="60%" cy="15%" r="60%">
+      <stop offset="0%" stop-color="#5B5EF4" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#07070F" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bgGlow2" cx="30%" cy="90%" r="45%">
+      <stop offset="0%" stop-color="#5B5EF4" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#07070F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="phoneShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5B5EF4" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#07070F" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="indigoPill" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5B5EF4"/>
+      <stop offset="100%" stop-color="#7B7EF8"/>
+    </linearGradient>
+    <linearGradient id="commandCard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#141428"/>
+      <stop offset="100%" stop-color="#10101E"/>
+    </linearGradient>
+    <linearGradient id="screenFade" x1="0%" y1="70%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#07070F" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#07070F" stop-opacity="1"/>
+    </linearGradient>
+    <clipPath id="phoneScreen">
+      <rect x="272" y="62" width="536" height="956" rx="20"/>
+    </clipPath>
+    <filter id="phoneShadowFilter" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="20" stdDeviation="40" flood-color="#5B5EF4" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="1080" height="1080" fill="#07070F"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow)"/>
+  <rect width="1080" height="1080" fill="url(#bgGlow2)"/>
+
+  <!-- ── Top / bottom rule lines ── -->
+  <line x1="72" y1="44" x2="1008" y2="44" stroke="#18183A" stroke-width="1"/>
+  <line x1="72" y1="1036" x2="1008" y2="1036" stroke="#18183A" stroke-width="1"/>
+
+  <!-- ── Label above phone ── -->
+  <text x="540" y="34" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#5B5EF4" text-anchor="middle" letter-spacing="6">KYROO FOR MOBILE</text>
+
+  <!-- ── Phone outer shell (shadow group) ── -->
+  <g filter="url(#phoneShadowFilter)">
+    <!-- Phone body -->
+    <rect x="260" y="50" width="560" height="980" rx="54" fill="#0A0A18"/>
+    <!-- Side rails -->
+    <rect x="260" y="50" width="560" height="980" rx="54" fill="none" stroke="#22224A" stroke-width="2.5"/>
+    <!-- Buttons right side -->
+    <rect x="818" y="230" width="6" height="70" rx="3" fill="#1A1A3A"/>
+    <rect x="818" y="320" width="6" height="100" rx="3" fill="#1A1A3A"/>
+    <!-- Button left side -->
+    <rect x="256" y="260" width="6" height="80" rx="3" fill="#1A1A3A"/>
+  </g>
+
+  <!-- ── Screen area ── -->
+  <rect x="272" y="62" width="536" height="956" rx="20" fill="#07070F"/>
+
+  <!-- ════════════════════════════════════════
+       APP UI — clipped to screen
+  ════════════════════════════════════════ -->
+  <g clip-path="url(#phoneScreen)">
+
+    <!-- Screen background -->
+    <rect x="272" y="62" width="536" height="956" fill="#07070F"/>
+
+    <!-- ── Status bar ── -->
+    <text x="305" y="94" font-family="'Helvetica Neue', sans-serif" font-size="13" font-weight="600" fill="#E8E8F0">9:41</text>
+    <!-- Signal bars -->
+    <rect x="714" y="82" width="4" height="10" rx="1" fill="#E8E8F0"/>
+    <rect x="721" y="79" width="4" height="13" rx="1" fill="#E8E8F0"/>
+    <rect x="728" y="76" width="4" height="16" rx="1" fill="#E8E8F0"/>
+    <rect x="735" y="73" width="4" height="19" rx="1" fill="#E8E8F0"/>
+    <!-- WiFi -->
+    <path d="M750 88 Q758 80 766 88" stroke="#E8E8F0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M754 92 Q758 88 762 92" stroke="#E8E8F0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="758" cy="96" r="2" fill="#E8E8F0"/>
+    <!-- Battery -->
+    <rect x="774" y="80" width="26" height="14" rx="3" fill="none" stroke="#E8E8F0" stroke-width="1.5"/>
+    <rect x="800" y="85" width="3" height="4" rx="1" fill="#E8E8F0"/>
+    <rect x="776" y="82" width="20" height="10" rx="2" fill="#5B5EF4"/>
+
+    <!-- ── Dynamic island / notch ── -->
+    <rect x="464" y="68" width="152" height="28" rx="14" fill="#0A0A18"/>
+
+    <!-- ── Header: greeting ── -->
+    <text x="305" y="150" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" letter-spacing="1">GOOD MORNING</text>
+    <text x="305" y="182" font-family="Georgia, serif" font-size="30" font-weight="700" fill="#E8E8F0">Amanda 👋</text>
+    <!-- Avatar -->
+    <circle cx="762" cy="162" r="28" fill="#1A1A28" stroke="#18183A" stroke-width="1.5"/>
+    <circle cx="762" cy="162" r="28" fill="none" stroke="#5B5EF4" stroke-width="1.5" stroke-opacity="0.5"/>
+    <text x="762" y="170" font-family="'Helvetica Neue', sans-serif" font-size="18" font-weight="700" fill="#5B5EF4" text-anchor="middle">A</text>
+
+    <!-- ── Command card ── -->
+    <rect x="292" y="206" width="496" height="260" rx="16" fill="url(#commandCard)" stroke="#18183A" stroke-width="1"/>
+    <!-- Indigo accent top bar -->
+    <rect x="292" y="206" width="496" height="3" rx="1.5" fill="#5B5EF4"/>
+
+    <text x="316" y="240" font-family="Georgia, serif" font-size="20" fill="#E8E8F0" font-weight="700">What's today's plan?</text>
+    <text x="316" y="262" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A">Set your energy and time — we'll find your best match.</text>
+
+    <!-- Energy label -->
+    <text x="316" y="294" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#40405A" letter-spacing="2">ENERGY LEVEL</text>
+
+    <!-- Energy bubbles -->
+    <circle cx="338" cy="328" r="22" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="338" y="335" font-family="sans-serif" font-size="16" text-anchor="middle">💤</text>
+
+    <circle cx="396" cy="328" r="22" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="396" y="335" font-family="sans-serif" font-size="16" text-anchor="middle">😔</text>
+
+    <circle cx="454" cy="322" r="28" fill="#0D0D1E" stroke="#5B5EF4" stroke-width="2"/>
+    <text x="454" y="330" font-family="sans-serif" font-size="20" text-anchor="middle">😊</text>
+
+    <circle cx="518" cy="328" r="22" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="518" y="335" font-family="sans-serif" font-size="16" text-anchor="middle">💪</text>
+
+    <circle cx="576" cy="328" r="22" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="576" y="335" font-family="sans-serif" font-size="16" text-anchor="middle">⚡</text>
+
+    <!-- Time label -->
+    <text x="316" y="378" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#40405A" letter-spacing="2">TIME AVAILABLE</text>
+
+    <!-- Time pills -->
+    <rect x="316" y="390" width="56" height="30" rx="15" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="344" y="410" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle">15m</text>
+
+    <rect x="382" y="390" width="56" height="30" rx="15" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="410" y="410" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle">20m</text>
+
+    <rect x="448" y="390" width="56" height="30" rx="15" fill="#0D0D1E" stroke="#5B5EF4" stroke-width="2"/>
+    <text x="476" y="410" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#5B5EF4" text-anchor="middle" font-weight="600">30m</text>
+
+    <rect x="514" y="390" width="56" height="30" rx="15" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="542" y="410" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle">45m</text>
+
+    <rect x="580" y="390" width="60" height="30" rx="15" fill="#10101E" stroke="#18183A" stroke-width="1.5"/>
+    <text x="610" y="410" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle">60m+</text>
+
+    <!-- Find workout CTA inside card -->
+    <rect x="316" y="434" width="452" height="18" rx="2" fill="#18183A" opacity="0.5"/>
+
+    <!-- ── Recommended label ── -->
+    <text x="305" y="504" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#40405A" letter-spacing="2">RECOMMENDED FOR YOU</text>
+
+    <!-- ── Program card 1 (highlighted) ── -->
+    <rect x="292" y="516" width="496" height="110" rx="14" fill="#10101E" stroke="#18183A" stroke-width="1"/>
+    <rect x="292" y="516" width="4" height="110" rx="2" fill="#5B5EF4"/>
+    <text x="316" y="546" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#5B5EF4" letter-spacing="2">STRENGTH</text>
+    <text x="316" y="572" font-family="Georgia, serif" font-size="20" fill="#E8E8F0">12-Week Strength Builder</text>
+    <text x="316" y="594" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A">Build real strength. Progressive overload.</text>
+    <rect x="316" y="608" width="72" height="6" rx="3" fill="#5B5EF4" opacity="0.25"/>
+    <rect x="316" y="608" width="48" height="6" rx="3" fill="#5B5EF4"/>
+    <text x="660" y="572" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle">→</text>
+
+    <!-- ── Program card 2 ── -->
+    <rect x="292" y="640" width="496" height="100" rx="14" fill="#10101E" stroke="#18183A" stroke-width="1"/>
+    <text x="316" y="666" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#40405A" letter-spacing="2">FAT LOSS</text>
+    <text x="316" y="690" font-family="Georgia, serif" font-size="20" fill="#E8E8F0">Summer Shred</text>
+    <text x="316" y="712" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A">90 days. Deficit. Training. Results.</text>
+
+    <!-- ── Program card 3 ── -->
+    <rect x="292" y="754" width="496" height="100" rx="14" fill="#10101E" stroke="#18183A" stroke-width="1"/>
+    <text x="316" y="780" font-family="'Helvetica Neue', sans-serif" font-size="11" font-weight="700" fill="#40405A" letter-spacing="2">PERFORMANCE</text>
+    <text x="316" y="804" font-family="Georgia, serif" font-size="20" fill="#E8E8F0">Plateau Breaker</text>
+    <text x="316" y="826" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A">Break through. Level up your game.</text>
+
+    <!-- ── Screen fade at bottom ── -->
+    <rect x="272" y="62" width="536" height="956" fill="url(#screenFade)"/>
+
+    <!-- ── Bottom navigation bar ── -->
+    <rect x="272" y="948" width="536" height="70" fill="#07070F"/>
+    <line x1="272" y1="948" x2="808" y2="948" stroke="#18183A" stroke-width="1"/>
+
+    <!-- Tab: Today (active) -->
+    <text x="352" y="975" font-family="sans-serif" font-size="18" text-anchor="middle">⚡</text>
+    <text x="352" y="994" font-family="'Helvetica Neue', sans-serif" font-size="10" font-weight="600" fill="#5B5EF4" text-anchor="middle">Today</text>
+    <rect x="338" y="946" width="28" height="2" rx="1" fill="#5B5EF4"/>
+
+    <!-- Tab: Tools -->
+    <text x="454" y="975" font-family="sans-serif" font-size="18" text-anchor="middle">🛠️</text>
+    <text x="454" y="994" font-family="'Helvetica Neue', sans-serif" font-size="10" fill="#40405A" text-anchor="middle">Tools</text>
+
+    <!-- Tab: Progress -->
+    <text x="556" y="975" font-family="sans-serif" font-size="18" text-anchor="middle">📈</text>
+    <text x="556" y="994" font-family="'Helvetica Neue', sans-serif" font-size="10" fill="#40405A" text-anchor="middle">Progress</text>
+
+    <!-- Tab: Me -->
+    <text x="658" y="975" font-family="sans-serif" font-size="18" text-anchor="middle">👤</text>
+    <text x="658" y="994" font-family="'Helvetica Neue', sans-serif" font-size="10" fill="#40405A" text-anchor="middle">Me</text>
+
+    <!-- Home indicator -->
+    <rect x="460" y="1006" width="120" height="4" rx="2" fill="#40405A" opacity="0.4"/>
+
+  </g>
+  <!-- END clip -->
+
+  <!-- ── Wordmark below phone ── -->
+  <text x="540" y="1062" font-family="'Helvetica Neue', sans-serif" font-size="13" fill="#40405A" text-anchor="middle" letter-spacing="6">KYROO.DE</text>
+</svg>
